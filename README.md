@@ -8,6 +8,7 @@ A projekt futtatása előtt győződj meg arról, hogy a következők telepítve
 
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
+- [Git](https://git-scm.com/)
 
 ## Projekt Struktúra
 
@@ -18,15 +19,23 @@ A projekt futtatása előtt győződj meg arról, hogy a következők telepítve
 
 ## A Projekt Futtatása
 
-### Docker Compose használatával
+### Repository Klónozása
 
-1. **Navigálj a projekt gyökérkönyvtárába** (ahol a `docker-compose.yml` található):
+1. **Klónozd a repository-t** a Git segítségével:
 
    ```sh
-   cd path/to/project
+   git clone https://github.com/HDenes8/react-flusk-testsite-2025.git
    ```
 
-2. **Építsd fel és indítsd el a konténereket** a Docker Compose segítségével:
+2. **Navigálj a projekt gyökérkönyvtárába**:
+
+   ```sh
+   cd react-flusk-testsite-2025
+   ```
+
+### Docker Compose használatával
+
+3. **Építsd fel és indítsd el a konténereket** a Docker Compose segítségével:
 
    ```sh
    docker-compose up --build
@@ -34,11 +43,11 @@ A projekt futtatása előtt győződj meg arról, hogy a következők telepítve
 
    - A `--build` kapcsoló biztosítja, hogy a konténerek újraépüljenek, ha változások történtek a kódban vagy a függőségekben.
 
-3. **Várj, amíg a konténerek elindulnak**:
+4. **Várj, amíg a konténerek elindulnak**:
    - A Docker Compose letölti a szükséges képeket, felépíti a konténereket, és elindítja a szolgáltatásokat.
    - A terminálban megjelenő naplókból láthatod, hogy a backend és a frontend szolgáltatások sikeresen elindultak.
 
-4. **Az alkalmazás elérése**:
+5. **Az alkalmazás elérése**:
    - A **backend** (Flask API) elérhető itt:  
      `http://localhost:5000`
    - A **frontend** (React app) elérhető itt:  
@@ -46,7 +55,7 @@ A projekt futtatása előtt győződj meg arról, hogy a következők telepítve
 
    Nyisd meg ezeket az URL-eket a böngésződben, hogy ellenőrizd, az alkalmazás fut-e.
 
-5. **A konténerek leállítása**:
+6. **A konténerek leállítása**:
    - A konténerek leállításához nyomd meg a `Ctrl+C`-t abban a terminálban, ahol a Docker Compose fut.
    - Ezután tisztítsd meg a konténereket és a hálózatokat az alábbi paranccsal:
 
@@ -54,7 +63,7 @@ A projekt futtatása előtt győződj meg arról, hogy a következők telepítve
      docker-compose down
      ```
 
-6. **A konténerek újraépítése**:
+7. **A konténerek újraépítése**:
    - Ha változtatsz a kódon, és újra kell építened a konténereket, használd:
 
      ```sh
@@ -105,6 +114,7 @@ Before running the project, ensure you have the following installed:
 
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
+- [Git](https://git-scm.com/)
 
 ## Project Structure
 
@@ -115,15 +125,23 @@ Before running the project, ensure you have the following installed:
 
 ## Running the Project
 
-### Using Docker Compose
+### Cloning the Repository
 
-1. **Navigate to the root directory of the project** (where `docker-compose.yml` is located):
+1. **Clone the repository** using Git:
 
    ```sh
-   cd path/to/project
+   git clone https://github.com/HDenes8/react-flusk-testsite-2025.git
    ```
 
-2. **Build and start the containers** using Docker Compose:
+2. **Navigate to the root directory of the project**:
+
+   ```sh
+   cd react-flusk-testsite-2025
+   ```
+
+### Using Docker Compose
+
+3. **Build and start the containers** using Docker Compose:
 
    ```sh
    docker-compose up --build
@@ -131,11 +149,11 @@ Before running the project, ensure you have the following installed:
 
    - The `--build` flag ensures that the containers are rebuilt if there are any changes in the code or dependencies.
 
-3. **Wait for the containers to start**:
+4. **Wait for the containers to start**:
    - Docker Compose will pull any necessary images, build the containers, and start the services.
    - You should see logs in the terminal indicating that the backend and frontend services have started successfully.
 
-4. **Access the application**:
+5. **Access the application**:
    - The **backend** (Flask API) will be available at:  
      `http://localhost:5000`
    - The **frontend** (React app) will be available at:  
@@ -143,7 +161,7 @@ Before running the project, ensure you have the following installed:
 
    Open these URLs in your browser to verify that the application is running.
 
-5. **Stopping the containers**:
+6. **Stopping the containers**:
    - To stop the containers, press `Ctrl+C` in the terminal where Docker Compose is running.
    - Then, clean up the containers and networks by running:
 
@@ -151,7 +169,7 @@ Before running the project, ensure you have the following installed:
      docker-compose down
      ```
 
-6. **Rebuilding the containers**:
+7. **Rebuilding the containers**:
    - If you make changes to the code and need to rebuild the containers, use:
 
      ```sh
