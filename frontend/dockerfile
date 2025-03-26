@@ -10,6 +10,9 @@ COPY package.json package-lock.json ./
 # Install dependencies
 RUN npm install
 
+# Explicitly install react-scripts
+RUN npm install react-scripts
+
 # Copy the rest of the application code
 COPY . .
 
