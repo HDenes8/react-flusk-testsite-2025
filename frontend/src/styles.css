@@ -1,0 +1,19 @@
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+}
+
+nav ul li {
+  display: inline;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: blue;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
