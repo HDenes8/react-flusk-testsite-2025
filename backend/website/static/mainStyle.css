@@ -1,0 +1,71 @@
+/* settings stuff */
+
+.profile-pic-menu {
+    display: none; /* Hide menu by default */
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    width: 200px;
+}
+
+.profile-pic-options {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.profile-pic-options label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.profile-pic-thumb {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s ease-in-out;
+}
+
+.profile-pic-thumb:hover {
+    transform: scale(1.1); /* Slight zoom on hover */
+}
+
+#selectProfilePicButton {
+    margin: 2px;
+    padding: 2px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+#selectProfilePicButton:hover {
+    background-color: #0056b3;
+}
+
+/* settings stuff end */
+
+
+/* table stuff for projects */
+.table {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 0px; 
+    width: 300px; 
+    margin: auto;
+}
+.cell {
+    padding: 10px;
+    background-color: #f0f0f0;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+/* table stuff for projects end */

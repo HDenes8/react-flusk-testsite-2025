@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+<title>{% block title %} Home {% endblock %}</title>
+
+{% block content %}
+<h1>Welcome, {{ user.full_name }}! </h1>
+<p>Email: {{ user.email }} </p>
+<p>Joined: {{ user.created_date }} </p>
+<p>PP: <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_pic) }}" 
+    alt="Profile Picture" 
+    class="profile-pic-thumb"></p>
+<br>
+<h3>Your project roles</h3>
+<ul>
+    {% for role in roles %}
+        <li>
+            {{ role.project_name }} - Role: {{ role.role }} - 
+            Creation date: {{ role.created_date }} - 
+            Creator: {{ role.creator_name }} - 
+            Latest Downloaded: 
+            {% if role.has_latest %} ✅ Up-to-date {% else %} ❌ Outdated {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

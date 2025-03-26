@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+<title>{% block title %}Projects {% endblock %}</title>
+
+{% block content %}
+<div>
+    <nav>
+        <a class="nav-item nav-link" id="members" href="/members">Members</a>
+    </nav>
+</div>
+<div class="table">
+    <div class="cell">VerNum</div>
+    <div class="cell">File Name</div>
+    <div class="cell">Description</div>
+    <div class="cell">Date</div>
+    <div class="cell">Owner</div>
+
+    {% for project, user, creator in projects %}
+    <div class="cell">{{ project.project_id }}</div>
+    <div class="cell">{{ project.name }}</div>
+    <div class="cell">{{ project.description }}</div>
+    <div class="cell">{{ project.created_date }}</div>
+    <div class="cell">{{ creator.nickname }}</div> 
+    {% endfor %}
+</div>
+<div>
+    <h3>Upload Files</h3>
+    <form action="{{ url_for('views.upload_file') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+
+    <h3>Download Files</h3>
+    <ul>
+        {% for file in files %}
+            <li><a href="{{ url_for('views.download_file', filename=file) }}">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

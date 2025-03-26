@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+<title>{% block title %}Settings {% endblock %}</title>
+
+{% block content %}
+<form method="POST">
+    <h3 align="center">Settings</h3>
+    <div class="form-group">
+        <label for="fullName">Full Name: {{ user.full_name }} </label>
+        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Change full name">
+    </div>
+    <div class="form-group">
+        <label for="nickname">Nickname: {{ user.nickname }} </label>
+        <input type="text" class="form-control" id="nickname" name="nickname" placeholder="Change/ Add nickname">
+    </div>
+    <div class="form-group">
+        <label for="email">Email Address: {{ user.email }} </label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Change email">
+    </div>
+    <div class="form-group">
+        <label for="mobile">Phone Number: {{ user.mobile }} </label>
+        <input type="text" class="form-control" id="mobile" name="mobile" placeholder="Change/ Add mobile number">
+    </div>
+    <div class="form-group">
+        <label for="job">Job Title: {{ user.job }} </label>
+        <input type="text" class="form-control" id="job" name="job" placeholder="Change/ Add job">
+    </div>
+    <div class="form-group">
+        <label for="password1">Password *</label>
+        <input type="password" class="form-control" id="password1" name="password1" placeholder="Change password">
+    </div>
+    <div class="form-group">
+        <label for="password2">Password (Confirm) *</label>
+        <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm changing password">
+        
+        <button type="button" id="selectProfilePicButton" class="btn btn-primary">Select Profile Picture</button>
+        <!-- Profile Picture Selection -->
+        <div id="profilePicMenu" class="profile-pic-menu" style="display: none;">
+            <form method="POST">
+                <div class="profile-pic-options">
+                    {% for pic in profile_pics %}
+                        <label>
+                            <input type="radio" name="profile_pic" value="{{ pic }}" {% if pic == user.profile_pic %}checked{% endif %}>
+                            <img src="{{ url_for('static', filename='profile_pics/' + pic) }}" alt="{{ pic }}" class="profile-pic-thumb">
+                            
+                        </label>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+    <br>
+    <button type="submit" class="btn btn-primary" name="submit">Save Changes</button>
+</form>
+{% endblock %}

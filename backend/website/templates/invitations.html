@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+<title>{% block title %} Invitations {% endblock %} </title>
+{% block content %}
+
+<!-- {% for invite in current_user.invitations %}
+    <div>
+        <p>Project: {{ invite.project.name }}</p>
+        <p>Invited by: {{ invite.referrer.full_name }}</p>
+        <form action="{{ url_for('views.accept_invite', invitation_id=invite.invitation_id) }}" method="post">
+            <button type="submit">Accept</button>
+        </form>
+    </div>
+{% endfor %} -->
+
+<h3>Pending Invitations</h3>
+
+<h3>Filter Invitations</h3>
+
+<!-- Checkbox Filters -->
+<form method="GET">
+    <label>
+        <input type="checkbox" name="status" value="pending" 
+               {% if 'pending' in filter_status %}checked{% endif %} onchange="this.form.submit()"> Pending
+    </label>
+    <label>
+        <input type="checkbox" name="status" value="accepted" 
+               {% if 'accepted' in filter_status %}checked{% endif %} onchange="this.form.submit()"> Accepted
+    </label>
+    <label>
+        <input type="checkbox" name="status" value="declined" 
+               {% if 'declined' in filter_status %}checked{% endif %} onchange="this.form.submit()"> Denied
+    </label>
+</form>
+
+<ul>
+    {% for invite in invitations %}
+        <li>
+            <p>Project: {{ invite.project.name if invite.project else "Unknown Project" }}</p>
+            <p>Invited by: {{ invite.referrer.full_name if invite.referrer else "Unknown User" }}</p>
+            <p>Date: {{ invite.invite_date }}</p>
+            {% if invite.status == "pending" %}
+                <form method="POST" action="{{ url_for('views.accept_invite', invitation_id=invite.invitation_id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-success">Accept</button>
+                </form>
+                <form method="POST" action="{{ url_for('views.deny_invite', invitation_id=invite.invitation_id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Deny</button>
+                </form>
+            {% elif invite.status == "accepted" %}
+                <p style="color: green;">You have accepted this invitation.</p>
+            {% elif invite.status == "declined" %}
+                <p style="color: red;">You have declined this invitation.</p>
+            {% else %}
+                <p>Status: {{ invite.status.capitalize() }}</p>
+            {% endif %}
+        </li>
+    {% else %}
+        <li>No invitations found.</li>
+    {% endfor %}
+</ul>
+
+
+{% endblock %}

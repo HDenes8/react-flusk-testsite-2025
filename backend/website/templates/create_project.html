@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+<title>{% block title %} Create New Projects {% endblock %} </title>
+{% block content %}
+
+<form method="POST" >
+    <!-- action="{{ url_for('views.create_project') }}" -->
+<h3 align="center">Create New Project</h3>
+    <div class="form-group">
+        <label for="projectName">Project Name *</label>
+        <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter project name">
+    </div>
+    <div class="form-group">
+        <label for="description">Description *</label>
+        <input type="text" class="form-control" id="description" name="description" placeholder="Enter description">
+    </div>
+    <div class="form-group">
+        <label for="inviteEmails">Invite via Email</label>
+        <textarea class="form-control" id="inviteEmails" name="inviteEmails" rows="2" 
+              placeholder="Enter emails separated by commas"></textarea>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Create Project</button>
+</form>
+
+{% endblock %}
