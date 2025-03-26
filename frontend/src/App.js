@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import SignUp from './SignUp';
+import Login from './login';
 import './styles.css';
 
 function App() {
@@ -11,10 +12,11 @@ function App() {
     <Router>
       <nav>
         <ul>
-          <li><Link to="/">Home</Link></li>
+        <li><Link to="/" className="active">Home</Link></li>
           <li><Link to="/about">About</Link></li>
           <li><Link to="/contact">Contact</Link></li>
           <li><Link to="/sign-up">SignUp</Link></li>
+          <li><Link to="/login">Login</Link></li>
         </ul>
       </nav>
       <Routes>
@@ -22,6 +24,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );

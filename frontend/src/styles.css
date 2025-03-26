@@ -1,8 +1,18 @@
+/* Modern Navbar Styles */
+nav {
+  background-color: #333; /* Dark background for the navbar */
+  padding: 10px 20px; /* Add padding for spacing */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
 nav ul {
   list-style-type: none;
+  margin: 0;
   padding: 0;
   display: flex;
-  gap: 10px;
+  gap: 20px; /* Space between items */
+  align-items: center; /* Vertically align items */
+  justify-content: center; /* Center the navbar items */
 }
 
 nav ul li {
@@ -11,9 +21,20 @@ nav ul li {
 
 nav ul li a {
   text-decoration: none;
-  color: blue;
+  color: white; /* White text for contrast */
+  font-size: 16px; /* Slightly larger font size */
+  font-weight: 500; /* Medium font weight for better readability */
+  padding: 8px 12px; /* Add padding for clickable area */
+  border-radius: 4px; /* Rounded corners for links */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
 }
 
 nav ul li a:hover {
-  text-decoration: underline;
+  background-color: #555; /* Slightly lighter background on hover */
+  color: #fff; /* Ensure text stays white on hover */
+}
+
+nav ul li a.active {
+  background-color: #007bff; /* Highlight active link */
+  color: white;
 }
