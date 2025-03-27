@@ -4,6 +4,7 @@ import os
 from flask_cors import CORS  # Import flask-cors
 import psycopg2
 import time
+from sqlalchemy import inspect
 
 # Create the Flask app
 app = Flask(__name__)
@@ -56,7 +57,7 @@ def initialize_database():
     global initialized
     if not initialized:
         # Check if the User table exists
-        if not db.engine.dialect.has_table(db.engine, 'user'):
+        if not inspect(db.engine).has_table('user'):
             db.create_all()  # Create tables only if they don't exist
 
         # Create the table for `your_table_name` if it doesn't exist
