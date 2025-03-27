@@ -15,6 +15,7 @@ def create_app():
     app = Flask(__name__, static_folder='static')
     app.config['SECRET_KEY'] = 'szekret'
     #app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@db:5432/sortify'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/sortify'
     app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=3)
 

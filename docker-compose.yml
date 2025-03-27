@@ -17,7 +17,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/mydatabase
+      - DATABASE_URL=postgresql://postgres:password@db:5432/sortify
     depends_on:
       - db
 
@@ -28,11 +28,29 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: sortify
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/db-init:/docker-entrypoint-initdb.d/ # Mount the initialization script
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com # Default pgAdmin login email
+      PGADMIN_DEFAULT_PASSWORD: admin          # Default pgAdmin login password
+    ports:
+      - "8080:80" # Expose pgAdmin on port 8080
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

@@ -52,10 +52,11 @@ os.environ['RECAPTCHA_PUBLIC_KEY'] = "6LeKEvEqAAAAAI1MIfoiTYc_MBpk6GZ0hXO-fCot" 
 os.environ['RECAPTCHA_PRIVATE_KEY'] = "6LeKEvEqAAAAACB2kZN3_QckJOu_nYtxpHuRWz2O" #your_secret_key
 
 def verify_recaptcha(response):
-    secret_key = os.getenv('RECAPTCHA_PRIVATE_KEY')
+    secret_key = "6LeKEvEqAAAAACB2kZN3_QckJOu_nYtxpHuRWz2O"  # Replace with your actual secret key
     verify_url = "https://www.google.com/recaptcha/api/siteverify"
     payload = {'secret': secret_key, 'response': response}
     result = requests.post(verify_url, data=payload).json()
+    print("reCAPTCHA API response:", result)  # Debugging
     return result.get("success", False)
 
 # Regex patterns
@@ -71,78 +72,75 @@ def is_valid_phone_number(number):
         except phonenumbers.NumberParseException:
             return False
 
-@auth.route('/sign-up', methods=['GET', 'POST'])
+@auth.route('/sign-up', methods=['POST'])
 def sign_up():
     if request.method == 'POST':
-        data = request.get_json() 
-        email = request.form.get('email')
-        full_name = request.form.get('fullName')
-        nickname = request.form.get('nickname')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
-        captcha_response = request.form.get('g-recaptcha-response')
+        data = request.get_json()  # Parse JSON data from the request
+        captcha_response = data.get('captchaResponse')
+        print("Received captchaResponse:", captcha_response)  # Debugging
 
+        # Verify reCAPTCHA
         if not verify_recaptcha(captcha_response):
-            flash('Please complete the CAPTCHA.', category='error')
-            return redirect(url_for('auth.sign_up'))
-        
-        #optional fields
-        mobile = request.form.get('mobile') or None
-        job = request.form.get('job') or None
+            return {"message": "Please complete the CAPTCHA.", "status": "error"}, 400
 
-        #Ceck for: existing user, issues with credentials then create new user
+        email = data.get('email')
+        full_name = data.get('fullName')
+        nickname = data.get('nickname')
+        password1 = data.get('password1')
+        password2 = data.get('password2')
+
+        # Optional fields
+        mobile = data.get('mobile') or None
+        job = data.get('job') or None
+
+        # Check for existing user and validate input
         user = User_profile.query.filter_by(email=email).first()
         if user:
-            flash('Email already exists.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Email already exists.", "status": "error"}, 400
         elif len(email) < 4:
-            flash('Email must be greater than 3 characters.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Email must be greater than 3 characters.", "status": "error"}, 400
         elif len(full_name) < 2:
-            flash('Full name must be greater than 1 character.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Full name must be greater than 1 character.", "status": "error"}, 400
         elif not FULL_NAME_REGEX.match(full_name):
-            flash('Full name must only contain letters, spaces, and hyphens.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Full name must only contain letters, spaces, and hyphens.", "status": "error"}, 400
         elif len(nickname) < 2:
-            flash('Nickname must be greater than 1 character.', category='error')
-            return redirect(url_for('auth.sign_up'))
-
+            return {"message": "Nickname must be greater than 1 character.", "status": "error"}, 400
         elif not NICKNAME_REGEX.match(nickname):
-            flash('Nickname can only contain letters, numbers, and underscores.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Nickname can only contain letters, numbers, and underscores.", "status": "error"}, 400
         elif job and not NICKNAME_REGEX.match(job):
-            flash('Job can only contain letters, numbers, and underscores.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Job can only contain letters, numbers, and underscores.", "status": "error"}, 400
         elif mobile and not is_valid_phone_number(mobile):
-            flash('Invalid phone number.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Invalid phone number.", "status": "error"}, 400
         elif password1 != password2:
-            flash('Passwords don\'t match.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {"message": "Passwords don't match.", "status": "error"}, 400
         elif not PASSWORD_REGEX.match(password1):
-            flash('Password must be at least 7 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.', category='error')
-            return redirect(url_for('auth.sign_up'))
+            return {
+                "message": "Password must be at least 7 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+                "status": "error",
+            }, 400
         else:
+            # Create new user
             new_user = User_profile(
-                email=email, 
-                full_name=full_name, 
+                email=email,
+                full_name=full_name,
                 password=generate_password_hash(password1, method='pbkdf2:sha256'),
                 nickname=nickname,
                 mobile=mobile,
-                job=job 
+                job=job,
             )
-            
+
             db.session.add(new_user)
-            db.session.commit()   
+            db.session.commit()
 
-            # Now update the nickname by appending the user ID
+            # Update the nickname by appending the user ID
             new_user.nickname = f"{new_user.nickname}#{new_user.user_id}"
-            
-            db.session.commit()  # Commit the nickname change
+            db.session.commit()
 
-            login_user(new_user, remember=True)      
-               
+            login_user(new_user, remember=True)
+
             return {"message": "Account created successfully!", "status": "success"}, 201
+
+    # If the request method is not POST, return an error
+    return {"message": "Invalid request method.", "status": "error"}, 405
 
 # sign up stuff end

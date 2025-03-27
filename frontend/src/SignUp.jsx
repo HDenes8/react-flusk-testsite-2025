@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 import './sign_up.css';
 
 const SignUp = () => {
@@ -11,18 +12,56 @@ const SignUp = () => {
     job: '',
     password1: '',
     password2: '',
+    captchaResponse: '', // For reCAPTCHA
   });
+
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add form submission logic here (e.g., send data to the backend)
-    console.log('Form submitted:', formData);
+  const handleCaptchaChange = () => {
+    const response = window.grecaptcha.getResponse();
+    setFormData((prevFormData) => ({
+        ...prevFormData, // Preserve existing form data
+        captchaResponse: response, // Update only the captchaResponse
+    }));
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.captchaResponse) {
+        setMessage('Please complete the reCAPTCHA.');
+        return;
+    }
+
+    try {
+        const response = await axios.post('/sign-up', formData);
+        setMessage(response.data.message);
+
+        if (response.data.status === 'success') {
+            navigate('/login');
+        }
+    } catch (error) {
+        if (error.response) {
+            setMessage(error.response.data.message);
+        } else {
+            setMessage('An error occurred. Please try again.');
+        }
+    } finally {
+        // Reset the reCAPTCHA widget
+        window.grecaptcha.reset();
+        setFormData({ ...formData, captchaResponse: '' }); // Clear the captcha response
+    }
+  };
+
+  useEffect(() => {
+    window.handleCaptchaChange = handleCaptchaChange;
+  }, []);
 
   return (
     <div className="container">
@@ -31,6 +70,8 @@ const SignUp = () => {
           <img src="/sortify_logo.png" alt="Sortify Logo" width="250" />
         </div>
         <h3 align="center">Register</h3>
+
+        {message && <p className="error-message">{message}</p>}
 
         <div className="form-group">
           <label htmlFor="fullName">Full Name *</label>
@@ -42,6 +83,7 @@ const SignUp = () => {
             onChange={handleChange}
             className="form-control"
             placeholder="Enter full name"
+            required
           />
         </div>
 
@@ -55,6 +97,7 @@ const SignUp = () => {
             onChange={handleChange}
             className="form-control"
             placeholder="Enter nickname"
+            required
           />
         </div>
 
@@ -68,6 +111,7 @@ const SignUp = () => {
             onChange={handleChange}
             className="form-control"
             placeholder="Enter email"
+            required
           />
         </div>
 
@@ -107,6 +151,7 @@ const SignUp = () => {
             onChange={handleChange}
             className="form-control"
             placeholder="Enter password"
+            required
           />
         </div>
 
@@ -120,10 +165,15 @@ const SignUp = () => {
             onChange={handleChange}
             className="form-control"
             placeholder="Confirm password"
+            required
           />
         </div>
 
-        <div className="g-recaptcha" data-sitekey="6LeKEvEqAAAAAI1MIfoiTYc_MBpk6GZ0hXO-fCot"></div>
+        <div
+          className="g-recaptcha"
+          data-sitekey="6LeKEvEqAAAAAI1MIfoiTYc_MBpk6GZ0hXO-fCot"
+          data-callback="handleCaptchaChange"
+        ></div>
 
         <button type="submit" className="btn btn-primary">
           Submit
