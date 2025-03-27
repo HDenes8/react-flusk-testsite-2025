@@ -109,20 +109,27 @@ span a:hover {
 /* Divider styling */
 .divider {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
-  color: #000000;
+  align-items: center; /* Vertically center the text */
+  justify-content: center; /* Horizontally center the content */
+  margin: 15px 0;
+  color: #666; /* Adjust text color */
   font-size: 14px;
+  font-weight: 500; /* Make the text slightly bolder for better visibility */
+  line-height: 1; /* Ensure consistent line height */
 }
 
 .divider::before,
 .divider::after {
   content: '';
-  flex: 1;
-  height: 1px;
-  background-color: #ddd;
-  margin: 0 10px;
+  flex: 1; /* Make the lines take up equal space */
+  height: 1px; /* Line thickness */
+  background-color: #ddd; /* Line color */
+  margin: 0 10px; /* Space between the line and the text */
+}
+
+.divider span {
+  display: inline-block; /* Ensure the text is treated as inline */
+  vertical-align: middle; /* Align the text vertically with the lines */
 }
 
 .already-account a {
