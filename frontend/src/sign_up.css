@@ -11,9 +11,14 @@ form {
     background-color: #fff;
     width: 350px;
     margin: 50px auto;
-    padding: 30px;
+    padding: 40px;
     border-radius: 8px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+    margin-right: 20px;
 }
 
 h3 {
@@ -22,10 +27,6 @@ h3 {
     font-weight: 700;
     color: #333;
     margin-bottom: 10px;
-}
-
-.form-group {
-    margin-bottom: 15px;
 }
 
 label {
@@ -66,14 +67,17 @@ input::placeholder {
 }
 
 .btn-secondary {
-    width: 100%;
+    width: 95%;
     padding: 10px;
-    background-color: #222;
-    color: white;
-    border: none;
+    background-color: #e8e8e8;
+    color: #000000;
     border-radius: 5px;
     font-size: 14px;
     cursor: pointer;
+    display: block;
+    text-decoration: none;
+    padding: 10px;
+    text-align: center;
 }
 
 .btn-secondary:hover {

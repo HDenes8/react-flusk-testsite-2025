@@ -40,7 +40,7 @@ const Home = () => {
           <p>Loading database entry...</p> // Show loading message while fetching database data
         ) : data ? (
           <p>
-            Database Entry: <strong>{data.id}</strong> - {data.value}
+            User <strong>{data.name}</strong> added to the database!
           </p>
         ) : (
           <p>No data found in the database.</p> // Show this if no data is available

@@ -55,9 +55,11 @@ initialized = False
 def initialize_database():
     global initialized
     if not initialized:
-        db.create_all()
+        # Check if the User table exists
+        if not db.engine.dialect.has_table(db.engine, 'user'):
+            db.create_all()  # Create tables only if they don't exist
 
-        # Create the table if it doesn't exist
+        # Create the table for `your_table_name` if it doesn't exist
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""

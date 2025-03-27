@@ -5,6 +5,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import SignUp from './SignUp';
 import Login from './login';
+import MainPage from './pages/MainPage';
 import './styles.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <li><Link to="/contact">Contact</Link></li>
           <li><Link to="/sign-up">SignUp</Link></li>
           <li><Link to="/login">Login</Link></li>
+          <li><Link to="/mainpage">MainPage</Link></li>
         </ul>
       </nav>
       <Routes>
@@ -25,6 +27,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/mainpage" element={<MainPage />} />
       </Routes>
     </Router>
   );

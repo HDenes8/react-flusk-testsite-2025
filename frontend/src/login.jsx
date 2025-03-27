@@ -42,13 +42,6 @@ const Login = () => {
           Log In
         </button>
 
-        <button 
-          type="submit" 
-          className="btn btn-secondary"
-        >
-          Register
-        </button>
-
         <div className="divider">
           ----------------------------------or----------------------------------
         </div>
