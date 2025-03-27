@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './sign_up.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/login', { email, password });
+      const response = await axios.post('/login', { email, password });
       setMessage(response.data.message);
 
       if (response.data.status === 'success') {
         // Redirect to home page or perform other actions
-        window.location.href = '/home';
+        navigate('/mainpage');
       }
     } catch (error) {
       if (error.response) {
