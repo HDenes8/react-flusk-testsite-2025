@@ -84,7 +84,7 @@ const Login = () => {
         </button>
 
         <div className="divider">
-          ----------------------------------or----------------------------------
+          <span>or</span>
         </div>
 
         <Link to="/sign-up" className="btn btn-secondary">
