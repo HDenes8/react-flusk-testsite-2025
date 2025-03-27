@@ -1,0 +1,42 @@
+# General
+*.log
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.sqlite3
+
+# Node.js (React frontend)
+node_modules/
+build/
+dist/
+.cache/
+*.env
+*.env.local
+*.env.development
+*.env.production
+*.env.test
+
+# Python (Flask backend)
+venv/
+.env
+instance/
+*.pyc
+*.pyo
+__pycache__/
+*.db
+*.sqlite3
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+*.sock
