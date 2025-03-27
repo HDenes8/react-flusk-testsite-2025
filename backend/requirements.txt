@@ -1,5 +1,6 @@
-Flask
-Flask-Cors
-Flask-SQLAlchemy
+flask
+flask-Cors
+sqlalchemy
+flask-sqlalchemy
 psycopg2-binary
 requests
