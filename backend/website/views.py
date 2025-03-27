@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, url_for, redirect
+from flask import Blueprint, render_template, request, flash, url_for, redirect, jsonify
 from flask_login import login_required, current_user
 from .models import User_profile, User_Project, Project, Invitation
 from . import db
@@ -29,7 +29,7 @@ def members():
             "role": user_project.role
         })
 
-    return render_template("members.html", user=current_user, project_roles=project_roles)
+    return jsonify({"user_id": current_user.user_id, "projects": project_roles})
 
 
 # members end
@@ -54,28 +54,32 @@ def invitations():
          (Invitation.invited_email == current_user.email))
     ).filter(Invitation.status.in_(filter_status)).order_by(Invitation.invite_date.desc()).all()
 
-    return render_template("invitations.html", user=current_user, invitations=user_invitations, filter_status=filter_status)
+    invitations_data = [{
+        "id": inv.id,
+        "project_id": inv.project_id,
+        "status": inv.status,
+        "invite_date": inv.invite_date.strftime('%Y-%m-%d')
+    } for inv in user_invitations]
+    
+    return jsonify({"invitations": invitations_data})
 
 #sending inv
 
+# sending invitation
 @views.route('/invite', methods=['POST'])
 @login_required
 def invite():
     project_id = request.form.get('project_id')
     email_or_id = request.form.get('email_or_id')
 
-    # Check if the user has permission
     user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
     if not user_project or user_project.role not in ['owner', 'admin', 'editor']:
-        flash('You do not have permission to send invites.', category='error')
-        return redirect(url_for('views.members'))
+        return jsonify({"error": "You do not have permission to send invites."}), 403
 
-    # Check if input is an email or a user ID
     if email_or_id.isdigit():
         invited_user = User_profile.query.filter_by(user_id=int(email_or_id)).first()
         if not invited_user:
-            flash('User ID not found.', category='error')
-            return redirect(url_for('views.members'))
+            return jsonify({"error": "User ID not found."}), 404
         invited_email = None
         invited_user_id = invited_user.user_id
     else:
@@ -83,13 +87,10 @@ def invite():
         invited_email = email_or_id
         invited_user_id = invited_user.user_id if invited_user else None
 
-    # Check if invitation already exists
     existing_invite = Invitation.query.filter_by(project_id=project_id, invited_email=invited_email, invited_user_id=invited_user_id).first()
     if existing_invite:
-        flash('An invitation has already been sent.', category='error')
-        return redirect(url_for('views.members'))
+        return jsonify({"error": "An invitation has already been sent."}), 400
 
-    # Create and save the invitation
     new_invite = Invitation(
         invited_email=invited_email,
         invited_user_id=invited_user_id,
@@ -99,8 +100,7 @@ def invite():
     db.session.add(new_invite)
     db.session.commit()
 
-    flash('Invitation sent successfully!', category='success')
-    return redirect(url_for('views.members'))
+    return jsonify({"message": "Invitation sent successfully!"})
 
 #sending inv end
 
@@ -112,26 +112,20 @@ def accept_invite(invitation_id):
     invitation = Invitation.query.get(invitation_id)
 
     if not invitation or (invitation.invited_user_id and invitation.invited_user_id != current_user.user_id) \
-        or (invitation.invited_email and invitation.invited_email != current_user.email):        
-        flash('Invalid invitation.', category='error')
-        return redirect(url_for('views.invitations'))
+        or (invitation.invited_email and invitation.invited_email != current_user.email):
+        return jsonify({"error": "Invalid invitation."}), 400
 
-    # Check if the user is already in the project
-    existing_membership = User_Project.query.filter_by(
-        user_id=current_user.user_id, project_id=invitation.project_id
-    ).first()
+    existing_membership = User_Project.query.filter_by(user_id=current_user.user_id, project_id=invitation.project_id).first()
 
     if existing_membership:
-        flash('You are already a member of this project.', category='error')
-    else: # Assign the user to the project with the default role of "reader"
+        return jsonify({"error": "You are already a member of this project."}), 400
+    else:
         new_member = User_Project(user_id=current_user.user_id, project_id=invitation.project_id, role='reader')
         db.session.add(new_member)
-        flash('You have joined the project!', category='success')
+        invitation.status = 'accepted'
+        db.session.commit()
 
-    invitation.status = 'accepted'
-    db.session.commit()
-
-    return redirect(url_for('views.projects'))
+    return jsonify({"message": "Invitation accepted."})
 
 #accept inv end
 
@@ -150,8 +144,7 @@ def deny_invite(invitation_id):
     invitation.status = 'declined'
     db.session.commit()
 
-    flash('Invitation denied.', category='info')
-    return redirect(url_for('views.invitations'))
+    return jsonify({"message": "Invitation denied."})
 #deny inv end
 
 #invitations end
@@ -171,24 +164,20 @@ def allowed_file(filename):
 @login_required
 def upload_file():
     if 'file' not in request.files:
-        flash('No file part', category='error')
-        return redirect(request.referrer)
+        return jsonify({"error": "No file part"}), 400
 
     file = request.files['file']
 
     if file.filename == '':
-        flash('No selected file', category='error')
-        return redirect(request.referrer)
+        return jsonify({"error": "No selected file"}), 400
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
-        flash('File uploaded successfully!', category='success')
+        return jsonify({"message": "File uploaded successfully!"})
     else:
-        flash('Invalid file type!', category='error')
-
-    return redirect(request.referrer)
+        return jsonify({"error": "Invalid file type!"}), 400
 
 @views.route('/download/<filename>')
 @login_required
@@ -197,8 +186,7 @@ def download_file(filename):
     if os.path.exists(file_path):
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
     else:
-        flash('File not found.', category='error')
-        return redirect(request.referrer)
+        return jsonify({"error": "File not found."}), 404
     
 #Upload / download end
 
@@ -219,8 +207,11 @@ def projects():
         filter(User_Project.user_id == current_user.user_id).\
         all()
     
-    
-    print(projects)
+    projects_data = [{
+        "project_id": proj.Project.project_id,
+        "name": proj.Project.name,
+        "creator": proj.creator_alias.full_name,
+    } for proj in projects]
 
     # user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
     # project_ids = [up.project_id for up in user_projects]
@@ -228,7 +219,7 @@ def projects():
 
     files = os.listdir(current_app.config['UPLOAD_FOLDER'])
 
-    return render_template("projects.html", user=current_user, projects=projects, files=files)
+    return jsonify({"projects": projects_data}, files=files)
 
 #projects end
 
@@ -238,7 +229,6 @@ def projects():
 @views.route('/settings', methods=['POST', 'GET'])
 @login_required 
 def settings():
-
     profile_pics_folder = os.path.join(current_app.static_folder, 'profile_pics')
     profile_pics = [f for f in os.listdir(profile_pics_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
     
@@ -246,58 +236,41 @@ def settings():
         profile_pics.append("default.png")
 
     if request.method == 'POST':
-        # Get form data
         email = request.form.get('email')
         full_name = request.form.get('fullName')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
-        # Optional fields
         nickname = request.form.get('nickname')
         mobile = request.form.get('mobile')
         job = request.form.get('job')
         selected_pic = request.form.get('profile_pic')
 
-        #print(f"Email: {email}, Full Name: {full_name}, Nickname: {nickname}, Mobile: {mobile}, Job: {job}") # Debug
-
-        # Initialize error flag
         errors = False
 
-        # Handle email change
         if email and email != current_user.email:
             if len(email) < 4:
-                flash('Email must be greater than 3 characters.', category='error')
-                errors = True
+                return jsonify({"error": "Email must be greater than 3 characters."}), 400
             elif User_profile.query.filter_by(email=email).first():
-                flash('Email already exists.', category='error')
-                errors = True
+                return jsonify({"error": "Email already exists."}), 400
 
-        # Handle full name change
         if full_name and full_name != current_user.full_name:
             if len(full_name) < 2:
-                flash('Full name must be greater than 1 character.', category='error')
-                errors = True
+                return jsonify({"error": "Full name must be greater than 1 character."}), 400
 
-        # Handle password change
         if password1 or password2:
             if password1 != password2:
-                flash('Passwords don\'t match.', category='error')
-                errors = True
+                return jsonify({"error": "Passwords don't match."}), 400
             elif len(password1) < 7:
-                flash('Password must be at least 7 characters.', category='error')
-                errors = True
+                return jsonify({"error": "Password must be at least 7 characters."}), 400
             elif password1 and check_password_hash(current_user.password, password1):
-                flash('Password can\'t be the old one.', category='error')
-                errors = True
+                return jsonify({"error": "Password can't be the old one."}), 400
 
-        # If there are errors, re-render the form with error messages
         if errors:
-            return render_template("settings.html", user=current_user)
+            return jsonify({"error": "There were issues with the form."}), 400
 
-        # Update fields if no errors
         user = current_user
 
-        # Only update the fields that are being changed
         if email and email != user.email:
             user.email = email
         if full_name and full_name != user.full_name:
@@ -311,21 +284,14 @@ def settings():
         if selected_pic:
             if selected_pic in profile_pics:
                 if selected_pic != user.profile_pic:
-                    user.profile_pic=selected_pic
+                    user.profile_pic = selected_pic
 
-        # If a new password hash it
         if password1:
             user.password = generate_password_hash(password1, method='pbkdf2:sha256')
 
-        # Commit changes to the database
         db.session.commit()
-        flash('Your changes have been saved!', category='success')
 
-        # Redirect to the settings page after update
-        return redirect(url_for('views.settings')) 
-
-    # Pre-fill the form with current user info when the page loads
-    return render_template("settings.html", user=current_user, profile_pics=profile_pics)
+        return jsonify({"message": "Your changes have been saved!"})
 
 #settings end
 
@@ -347,9 +313,9 @@ def create_project():
         invited_emails = request.form.get('inviteEmails')
 
         if len(project_name) < 1:
-            flash('Project name is required!', category='error')
+            return jsonify({"error": "Project name is required."}), 400
         elif len(description) < 1:
-            flash('Description is required!', category='error')
+            return jsonify({"error": "Project description is required."}), 400
         else:
             new_project = Project(
                 name=project_name, 
@@ -383,10 +349,9 @@ def create_project():
 
             db.session.commit()
 
-            flash('Project created successfully!', category='success')
-            return redirect(url_for('views.home'))
+            return jsonify({"message": "Project created successfully!"})
         
-    return render_template("create_project.html", user=current_user)
+    return jsonify({"message": "Please provide project details."})
 
 #create new project end
 

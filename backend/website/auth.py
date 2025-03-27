@@ -74,6 +74,7 @@ def is_valid_phone_number(number):
 @auth.route('/sign-up', methods=['GET', 'POST'])
 def sign_up():
     if request.method == 'POST':
+        data = request.get_json() 
         email = request.form.get('email')
         full_name = request.form.get('fullName')
         nickname = request.form.get('nickname')
@@ -85,7 +86,7 @@ def sign_up():
             flash('Please complete the CAPTCHA.', category='error')
             return redirect(url_for('auth.sign_up'))
         
-        # optional        
+        #optional fields
         mobile = request.form.get('mobile') or None
         job = request.form.get('job') or None
 
@@ -140,10 +141,8 @@ def sign_up():
             
             db.session.commit()  # Commit the nickname change
 
-            login_user(new_user, remember=True)         
-            flash('Account created!', category='success')
-            return redirect(url_for('views.home'))
-        
-    return render_template("sign_up.html", user=current_user)
+            login_user(new_user, remember=True)      
+               
+            return {"message": "Account created successfully!", "status": "success"}, 201
 
 # sign up stuff end
