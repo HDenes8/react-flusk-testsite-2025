@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_cors import CORS  # Import flask-cors
@@ -134,6 +134,24 @@ def home():
         })
     except Exception as e:
         return jsonify({"error": str(e)})
+
+# Dummy user data for demonstration
+users = {
+    "test@example.com": "password123"
+}
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    if email not in users:
+        return jsonify({"message": "Wrong email"}), 401
+    if users[email] != password:
+        return jsonify({"message": "Invalid password"}), 401
+
+    return jsonify({"message": "Login successful", "user": {"email": email}})
 
 # Run the app
 if __name__ == "__main__":
