@@ -114,7 +114,7 @@ body {
 }
 
 .main-page-sidebar.collapsed {
-  width: 80px;
+  width: 60px;
 }
 
 .main-page-sidebar.collapsed .main-page-sidebar-header h2,
@@ -157,7 +157,7 @@ body {
 .main-page-sidebar-nav li.active {
   background-color: #f0f0f0;
   font-weight: bold;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #1b1b1b;
 }
 
 .main-page-sidebar-nav li:hover {
