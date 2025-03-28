@@ -12,6 +12,8 @@ form {
     width: 350px;
     margin: 50px auto;
     padding: 50px;
+    padding-top: 40px; /* Reduce the space above the form */
+    padding-bottom: 20px; /* Reduce the space below the form */
     border-radius: 8px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
@@ -21,12 +23,18 @@ form {
     margin-right: 26px;
 }
 
+.logo {
+    text-align: center;
+    margin-bottom: 10px; /* Reduce the space below the logo */
+}
+
 h3 {
     text-align: center;
     font-size: 32px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 10px;
+    margin-top: 5px; /* Reduce the space above the heading */
+    margin-bottom: 10px; /* Adjust the space below the heading if needed */
 }
 
 label {
@@ -67,7 +75,7 @@ input::placeholder {
 }
 
 .btn-secondary {
-    width: 95%;
+    width: 94%;
     padding: 10px;
     background-color: #e8e8e8;
     color: #000000;
@@ -78,6 +86,7 @@ input::placeholder {
     text-decoration: none;
     padding: 10px;
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .btn-secondary:hover {
@@ -103,7 +112,29 @@ span a:hover {
 }
 
 .g-recaptcha {
-    margin: 15px 0;
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    margin: 20px auto; /* Center horizontally and add vertical spacing */
+    margin-top: 25px;
+    margin-bottom: 50px; /* Increased spacing below the widget */
+
+    /* Scale the reCAPTCHA widget */
+    transform: scale(1.16); /* Adjust the scale factor */
+    transform-origin: center; /* Scale from the center */
+    width: 304px; /* Set the container width to match the reCAPTCHA widget */
+    height: 78px; /* Set the container height to match the reCAPTCHA widget */
+    position: relative; /* Ensure it stays in its container */
+    z-index: 1; /* Ensure it does not overlap other elements */
+    overflow: hidden; /* Prevent the scaled widget from overflowing */
+}
+
+.g-recaptcha iframe {
+    position: absolute; /* Ensure the iframe is positioned correctly */
+    left: 0; /* Align the iframe to the left */
+    top: 0; /* Align the iframe to the top */
+    width: 304px !important; /* Match the reCAPTCHA widget's width */
+    height: 78px !important; /* Match the reCAPTCHA widget's height */
+    pointer-events: auto; /* Allow interaction with the iframe */
 }
 
 /* Divider styling */
@@ -111,7 +142,6 @@ span a:hover {
   display: flex;
   align-items: center; /* Vertically center the text */
   justify-content: center; /* Horizontally center the content */
-  margin: 15px 0;
   color: #666; /* Adjust text color */
   font-size: 14px;
   font-weight: 500; /* Make the text slightly bolder for better visibility */
@@ -140,24 +170,5 @@ span a:hover {
     font-size: 14px;
     color: #666;
     text-decoration: underline;
-}
-
-.g-recaptcha {
-    display: flex; /* Use flexbox for centering */
-    justify-content: center; /* Center horizontally */
-    margin: 20px auto; /* Center horizontally and add vertical spacing */
-    margin-top: 25px;
-    margin-bottom: 25px;
-
-    /* Scale the reCAPTCHA widget */
-    transform: scale(1.16); /* Adjust the scale factor (1.5 = 50% larger) */
-    transform-origin: center; /* Scale from the center */
-    width: 100%; /* Ensure the container takes full width */
-    height: auto; /* Adjust height automatically */
-}
-
-.g-recaptcha iframe {
-    width: 100% !important; /* Ensure iframe scales properly */
-    height: auto !important; /* Adjust height automatically */
-    max-width: none !important; /* Prevent width restrictions */
+    margin-top: 40px;
 }

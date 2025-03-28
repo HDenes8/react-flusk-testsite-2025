@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import './sign_up.css';
@@ -12,22 +12,42 @@ const SignUp = () => {
     job: '',
     password1: '',
     password2: '',
-    captchaResponse: '', // For reCAPTCHA
+    captchaResponse: '',
   });
 
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const loadRecaptchaScript = () => {
+    return new Promise((resolve, reject) => {
+      if (!document.getElementById('recaptcha-script')) {
+        const script = document.createElement('script');
+        script.id = 'recaptcha-script';
+        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.async = true;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
+      } else {
+        resolve();
+      }
+    });
   };
 
-  const handleCaptchaChange = () => {
-    const response = window.grecaptcha.getResponse();
+  const renderRecaptcha = useCallback(() => {
+    if (window.grecaptcha) {
+      window.grecaptcha.render('recaptcha-container', {
+        sitekey: '6LeKEvEqAAAAAI1MIfoiTYc_MBpk6GZ0hXO-fCot',
+        callback: handleCaptchaChange,
+      });
+    }
+  }, []);
+
+  const handleCaptchaChange = (response) => {
     setFormData((prevFormData) => ({
-        ...prevFormData, // Preserve existing form data
-        captchaResponse: response, // Update only the captchaResponse
+      ...prevFormData,
+      captchaResponse: response,
     }));
   };
 
@@ -35,33 +55,40 @@ const SignUp = () => {
     e.preventDefault();
 
     if (!formData.captchaResponse) {
-        setMessage('Please complete the reCAPTCHA.');
-        return;
+      setMessage('Please complete the reCAPTCHA.');
+      return;
     }
 
     try {
-        const response = await axios.post('/sign-up', formData);
-        setMessage(response.data.message);
+      const response = await axios.post('/sign-up', formData);
+      setMessage(response.data.message);
 
-        if (response.data.status === 'success') {
-            navigate('/login');
-        }
+      if (response.data.status === 'success') {
+        navigate('/login');
+      }
     } catch (error) {
-        if (error.response) {
-            setMessage(error.response.data.message);
-        } else {
-            setMessage('An error occurred. Please try again.');
-        }
+      if (error.response) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage('An error occurred. Please try again.');
+      }
     } finally {
-        // Reset the reCAPTCHA widget
+      if (window.grecaptcha) {
         window.grecaptcha.reset();
-        setFormData({ ...formData, captchaResponse: '' }); // Clear the captcha response
+      }
+      setFormData({ ...formData, captchaResponse: '' });
     }
   };
 
   useEffect(() => {
-    window.handleCaptchaChange = handleCaptchaChange;
-  }, []);
+    loadRecaptchaScript()
+      .then(() => {
+        renderRecaptcha();
+      })
+      .catch((error) => {
+        console.error('Failed to load reCAPTCHA script:', error);
+      });
+  }, [renderRecaptcha]);
 
   return (
     <div className="container">
@@ -80,7 +107,7 @@ const SignUp = () => {
             id="fullName"
             name="fullName"
             value={formData.fullName}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             className="form-control"
             placeholder="Enter full name"
             required
@@ -94,7 +121,7 @@ const SignUp = () => {
             id="nickname"
             name="nickname"
             value={formData.nickname}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
             className="form-control"
             placeholder="Enter nickname"
             required
@@ -108,7 +135,7 @@ const SignUp = () => {
             id="email"
             name="email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="form-control"
             placeholder="Enter email"
             required
@@ -122,7 +149,7 @@ const SignUp = () => {
             id="mobile"
             name="mobile"
             value={formData.mobile}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
             className="form-control"
             placeholder="Enter mobile number (Optional)"
           />
@@ -135,7 +162,7 @@ const SignUp = () => {
             id="job"
             name="job"
             value={formData.job}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, job: e.target.value })}
             className="form-control"
             placeholder="Enter job (Optional)"
           />
@@ -148,7 +175,7 @@ const SignUp = () => {
             id="password1"
             name="password1"
             value={formData.password1}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, password1: e.target.value })}
             className="form-control"
             placeholder="Enter password"
             required
@@ -162,18 +189,14 @@ const SignUp = () => {
             id="password2"
             name="password2"
             value={formData.password2}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, password2: e.target.value })}
             className="form-control"
             placeholder="Confirm password"
             required
           />
         </div>
 
-        <div
-          className="g-recaptcha"
-          data-sitekey="6LeKEvEqAAAAAI1MIfoiTYc_MBpk6GZ0hXO-fCot"
-          data-callback="handleCaptchaChange"
-        ></div>
+        <div id="recaptcha-container" className="g-recaptcha"></div>
 
         <button type="submit" className="btn btn-primary">
           Submit
