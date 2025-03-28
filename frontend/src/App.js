@@ -1,19 +1,26 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import SignUp from './SignUp';
-import Login from './login';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
 import MainPage from './pages/MainPage';
-import './styles.css';
+import LoginPage from './pages/LoginPage';
+import ProjectsPage from './pages/ProjectsPage';
+import './App.css';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Redirect the root path to /login */}
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/mainpage" element={<MainPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={
+          <Layout>
+            <MainPage />
+          </Layout>
+        } />
+        <Route path="/mainpage" element={
+          <Layout>
+            <ProjectsPage />
+          </Layout>
+        } />
       </Routes>
     </Router>
   );
