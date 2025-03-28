@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -11,16 +11,60 @@ import './styles.css';
 function App() {
   return (
     <Router>
-      <nav>
-        <ul>
-        <li><Link to="/" className="active">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
-          <li><Link to="/sign-up">SignUp</Link></li>
-          <li><Link to="/login">Login</Link></li>
-          <li><Link to="/mainpage">MainPage</Link></li>
-        </ul>
-      </nav>
+      <div className="global-navbar">
+        <nav>
+          <ul>
+            <li>
+              <NavLink
+                to="/"
+                className={({ isActive }) => (isActive ? 'active' : '')}
+              >
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/about"
+                className={({ isActive }) => (isActive ? 'active' : '')}
+              >
+                About
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/contact"
+                className={({ isActive }) => (isActive ? 'active' : '')}
+              >
+                Contact
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/sign-up"
+                className={({ isActive }) => (isActive ? 'active' : '')}
+              >
+                SignUp
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/login"
+                className={({ isActive }) => (isActive ? 'active' : '')}
+              >
+                Login
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/mainpage"
+                className={({ isActive }) => (isActive ? 'active' : '')}
+              >
+                MainPage
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </div>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />

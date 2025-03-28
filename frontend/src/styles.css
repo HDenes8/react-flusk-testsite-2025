@@ -1,11 +1,11 @@
 /* Modern Navbar Styles */
-nav {
+.global-navbar nav {
   background-color: #333; /* Dark background for the navbar */
   padding: 10px 20px; /* Add padding for spacing */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
-nav ul {
+.global-navbar nav ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -15,11 +15,11 @@ nav ul {
   justify-content: center; /* Center the navbar items */
 }
 
-nav ul li {
+.global-navbar nav ul li {
   display: inline;
 }
 
-nav ul li a {
+.global-navbar nav ul li a {
   text-decoration: none;
   color: white; /* White text for contrast */
   font-size: 16px; /* Slightly larger font size */
@@ -29,12 +29,13 @@ nav ul li a {
   transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
 }
 
-nav ul li a:hover {
+.global-navbar nav ul li a:hover {
   background-color: #555; /* Slightly lighter background on hover */
   color: #fff; /* Ensure text stays white on hover */
 }
 
-nav ul li a.active {
-  background-color: #007bff; /* Highlight active link */
+.global-navbar nav ul li a.active {
+  background-color: #2998ff; /* Highlight active link */
   color: white;
+  font-weight: bold; /* Optional: Make the active link bold */
 }

@@ -11,14 +11,14 @@ form {
     background-color: #fff;
     width: 350px;
     margin: 50px auto;
-    padding: 40px;
+    padding: 50px;
     border-radius: 8px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
     margin-bottom: 15px;
-    margin-right: 20px;
+    margin-right: 26px;
 }
 
 h3 {
@@ -140,4 +140,24 @@ span a:hover {
     font-size: 14px;
     color: #666;
     text-decoration: underline;
+}
+
+.g-recaptcha {
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    margin: 20px auto; /* Center horizontally and add vertical spacing */
+    margin-top: 25px;
+    margin-bottom: 25px;
+
+    /* Scale the reCAPTCHA widget */
+    transform: scale(1.16); /* Adjust the scale factor (1.5 = 50% larger) */
+    transform-origin: center; /* Scale from the center */
+    width: 100%; /* Ensure the container takes full width */
+    height: auto; /* Adjust height automatically */
+}
+
+.g-recaptcha iframe {
+    width: 100% !important; /* Ensure iframe scales properly */
+    height: auto !important; /* Adjust height automatically */
+    max-width: none !important; /* Prevent width restrictions */
 }

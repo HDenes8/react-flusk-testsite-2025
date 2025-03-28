@@ -1,38 +1,89 @@
-import React from 'react';
-import './MainPage.css'; // Import the CSS file for styling
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './MainPage.css';
+import { FaHome, FaFolder, FaHeart, FaEnvelope, FaPlus, FaCog, FaSignOutAlt, FaBars, FaInfoCircle } from 'react-icons/fa';
 
 const MainPage = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [profile, setProfile] = useState({ name: 'Name Place', avatar: 'profile.jpg' });
+
+  // Fetch projects and profile data from the backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const projectsResponse = await axios.get('/api/projects'); // Replace with your backend endpoint
+        const profileResponse = await axios.get('/api/profile'); // Replace with your backend endpoint
+        setProjects(projectsResponse.data);
+        setFilteredProjects(projectsResponse.data);
+        setProfile(profileResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Handle search and filter
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    setFilteredProjects(
+      projects.filter((project) =>
+        project.name.toLowerCase().includes(query)
+      )
+    );
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await axios.post('/logout'); // Replace with your backend logout endpoint
+      window.location.href = '/login'; // Redirect to login page
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <div className="main-page-container">
       {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header">
+      <aside className={`main-page-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+        <div className="main-page-sidebar-header">
           <h2>Sortify</h2>
+          <button className="main-page-collapse-button" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
+            <FaBars />
+          </button>
         </div>
-        <nav className="sidebar-nav">
+        <nav className="main-page-sidebar-nav">
           <ul>
             <li className="active">
-              <span>🏠</span> Main Page
+              <FaHome /> {!sidebarCollapsed && 'Main Page'}
             </li>
             <li>
-              <span>📂</span> My Projects
+              <FaFolder /> {!sidebarCollapsed && 'My Projects'}
             </li>
             <li>
-              <span>❤️</span> Favourite (?)
+              <FaHeart /> {!sidebarCollapsed && 'Favourite'}
             </li>
             <li>
-              <span>📩</span> Invitation
+              <FaEnvelope /> {!sidebarCollapsed && 'Invitation'}
             </li>
             <li>
-              <span>➕</span> Create New Project
+              <FaPlus /> {!sidebarCollapsed && 'Create New Project'}
             </li>
             <li>
-              <span>⚙️</span> Settings
+              <FaCog /> {!sidebarCollapsed && 'Settings'}
+            </li>
+            <li>
+              <FaInfoCircle /> {!sidebarCollapsed && 'About'}
             </li>
           </ul>
         </nav>
-        <div className="sidebar-footer">
-          <p>About</p>
+        <div className="main-page-sidebar-footer">
+          <p>© 2025 Sortify</p>
         </div>
       </aside>
 
@@ -41,13 +92,20 @@ const MainPage = () => {
         <header className="main-header">
           <h1>Main Page</h1>
           <div className="search-filter">
-            <input type="text" placeholder="Search projects..." />
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={handleSearch}
+            />
             <button className="filter-button">Filter</button>
           </div>
           <div className="user-profile">
-            <img src="profile.jpg" alt="User" />
-            <span>Name Place</span>
-            <button>🔄</button>
+            <img src={profile.avatar} alt="User" />
+            <span>{profile.name}</span>
+            <button onClick={handleLogout}>
+              <FaSignOutAlt />
+            </button>
           </div>
         </header>
 
@@ -63,34 +121,26 @@ const MainPage = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Project 1 <span className="status success">✔</span></td>
-                <td>Reader</td>
-                <td>2025.01.05 17:28:32</td>
-                <td>2025.01.05 17:28:32</td>
-                <td><img src="owner1.jpg" alt="Owner 1" className="owner-avatar" /></td>
-              </tr>
-              <tr>
-                <td>Project 2 <span className="status warning">!</span></td>
-                <td>Editor</td>
-                <td>2025.01.05 17:28:32</td>
-                <td>2025.01.05 17:28:32</td>
-                <td><img src="owner2.jpg" alt="Owner 2" className="owner-avatar" /></td>
-              </tr>
-              <tr>
-                <td>Project 3 <span className="status success">✔</span></td>
-                <td>Reader</td>
-                <td>2025.01.05 17:28:32</td>
-                <td>2025.01.05 17:28:32</td>
-                <td><img src="owner1.jpg" alt="Owner 1" className="owner-avatar" /></td>
-              </tr>
-              <tr>
-                <td>Project 4 <span className="status warning">!</span></td>
-                <td>Admin</td>
-                <td>2025.01.05 17:28:32</td>
-                <td>2025.01.05 17:28:32</td>
-                <td><img src="owner3.jpg" alt="Owner 3" className="owner-avatar" /></td>
-              </tr>
+              {filteredProjects.map((project) => (
+                <tr key={project.id}>
+                  <td>
+                    {project.name}{' '}
+                    <span className={`status ${project.status}`}>
+                      {project.status === 'success' ? '✔' : '!' }
+                    </span>
+                  </td>
+                  <td>{project.role}</td>
+                  <td>{project.lastModified}</td>
+                  <td>{project.date}</td>
+                  <td>
+                    <img
+                      src={project.ownerAvatar}
+                      alt={project.ownerName}
+                      className="owner-avatar"
+                    />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </section>
