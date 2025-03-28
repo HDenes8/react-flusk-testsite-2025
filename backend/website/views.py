@@ -378,14 +378,13 @@ def create_project():
 
 #home
 
-@views.route('/')
+@views.route('/mainpage', methods=['GET', 'POST'])
 @login_required
 def home():
     user = User_profile.query.get(current_user.user_id)
 
     if not user:
-        flash('User not found.', category='error')
-        return redirect(url_for('auth.login'))
+        return jsonify({"error": "User not found"}), 404
     
     #SQLAlchemy JOIN
     # roles = db.session.query(
@@ -425,8 +424,17 @@ def home():
     #         'creator': creator.full_name if creator else "Unknown"
     #     })
 
-    return render_template("home.html", user=user, roles=roles_list, current_user=current_user) #project and creator is in roles too
+    response_data = {
+        "user": {
+            "id": user.user_id,
+            "name": user.full_name,
+            "email": user.email,
+            "profile_pic": f"/static/profile_pics/{user.profile_pic}" if user.profile_pic else "/static/profile_pics/default.png"
+        },
+        "roles": roles_list
+    }
 
+    return jsonify(response_data)
 #home end
 
 #profile
@@ -434,7 +442,7 @@ def home():
 @views.route('/api/profile', methods=['GET'])
 @login_required
 def get_profile():
-    user = User.query.get(current_user.id)
+    user = User_profile.query.get(current_user.id)
 
     if not user:
         return jsonify({"error": "User not found"}), 404
