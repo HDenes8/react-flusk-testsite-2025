@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from .models import User_profile, User_Project, Project
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
@@ -38,11 +38,11 @@ def login():
 
 # logout
 
-@auth.route('/logout')
+@auth.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('auth.login'))
+    return jsonify({"message": "Logged out successfully"}), 200
 
 # logout end
 

@@ -5,19 +5,22 @@ import { FaHome, FaFolder, FaHeart, FaEnvelope, FaPlus, FaCog, FaSignOutAlt, FaB
 
 const MainPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [projects, setProjects] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [profile, setProfile] = useState({ name: 'Name Place', avatar: 'profile.jpg' });
+  const [projects, setProjects] = useState([]); // Stores all projects
+  const [searchQuery, setSearchQuery] = useState(''); // Search query for filtering
+  const [filteredProjects, setFilteredProjects] = useState([]); // Filtered projects based on search
+  const [profile, setProfile] = useState({ name: '', avatar: '/static/profile_pics/default.png' }); // User profile data
 
   // Fetch projects and profile data from the backend
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const projectsResponse = await axios.get('/api/projects'); // Replace with your backend endpoint
-        const profileResponse = await axios.get('/api/profile'); // Replace with your backend endpoint
+        // Fetch projects from the backend
+        const projectsResponse = await axios.get('/api/projects');
+        const profileResponse = await axios.get('/api/profile');
+
+        // Set the fetched data to state
         setProjects(projectsResponse.data);
-        setFilteredProjects(projectsResponse.data);
+        setFilteredProjects(projectsResponse.data); // Initially, all projects are displayed
         setProfile(profileResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -40,7 +43,7 @@ const MainPage = () => {
   // Handle logout
   const handleLogout = async () => {
     try {
-      await axios.post('/logout'); // Replace with your backend logout endpoint
+      await axios.post('/logout'); // Call the backend logout endpoint
       window.location.href = '/login'; // Redirect to login page
     } catch (error) {
       console.error('Error during logout:', error);
@@ -102,7 +105,7 @@ const MainPage = () => {
           </div>
           <div className="user-profile">
             <img src={profile.avatar} alt="User" />
-            <span>{profile.name}</span>
+            <span>{profile.name || 'Loading...'}</span>
             <button onClick={handleLogout}>
               <FaSignOutAlt />
             </button>
@@ -121,26 +124,33 @@ const MainPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProjects.map((project) => (
-                <tr key={project.id}>
-                  <td>
-                    {project.name}{' '}
-                    <span className={`status ${project.status}`}>
-                      {project.status === 'success' ? '✔' : '!' }
-                    </span>
-                  </td>
-                  <td>{project.role}</td>
-                  <td>{project.lastModified}</td>
-                  <td>{project.date}</td>
-                  <td>
-                    <img
-                      src={project.ownerAvatar}
-                      alt={project.ownerName}
-                      className="owner-avatar"
-                    />
-                  </td>
+              {filteredProjects.length > 0 ? (
+                filteredProjects.map((project) => (
+                  <tr key={project.id}>
+                    <td>
+                      {project.name}{' '}
+                      <span className={`status ${project.status}`}>
+                        {project.status === 'success' ? '✔' : '!'}
+                      </span>
+                    </td>
+                    <td>{project.role}</td>
+                    <td>{project.lastModified || 'N/A'}</td>
+                    <td>{project.date || 'N/A'}</td>
+                    <td>
+                      <img
+                        src={project.ownerAvatar}
+                        alt={project.ownerName}
+                        className="owner-avatar"
+                      />
+                      <span>{project.ownerName}</span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5">No projects found</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </section>

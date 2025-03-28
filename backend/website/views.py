@@ -221,6 +221,27 @@ def projects():
 
     return jsonify({"projects": projects_data}, files=files)
 
+@views.route('/api/projects', methods=['GET'])
+@login_required
+def get_projects():
+    user_projects = User_Project.query.filter_by(user_id=current_user.id).all()
+
+    projects_data = []
+    for user_project in user_projects:
+        project = Project.query.get(user_project.project_id)
+        projects_data.append({
+            "id": project.id,
+            "name": project.name,
+            "role": user_project.role,
+            "lastModified": project.last_modified.strftime('%Y-%m-%d') if project.last_modified else None,
+            "date": project.created_date.strftime('%Y-%m-%d') if project.created_date else None,
+            "ownerName": User.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
+            "ownerAvatar": f"/static/profile_pics/{User.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
+            "status": "success"
+        })
+
+    return jsonify(projects_data)
+
 #projects end
 
 
@@ -407,3 +428,22 @@ def home():
     return render_template("home.html", user=user, roles=roles_list, current_user=current_user) #project and creator is in roles too
 
 #home end
+
+#profile
+
+@views.route('/api/profile', methods=['GET'])
+@login_required
+def get_profile():
+    user = User.query.get(current_user.id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    profile_data = {
+        "name": user.full_name,
+        "avatar": f"/static/profile_pics/{user.profile_pic}" if user.profile_pic else "/static/profile_pics/default.png"
+    }
+
+    return jsonify(profile_data)
+
+#profile end
