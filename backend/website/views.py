@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, url_for, redirect, jsonify
 from flask_login import login_required, current_user
-from .models import User_profile, User_Project, Project, Invitation
+from .models import File_data, User_profile, User_Project, Project, Invitation, File_version
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -224,19 +224,31 @@ def projects():
 @views.route('/api/projects', methods=['GET'])
 @login_required
 def get_projects():
-    user_projects = User_Project.query.filter_by(user_id=current_user.id).all()
+    user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
 
     projects_data = []
     for user_project in user_projects:
         project = Project.query.get(user_project.project_id)
+
+        # Join File_version with File_data to get the latest version for the project
+        last_version = db.session.query(File_version).join(File_data).filter(
+            File_data.project_id == project.project_id
+        ).order_by(File_version.upload_date.desc()).first()
+
+        # Safely handle the case where last_version is None
+        if last_version and last_version.upload_date:
+            last_modified = last_version.upload_date.strftime('%Y-%m-%d')
+        else:
+            last_modified = None
+
         projects_data.append({
-            "id": project.id,
+            "id": project.project_id,
             "name": project.name,
             "role": user_project.role,
-            "lastModified": project.last_modified.strftime('%Y-%m-%d') if project.last_modified else None,
+            "lastModified": last_modified,
             "date": project.created_date.strftime('%Y-%m-%d') if project.created_date else None,
-            "ownerName": User.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
-            "ownerAvatar": f"/static/profile_pics/{User.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
+            "ownerName": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
+            "ownerAvatar": f"/static/profile_pics/{User_profile.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
             "status": "success"
         })
 
@@ -442,7 +454,7 @@ def home():
 @views.route('/api/profile', methods=['GET'])
 @login_required
 def get_profile():
-    user = User_profile.query.get(current_user.id)
+    user = User_profile.query.get(current_user.user_id)
 
     if not user:
         return jsonify({"error": "User not found"}), 404
