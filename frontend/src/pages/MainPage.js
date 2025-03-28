@@ -94,15 +94,6 @@ const MainPage = () => {
       <main className="main-content">
         <header className="main-header">
           <h1>Main Page</h1>
-          <div className="search-filter">
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            <button className="filter-button">Filter</button>
-          </div>
           <div className="user-profile">
             <img src={profile.avatar} alt="User" />
             <span>{profile.name || 'Loading...'}</span>
@@ -111,6 +102,18 @@ const MainPage = () => {
             </button>
           </div>
         </header>
+
+        {/* Search and Filter Section */}
+        <div className="search-filter-container">
+          <input
+            type="text"
+            className="search-bar"
+            placeholder="Search projects..."
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+          <button className="filter-button">Filter</button>
+        </div>
 
         <section className="project-list">
           <table>

@@ -193,11 +193,13 @@ body {
   flex-direction: column;
 }
 
+/* Main header */
 .main-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding-bottom: 5px; /* Reduced padding below the header */
+  margin-bottom: 0; /* Remove extra margin below the header */
 }
 
 .main-header h1 {
@@ -206,32 +208,50 @@ body {
   font-weight: bold;
 }
 
-.search-filter {
+/* Search filter container */
+.search-filter-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  margin-top: 5px; /* Reduced spacing below the main header */
+  margin-bottom: 50px; /* Increased spacing above the projects table */
+  margin-left: 0; /* Align to the left */
+  gap: 10px; /* Add spacing between the search bar and the filter button */
+  height: 40px;
 }
 
-.search-filter input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+/* Search bar styling */
+.search-bar {
+  flex: 0 1 350px; /* Increased width of the search bar */
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   font-size: 14px;
-  width: 300px;
+  height: 22px; /* Set consistent height */
+  margin-right: 10px; /* Add spacing between the search bar and the filter button */
 }
 
+/* Filter button styling */
 .filter-button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: white;
+  color: grey;
+  border: 1px solid #ccc;
+  border-radius: 6px; /* Make the button more rounded */
   font-size: 14px;
+  cursor: pointer;
+  height: 40px; /* Match the height of the search bar */
 }
 
 .filter-button:hover {
-  background-color: #0056b3;
+  background-color: #f0f0f0; /* Slightly darker background on hover */
+}
+
+.filter-button .filter-icon {
+  margin-right: 8px; /* Add spacing between the icon and the text */
+  font-size: 16px; /* Adjust icon size */
 }
 
 /* Main Content specific to MainPage */
@@ -247,7 +267,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .main-page-header h1 {
