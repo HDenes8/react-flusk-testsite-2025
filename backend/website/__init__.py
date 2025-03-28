@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import os
 from os import path
@@ -43,6 +43,15 @@ def create_app():
     @login_manager.user_loader
     def load_user(id):
         return User_profile.query.get(int(id))
+    
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        # Check if the request is an API request
+        if request.path.startswith('/api/'):
+            return jsonify({"error": "Unauthorized"}), 401
+        else:
+            # Redirect to the login page for non-API requests
+            return redirect(url_for('auth.login'))
     
     return app
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import './MainPage.css';
 import { FaHome, FaFolder, FaHeart, FaEnvelope, FaPlus, FaCog, FaSignOutAlt, FaBars, FaInfoCircle } from 'react-icons/fa';
 
@@ -8,26 +9,36 @@ const MainPage = () => {
   const [projects, setProjects] = useState([]); // Stores all projects
   const [searchQuery, setSearchQuery] = useState(''); // Search query for filtering
   const [filteredProjects, setFilteredProjects] = useState([]); // Filtered projects based on search
-  const [profile, setProfile] = useState({ name: '', avatar: '/static/profile_pics/default.png' }); // User profile data
+  const [profile, setProfile] = useState(null); // User profile data
+  const navigate = useNavigate(); // Initialize useNavigate for redirection
 
   // Fetch projects and profile data from the backend
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch projects from the backend
-        const projectsResponse = await axios.get('/api/projects');
-        const profileResponse = await axios.get('/api/profile');
+        const projectsResponse = await axios.get('/api/projects', { validateStatus: false });
+        const profileResponse = await axios.get('/api/profile', { validateStatus: false });
+
+        // Check if the backend returned a 401 Unauthorized or 302 Found
+        if (projectsResponse.status === 401 || projectsResponse.status === 302 || 
+            profileResponse.status === 401 || profileResponse.status === 302) {
+          navigate('/login'); // Redirect to login page
+          return;
+        }
 
         // Set the fetched data to state
-        setProjects(projectsResponse.data);
-        setFilteredProjects(projectsResponse.data); // Initially, all projects are displayed
-        setProfile(profileResponse.data);
+        setProjects(projectsResponse.data || []); // Ensure data is an array
+        setFilteredProjects(projectsResponse.data || []); // Ensure data is an array
+        setProfile(profileResponse.data || { name: '', avatar: '/static/profile_pics/default.png' });
       } catch (error) {
         console.error('Error fetching data:', error);
+        navigate('/login'); // Redirect to login page on unexpected errors
       }
     };
+
     fetchData();
-  }, []);
+  }, [navigate]);
 
   // Handle search and filter
   const handleSearch = (e) => {
@@ -49,6 +60,10 @@ const MainPage = () => {
       console.error('Error during logout:', error);
     }
   };
+
+  if (!profile) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="main-page-container">
@@ -127,7 +142,7 @@ const MainPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredProjects.length > 0 ? (
+              {Array.isArray(filteredProjects) && filteredProjects.length > 0 ? (
                 filteredProjects.map((project) => (
                   <tr key={project.id}>
                     <td>

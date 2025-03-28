@@ -18,7 +18,7 @@ CORS(auth)
 
 #login
 
-@auth.route('/login', methods=['POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
     data = request.get_json()  # Parse JSON data from the request
     email = data.get('email')
