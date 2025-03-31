@@ -5,6 +5,7 @@ import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import ProjectsPage from './pages/ProjectsPage';
 import Projects from './pages/projects';
+import Invitation from './pages/invitation';
 import './App.css';
 
 function App() {
@@ -25,6 +26,11 @@ function App() {
         <Route path="/projects" element={
           <Layout>
             <Projects />
+          </Layout>
+        } />
+        <Route path="/invitation" element={
+          <Layout>
+            <Invitation />
           </Layout>
         } />
       </Routes>
