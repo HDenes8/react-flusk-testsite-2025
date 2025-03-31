@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './invitation.css';
 
 const Invitation = () => {
@@ -7,14 +8,16 @@ const Invitation = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-  useEffect(() => {
+  
+useEffect(() => {
     fetchInvitations();
-  }, []);
+  }, [navigate]);
 
   const fetchInvitations = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/invitations');
+      const response = await axios.get('/api/invitations');
       setInvitations(response.data);
     } catch (error) {
       console.error('Error fetching invitations:', error);
@@ -24,7 +27,7 @@ const Invitation = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/invitations', {
+      const response = await axios.post('/api/invitations', {
         name,
         email,
         message
