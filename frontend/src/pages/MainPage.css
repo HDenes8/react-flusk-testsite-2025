@@ -1,6 +1,7 @@
 /* MainPage.css */
 .main-page-container {
   width: 100%;
+  padding-top: 20px; /* Adjust this value as needed to create space */
 }
 
 .search-filter-container {
@@ -82,15 +83,4 @@
 .status.error {
   background-color: #e74c3c;
   color: white;
-}
-
-/* New CSS for aligning status icons to the right */
-.project-list .status-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: right;
-}
-
-.project-list .status-container .status {
-  margin-left: auto;
 }
