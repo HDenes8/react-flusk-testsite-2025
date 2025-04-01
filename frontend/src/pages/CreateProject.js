@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import {} from 'react-router-dom';
 import './CreateProject.css';
 
 const CreateProject = () => {
   const [formData, setFormData] = useState({
     projectName: '',
     description: '',
-    inviteUsers: '',
     inviteEmail: ''
   });
 
@@ -22,12 +20,11 @@ const CreateProject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/projects', formData);
+      const response = await axios.post('/create-project', formData, { withCredentials: true });
       alert('Project created successfully');
       setFormData({
         projectName: '',
         description: '',
-        inviteUsers: '',
         inviteEmail: ''
       });
     } catch (error) {
@@ -64,18 +61,6 @@ const CreateProject = () => {
             value={formData.description}
             onChange={handleChange}
             required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="inviteUsers">Invite Other Users</label>
-          <input
-            type="text"
-            className="form-control"
-            id="inviteUsers"
-            name="inviteUsers"
-            placeholder="Select User"
-            value={formData.inviteUsers}
-            onChange={handleChange}
           />
         </div>
         <div className="form-group">

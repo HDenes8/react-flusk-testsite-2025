@@ -13,8 +13,8 @@ const Invitations = () => {
 
   const fetchInvitations = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/invitations');
-      setInvitations(response.data);
+      const response = await axios.get('/invitations', { withCredentials: true });
+      setInvitations(response.data.invitations);
     } catch (error) {
       console.error('Error fetching invitations:', error);
     }
@@ -22,7 +22,7 @@ const Invitations = () => {
 
   const acceptInvitation = async (invitationId) => {
     try {
-      await axios.post(`http://localhost:5000/api/invitations/${invitationId}/accept`);
+      await axios.post(`/accept_invite/${invitationId}`, {}, { withCredentials: true });
       fetchInvitations(); // Refresh the list of invitations
       navigate('/projects'); // Redirect to the projects page after accepting an invitation
     } catch (error) {
@@ -30,17 +30,42 @@ const Invitations = () => {
     }
   };
 
+  const denyInvitation = async (invitationId) => {
+    try {
+      await axios.post(`/deny_invite/${invitationId}`, {}, { withCredentials: true });
+      fetchInvitations(); // Refresh the list of invitations
+    } catch (error) {
+      console.error('Error denying invitation:', error);
+    }
+  };
+
   return (
     <div className="invitations-container">
       <h1>Invitations</h1>
       {invitations.length > 0 ? (
-        invitations.map((invite) => (
-          <div key={invite.invitation_id} className="invitation">
-            <p>Project: {invite.project.name}</p>
-            <p>Invited by: {invite.referrer.full_name}</p>
-            <button onClick={() => acceptInvitation(invite.invitation_id)}>Accept</button>
-          </div>
-        ))
+        <table className="invitations-table">
+          <thead>
+            <tr>
+              <th>Project ID</th>
+              <th>Status</th>
+              <th>Invite Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invitations.map((invite) => (
+              <tr key={invite.id}>
+                <td>{invite.project_id}</td>
+                <td>{invite.status}</td>
+                <td>{invite.invite_date}</td>
+                <td>
+                  <button onClick={() => acceptInvitation(invite.id)}>Accept</button>
+                  <button onClick={() => denyInvitation(invite.id)}>Deny</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : (
         <p>No invitations found</p>
       )}
