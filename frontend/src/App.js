@@ -5,7 +5,9 @@ import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import ProjectsPage from './pages/ProjectsPage';
 import Projects from './pages/projects';
-import Invitation from './pages/invitation';
+import Invitations from './pages/Invitations';
+import Settings from './pages/Settings';
+import CreateProject from './pages/CreateProject';
 import './App.css';
 
 function App() {
@@ -28,9 +30,19 @@ function App() {
             <Projects />
           </Layout>
         } />
-        <Route path="/invitation" element={
+        <Route path="/invitations" element={
           <Layout>
-            <Invitation />
+            <Invitations />
+          </Layout>
+        } />
+        <Route path="/settings" element={
+          <Layout>
+            <Settings />
+          </Layout>
+        } />
+        <Route path="/create-project" element={
+          <Layout>
+            <CreateProject />
           </Layout>
         } />
       </Routes>

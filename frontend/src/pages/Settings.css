@@ -1,0 +1,48 @@
+.settings-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  max-width: 325px;
+}
+
+button:hover {
+  background-color: #8b939c;
+}
+
+.profile-pic-menu {
+  margin-top: 10px;
+}
+
+.profile-pic-options {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.profile-pic-thumb {
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}

@@ -1,0 +1,26 @@
+.invitations-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.invitation {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.invitation p {
+  margin: 5px 0;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

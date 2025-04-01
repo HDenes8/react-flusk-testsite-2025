@@ -70,7 +70,7 @@ const Navbar = () => {
             <li className={window.location.pathname === '/invitations' ? 'active' : ''} onClick={() => navigate('/invitations')}>
               <FaEnvelope /> {!sidebarCollapsed && 'Invitation'}
             </li>
-            <li className={window.location.pathname === '/new-project' ? 'active' : ''} onClick={() => navigate('/new-project')}>
+            <li className={window.location.pathname === '/create-project' ? 'active' : ''} onClick={() => navigate('/create-project')}>
               <FaPlus /> {!sidebarCollapsed && 'Create New Project'}
             </li>
             <li className={window.location.pathname === '/settings' ? 'active' : ''} onClick={() => navigate('/settings')}>

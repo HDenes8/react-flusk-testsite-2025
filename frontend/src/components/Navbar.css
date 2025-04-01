@@ -105,13 +105,13 @@
   .user-profile button {
     background: none;
     border: none;
-    color: #7f8c8d;
+    color: #000000;
     cursor: pointer;
     font-size: 1.2rem;
     transition: color 0.2s;
   }
   
   .user-profile button:hover {
-    color: #e74c3c;
+    color: #c22918;
   }
   
