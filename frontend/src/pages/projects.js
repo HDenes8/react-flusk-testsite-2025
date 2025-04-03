@@ -6,7 +6,6 @@ import './MainPage.css';
 const MainPage = () => {
   const [projects, setProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredProjects, setFilteredProjects] = useState([]);
   const navigate = useNavigate();
 
   // Fetch projects from the backend
@@ -14,39 +13,41 @@ const MainPage = () => {
     const fetchProjects = async () => {
       try {
         const projectsResponse = await axios.get('/api/projects', { validateStatus: false });
-
-        // Check if the backend returned a 401 Unauthorized or 302 Found
+  
         if (projectsResponse.status === 401 || projectsResponse.status === 302) {
           navigate('/login');
           return;
         }
-
-        // Set the fetched data to state
-        setProjects(projectsResponse.data || []);
-        setFilteredProjects(projectsResponse.data || []);
+  
+        // Case-insensitive role filtering
+        const ownerProjects = (projectsResponse.data || []).filter(project => 
+          project.role.toLowerCase() === 'owner'
+        );
+  
+        setProjects(ownerProjects);
       } catch (error) {
         console.error('Error fetching projects:', error);
         navigate('/login');
       }
     };
-
+  
     fetchProjects();
   }, [navigate]);
-
-  // Handle search and filter
+  
+  // Handle search
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    setFilteredProjects(
-      projects.filter((project) =>
-        project.name.toLowerCase().includes(query)
-      )
-    );
   };
+
+  // Filtered list based on search
+  const filteredProjects = projects.filter((project) =>
+    project.name.toLowerCase().includes(searchQuery)
+  );
 
   return (
     <div className="main-page-container">
-      {/* Search and Filter Section */}
+      {/* Search Bar */}
       <div className="search-filter-container">
         <input
           type="text"
@@ -55,22 +56,22 @@ const MainPage = () => {
           value={searchQuery}
           onChange={handleSearch}
         />
-        <button className="filter-button">Filter</button>
       </div>
 
+      {/* Project List */}
       <section className="project-list">
         <table>
           <thead>
             <tr>
-              <th>Project name</th>
-              <th>My Roles</th>
+              <th>Project Name</th>
+              <th>My Role</th>
               <th>Last Modified</th>
               <th>Date</th>
               <th>Owner</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(filteredProjects) && filteredProjects.length > 0 ? (
+            {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => (
                 <tr key={project.id}>
                   <td>
@@ -80,8 +81,8 @@ const MainPage = () => {
                     </span>
                   </td>
                   <td>{project.role}</td>
-                  <td>{project.lastModified || 'N/A'}</td>
-                  <td>{project.date || 'N/A'}</td>
+                  <td>{project.lastModified || '-'}</td>
+                  <td>{project.date || '-'}</td>
                   <td>
                     <img
                       src={project.ownerAvatar}

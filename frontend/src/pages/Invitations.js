@@ -41,12 +41,12 @@ const Invitations = () => {
 
   return (
     <div className="invitations-container">
-      <h1>Invitations</h1>
+    <section className="project-list">
       {invitations.length > 0 ? (
-        <table className="invitations-table">
+        <table>
           <thead>
             <tr>
-              <th>Project ID</th>
+              <th>Project Name</th>
               <th>Status</th>
               <th>Invite Date</th>
               <th>Actions</th>
@@ -55,7 +55,7 @@ const Invitations = () => {
           <tbody>
             {invitations.map((invite) => (
               <tr key={invite.id}>
-                <td>{invite.project_id}</td>
+                <td>{invite.project_name}</td>
                 <td>{invite.status}</td>
                 <td>{invite.invite_date}</td>
                 <td>
@@ -69,7 +69,7 @@ const Invitations = () => {
       ) : (
         <p>No invitations found</p>
       )}
-      <Link to="/projects">Back to Projects</Link>
+    </section>
     </div>
   );
 };

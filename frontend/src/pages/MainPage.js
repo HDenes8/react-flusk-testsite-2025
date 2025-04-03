@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './MainPage.css';
@@ -7,21 +7,21 @@ const MainPage = () => {
   const [projects, setProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [selectedRole, setSelectedRole] = useState('');
+  const [menuOpen, setMenuOpen] = useState(null);
+  const menuRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch projects from the backend
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const projectsResponse = await axios.get('/api/projects', { validateStatus: false });
 
-        // Check if the backend returned a 401 Unauthorized or 302 Found
         if (projectsResponse.status === 401 || projectsResponse.status === 302) {
           navigate('/login');
           return;
         }
 
-        // Set the fetched data to state
         setProjects(projectsResponse.data || []);
         setFilteredProjects(projectsResponse.data || []);
       } catch (error) {
@@ -33,20 +33,57 @@ const MainPage = () => {
     fetchProjects();
   }, [navigate]);
 
-  // Handle search and filter
+  useEffect(() => {
+    // Close menu when clicking outside of it
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    setFilteredProjects(
-      projects.filter((project) =>
+    filterProjects(query, selectedRole);
+  };
+
+  const handleRoleFilter = (e) => {
+    setSelectedRole(e.target.value);
+    filterProjects(searchQuery, e.target.value);
+  };
+
+  const filterProjects = (query, role) => {
+    let filtered = projects;
+
+    if (query) {
+      filtered = filtered.filter((project) =>
         project.name.toLowerCase().includes(query)
-      )
-    );
+      );
+    }
+
+    if (role) {
+      filtered = filtered.filter((project) => project.role === role);
+    }
+
+    setFilteredProjects(filtered);
+  };
+
+  const toggleMenu = (projectId) => {
+    setMenuOpen(menuOpen === projectId ? null : projectId);
+  };
+
+  const openProject = () => {
+    navigate('/project');
   };
 
   return (
     <div className="main-page-container">
-      {/* Search and Filter Section */}
       <div className="search-filter-container">
         <input
           type="text"
@@ -55,7 +92,15 @@ const MainPage = () => {
           value={searchQuery}
           onChange={handleSearch}
         />
-        <button className="filter-button">Filter</button>
+
+        <select className="filter-dropdown" value={selectedRole} onChange={handleRoleFilter}>
+          <option value="">All Roles</option>
+          {[...new Set(projects.map((project) => project.role))].map((role) => (
+            <option key={role} value={role}>
+              {role}
+            </option>
+          ))}
+        </select>
       </div>
 
       <section className="project-list">
@@ -67,34 +112,44 @@ const MainPage = () => {
               <th>Last Modified</th>
               <th>Date</th>
               <th>Owner</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(filteredProjects) && filteredProjects.length > 0 ? (
+            {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => (
                 <tr key={project.id}>
                   <td>
                     {project.name}{' '}
                     <span className={`status ${project.status}`}>
-                      {project.status === 'success' ? '✔' : '!'}
+                      {project.status === 'success' ? '✔' : '!' }
                     </span>
                   </td>
                   <td>{project.role}</td>
-                  <td>{project.lastModified || 'N/A'}</td>
-                  <td>{project.date || 'N/A'}</td>
+                  <td>{project.lastModified || '-'}</td>
+                  <td>{project.date || '-'}</td>
                   <td>
                     <img
                       src={project.ownerAvatar}
                       alt={project.ownerName}
                       className="owner-avatar"
                     />
-                    <span>{project.ownerName}</span>
+                    <span className="ownername">{project.ownerName}</span>
+                  </td>
+                  <td className="actions">
+                    <button className="dots-button" onClick={() => toggleMenu(project.id)}>⋯</button>
+                    {menuOpen === project.id && (
+                      <div ref={menuRef} className="horizontal-menu">
+                        <span>{project.description || 'No description available'}</span>
+                        <button className="open-project-button" onClick={openProject}>Open Project</button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5">No projects found</td>
+                <td colSpan="6">No projects found</td>
               </tr>
             )}
           </tbody>

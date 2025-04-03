@@ -44,6 +44,7 @@ def invitations():
     ).filter(Invitation.status.in_(filter_status)).order_by(Invitation.invite_date.desc()).all()
 
     invitations_data = [{
+        "project_name": inv.project.name,
         "id": inv.invitation_id,
         "project_id": inv.project_id,
         "status": inv.status,

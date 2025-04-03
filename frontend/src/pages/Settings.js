@@ -21,26 +21,30 @@ const Settings = () => {
     fetchProfilePics();
   }, []);
 
+  // Fetch user data from the backend API
   const fetchUserData = async () => {
     try {
       const response = await axios.get('/api/user');
+      console.log('Fetched user data:', response.data); // Debugging line
       setUser(response.data);
       setFormData({
-        fullName: response.data.full_name,
-        nickname: response.data.nickname,
-        email: response.data.email,
-        mobile: response.data.mobile,
-        job: response.data.job,
-        profilePic: response.data.profile_pic
+        fullName: response.data.full_name || '',
+        nickname: response.data.nickname || '',
+        email: response.data.email || '',
+        mobile: response.data.mobile || '',
+        job: response.data.job || '',
+        profilePic: response.data.profile_pic || ''  // Assuming this is the image file name
       });
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
 
+  // Fetch profile pictures from the backend API
   const fetchProfilePics = async () => {
     try {
       const response = await axios.get('/api/profile_pics');
+      console.log('Fetched profile pics:', response.data); // Debugging line
       setProfilePics(response.data);
     } catch (error) {
       console.error('Error fetching profile pictures:', error);
@@ -64,7 +68,7 @@ const Settings = () => {
     try {
       await axios.post('/api/user/update', formData);
       alert('Profile updated successfully');
-      fetchUserData();
+      fetchUserData();  // Refresh user data after update
     } catch (error) {
       console.error('Error updating profile:', error);
     }
@@ -82,7 +86,7 @@ const Settings = () => {
       <h3 align="center">Settings</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="fullName">Full Name: {user.full_name}</label>
+          <label htmlFor="fullName">Full Name:</label>
           <input
             type="text"
             className="form-control"
@@ -94,7 +98,7 @@ const Settings = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="nickname">Nickname: {user.nickname}</label>
+          <label htmlFor="nickname">Nickname:</label>
           <input
             type="text"
             className="form-control"
@@ -106,7 +110,7 @@ const Settings = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="email">Email Address: {user.email}</label>
+          <label htmlFor="email">Email Address:</label>
           <input
             type="email"
             className="form-control"
@@ -118,7 +122,7 @@ const Settings = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="mobile">Phone Number: {user.mobile}</label>
+          <label htmlFor="mobile">Phone Number:</label>
           <input
             type="text"
             className="form-control"
@@ -130,7 +134,7 @@ const Settings = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="job">Job Title: {user.job}</label>
+          <label htmlFor="job">Job Title:</label>
           <input
             type="text"
             className="form-control"
@@ -170,18 +174,22 @@ const Settings = () => {
         </button>
         <div id="profilePicMenu" className="profile-pic-menu" style={{ display: 'none' }}>
           <div className="profile-pic-options">
-            {profilePics.map((pic) => (
-              <label key={pic}>
-                <input
-                  type="radio"
-                  name="profile_pic"
-                  value={pic}
-                  checked={pic === formData.profilePic}
-                  onChange={handleProfilePicChange}
-                />
-                <img src={`/static/profile_pics/${pic}`} alt={pic} className="profile-pic-thumb" />
-              </label>
-            ))}
+            {profilePics.length > 0 ? (
+              profilePics.map((pic) => (
+                <label key={pic}>
+                  <input
+                    type="radio"
+                    name="profilePic"
+                    value={pic}
+                    checked={pic === formData.profilePic}
+                    onChange={handleProfilePicChange}
+                  />
+                  <img src={`/static/profile_pics/${pic}`} alt={pic} className="profile-pic-thumb" />
+                </label>
+              ))
+            ) : (
+              <p>No profile pictures available</p>
+            )}
           </div>
         </div>
         <br />
