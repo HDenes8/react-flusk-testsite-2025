@@ -281,8 +281,47 @@ def get_project_versions(project_id):
 
     return jsonify(versions)
 
-
 #project end
+
+#project_page
+
+@views.route('/project/<int:project_id>', methods=['GET'])
+@login_required
+def project_page(project_id):
+    # Fetch the project by ID
+    print(f"Fetching project with ID: {project_id}")  # Debugging
+    project = Project.query.get(project_id)
+    if not project:
+        print(f"Project with ID {project_id} not found.")  # Debugging
+        return jsonify({"error": "Project not found."}), 404
+
+    # Fetch files for the project
+    files = File_version.query.join(File_data, File_version.file_id == File_data.file_data_id).\
+        filter(File_data.project_id == project_id, File_version.last_version == True).all()
+
+    # Prepare the response data
+    project_data = {
+        "id": project.project_id,
+        "name": project.name,
+        "description": project.description,
+        "created_at": project.created_date.isoformat() if project.created_date else None,
+        "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
+    }
+
+    files_data = [{
+        "file_id": file.file_version_id,
+        "filename": file.file_name,
+        "file_size": file.file_size,
+        "file_type": file.file_type,
+        "upload_date": file.upload_date.isoformat() if file.upload_date else None
+    } for file in files]
+
+    return jsonify({
+        "project": project_data,
+        "files": files_data
+    })
+
+#project_page end
 
 # Settings
 @views.route('/api/user', methods=['GET'])
