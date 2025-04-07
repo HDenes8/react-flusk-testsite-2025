@@ -15,7 +15,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/ProjectsPage/:project_id" element={<ProjectsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={
@@ -48,7 +47,7 @@ function App() {
             <CreateProject />
           </Layout>
         } />
-        <Route path="/ProjectsPage" element={
+        <Route path="/ProjectsPage/:project_id" element={
           <Layout>
             <ProjectsPage />
           </Layout>
