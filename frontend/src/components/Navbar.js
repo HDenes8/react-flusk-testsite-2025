@@ -58,7 +58,7 @@ const Navbar = () => {
         </div>
         <nav className="navbar-sidebar-nav">
           <ul>
-            <li className={window.location.pathname === '/' ? 'active' : ''} onClick={() => navigate('/')}>
+            <li className={window.location.pathname === '/MainPage' ? 'active' : ''} onClick={() => navigate('/MainPage')}>
               <FaHome /> {!sidebarCollapsed && 'Main Page'}
             </li>
             <li className={window.location.pathname === '/projects' ? 'active' : ''} onClick={() => navigate('/projects')}>
@@ -91,7 +91,7 @@ const Navbar = () => {
         <h1>{getPageTitle()}</h1>
         <div className="user-profile">
           <img src={profile.avatar} alt="User" />
-          <span>{profile.name || 'Loading...'}</span>
+          <span>{profile.name || 'Loading... one minute please. . .'}</span>
           <button onClick={handleLogout}>
             <FaSignOutAlt />
           </button>
@@ -106,7 +106,7 @@ function getPageTitle() {
   const path = window.location.pathname;
   
   switch(path) {
-    case '/':
+    case '/MainPage':
       return 'Main Page';
     case '/projects':
       return 'My Projects';

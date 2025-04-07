@@ -107,7 +107,7 @@ const MainPage = () => {
         <table>
           <thead>
             <tr>
-              <th>Project name</th>
+              <th>Project Name</th>
               <th>My Roles</th>
               <th>Last Modified</th>
               <th>Date</th>

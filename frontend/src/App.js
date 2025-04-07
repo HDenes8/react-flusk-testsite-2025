@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
+import SignUp from './pages/SignUp';
 import ProjectsPage from './pages/ProjectsPage';
 import Projects from './pages/projects';
 import Invitations from './pages/Invitations';
@@ -15,14 +16,15 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={
           <Layout>
-            <MainPage />
+            <LoginPage />
           </Layout>
         } />
         <Route path="/mainpage" element={
           <Layout>
-            <ProjectsPage />
+            <MainPage />
           </Layout>
         } />
         <Route path="/projects" element={
@@ -43,6 +45,11 @@ function App() {
         <Route path="/create-project" element={
           <Layout>
             <CreateProject />
+          </Layout>
+        } />
+        <Route path="/ProjectsPAge" element={
+          <Layout>
+            <ProjectsPage />
           </Layout>
         } />
       </Routes>

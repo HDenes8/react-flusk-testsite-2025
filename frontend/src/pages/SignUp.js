@@ -60,7 +60,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await axios.post('/sign-up', formData);
+      const response = await axios.post('/signup', formData);
       setMessage(response.data.message);
 
       if (response.data.status === 'success') {
