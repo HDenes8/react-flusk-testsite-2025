@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, url_for, redirect, jsonify
+from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from .models import File_data, User_profile, User_Project, Project, Invitation, File_version
 from . import db
@@ -11,6 +11,9 @@ from werkzeug.utils import secure_filename
 
 from sqlalchemy import text
 from sqlalchemy.orm import aliased
+
+import datetime
+import uuid
 
 views = Blueprint('views', __name__)
 
@@ -119,59 +122,114 @@ def download_file(filename):
     else:
         return jsonify({"error": "File not found."}), 404
 
-# Projects
-@views.route('/projects', methods=['POST', 'GET'])
-@login_required
-def projects():
-    creator_alias = aliased(User_profile)
-    projects = db.session.query(Project, User_profile, creator_alias).\
-        select_from(User_profile).\
-        join(User_Project, User_Project.user_id == User_profile.user_id).\
-        join(Project, Project.project_id == User_Project.project_id).\
-        join(creator_alias, creator_alias.user_id == Project.creator_id).\
-        filter(User_Project.user_id == current_user.user_id).\
-        all()
-    
-    projects_data = [{
-        "project_id": proj.Project.project_id,
-        "name": proj.Project.name,
-        "creator": proj.creator_alias.full_name,
-    } for proj in projects]
+# Projects start 
 
-    files = os.listdir(current_app.config['UPLOAD_FOLDER'])
+# Create project
+projects_bp = Blueprint('projects', __name__)
+@projects_bp.route("/api/projects", methods=["POST"])
+def create_project():
+    data = request.get_json()
+    name = data.get("name")
+    description = data.get("description")
 
-    return jsonify({"projects": projects_data}, files=files)
+    if not name:
+        return jsonify({"error": "Project name is required"}), 400
 
-@views.route('/api/projects', methods=['GET'])
-@login_required
-def get_projects():
-    user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
+    project = Project(name=name, description=description)
+    db.session.add(project)
+    db.session.commit()
 
-    projects_data = []
-    for user_project in user_projects:
-        project = Project.query.get(user_project.project_id)
-
-        last_version = db.session.query(File_version).join(File_data).filter(
-            File_data.project_id == project.project_id
-        ).order_by(File_version.upload_date.desc()).first()
-
-        if last_version and last_version.upload_date:
-            last_modified = last_version.upload_date.strftime('%Y-%m-%d')
-        else:
-            last_modified = None
-
-        projects_data.append({
+    return jsonify({
+        "message": "Project created",
+        "project": {
             "id": project.project_id,
             "name": project.name,
-            "role": user_project.role,
-            "lastModified": last_modified,
-            "date": project.created_date.strftime('%Y-%m-%d') if project.created_date else None,
-            "ownerName": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
-            "ownerAvatar": f"/static/profile_pics/{User_profile.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
-            "status": "success"
-        })
+            "description": project.description,
+            "created_at": project.created_date.isoformat()
+        }
+    }), 201
 
-    return jsonify(projects_data)
+# Upload file + create version
+projects_bp = Blueprint('projects', __name__)
+@projects_bp.route("/api/projects/<int:project_id>/upload", methods=["POST"])
+def upload_file(project_id):
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    project = Project.query.get_or_404(project_id)
+
+    filename = file.filename
+    version_id = str(uuid.uuid4())
+    timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    stored_filename = f"{timestamp}_{filename}"
+
+    upload_folder = os.path.join("backend", "uploads", str(project.project_id))
+    os.makedirs(upload_folder, exist_ok=True)
+    file_path = os.path.join(upload_folder, stored_filename)
+    file.save(file_path)
+
+    # Create File_data entry
+    file_data = File_data(
+        description="File description",  
+        short_comment="Short comment",  
+        project_id=project.project_id
+    )
+    db.session.add(file_data)
+    db.session.commit()
+
+    # Create File_version entry for this file
+    version = File_version(
+        version_number=1,  
+        file_name=filename,
+        file_type=file.mimetype,
+        file_size=len(file.read()), 
+        description="Initial version",
+        last_version=True,  
+        short_comment="First version",
+        file_id=file_data.file_data_id,  
+        user_id=current_user.user_id  
+    )
+    db.session.add(version)
+    db.session.commit()
+
+    return jsonify({
+        "message": "File uploaded",
+        "version": {
+            "version_id": version.version_id,
+            "filename": version.file_name,
+            "timestamp": version.upload_date.isoformat(),
+            "file_size": version.file_size
+        }
+    }), 201
+
+# Get all versions for a project
+@projects_bp.route("/api/projects/<int:project_id>/versions", methods=["GET"])
+def get_project_versions(project_id):
+    project = Project.query.get_or_404(project_id)
+    file_data = File_data.query.filter_by(project_id=project.project_id).all()
+
+    if not file_data:
+        return jsonify({"error": "No files for this project"}), 404
+
+    versions = []
+    for f in file_data:
+        file_versions = File_version.query.filter_by(file_id=f.file_data_id).all()
+        for v in file_versions:
+            versions.append({
+                "version_id": v.version_id,
+                "filename": v.file_name,
+                "timestamp": v.upload_date.isoformat(),
+                "file_size": v.file_size
+            })
+
+    return jsonify(versions)
+
+
+#project end
 
 # Settings
 @views.route('/api/user', methods=['GET'])
