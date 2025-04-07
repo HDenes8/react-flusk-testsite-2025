@@ -114,7 +114,7 @@ function getPageTitle() {
       return 'Favorites';
     case '/invitations':
       return 'Invitations';
-    case '/new-project':
+    case '/create-project':
       return 'Create New Project';
     case '/settings':
       return 'Settings';

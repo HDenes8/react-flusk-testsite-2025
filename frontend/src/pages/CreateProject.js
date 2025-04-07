@@ -3,7 +3,10 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './CreateProject.css';
 
+
+
 const CreateProject = () => {
+  const navigate = useNavigate(); // ✅ This was missing!
   const [formData, setFormData] = useState({
     projectName: '',
     description: '',
@@ -21,18 +24,16 @@ const CreateProject = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/create-project', formData, { withCredentials: true });
+      await axios.post('/create-project', formData, { withCredentials: true });
       alert('Project created successfully');
-      setFormData({
-        projectName: '',
-        description: '',
-        inviteEmail: ''
-      });
+      navigate('/projects'); // ✅ This will now work
     } catch (error) {
       console.error('Error creating project:', error);
       alert('Failed to create project');
     }
   };
+  
+  
 
   return (
     <div className="create-project-container">

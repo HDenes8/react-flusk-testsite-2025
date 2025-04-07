@@ -1,77 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import './ProjectsPage.css';
+import React, { useEffect, useState } from 'react';
 
-const ProjectsPage = () => {
-  const [projects, setProjects] = useState([]);
+const ProjectPage = ({ projectId }) => {
+  const [project, setProject] = useState(null);
   const [files, setFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadData, setUploadData] = useState({
+    file: null,
+    description: '',
+    short_comment: '',
+  });
 
   useEffect(() => {
-    fetchProjects();
-    fetchFiles();
-  }, []);
+    fetch(`/api/project/${projectId}`)
+      .then(res => res.json())
+      .then(data => {
+        setProject(data.project);
+        setFiles(data.files);
+      });
+  }, [projectId]);
 
-  const fetchProjects = async () => {
-    try {
-      const response = await axios.get('/api/projects');
-      setProjects(response.data);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+  const handleFileSelect = (e) => {
+    const value = e.target.value;
+    setSelectedFiles(prev =>
+      e.target.checked ? [...prev, value] : prev.filter(id => id !== value)
+    );
+  };
+
+  const handleUploadChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'file') {
+      setUploadData(prev => ({ ...prev, file: files[0] }));
+    } else {
+      setUploadData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const fetchFiles = async () => {
-    try {
-      const response = await axios.get('/api/files');
-      setFiles(response.data);
-    } catch (error) {
-      console.error('Error fetching files:', error);
+  const handleUploadSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('file', uploadData.file);
+    formData.append('description', uploadData.description);
+    formData.append('short_comment', uploadData.short_comment);
+    formData.append('project_id', projectId);
+
+    await fetch('/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    // Optionally re-fetch files
+  };
+
+  const handleDownload = async (e) => {
+    e.preventDefault();
+    const response = await fetch('/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ selected_files: selectedFiles }),
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'files.zip'; // or whatever backend sets
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
   };
+
+  if (!project) return <p>Loading...</p>;
 
   return (
-    <div>
-      <nav>
-        <Link className="nav-item nav-link" id="members" to="/members">Members</Link>
-      </nav>
-      <div className="table">
-        <div className="cell">VerNum</div>
-        <div className="cell">File Name</div>
-        <div className="cell">Description</div>
-        <div className="cell">Size</div>
-        <div className="cell">Date</div>
-        <div className="cell">User</div>
+    <div className="project-page">
+      <h1>{project.name}</h1>
+      <p>{project.description}</p>
+      <p>Created on: {new Date(project.created_date).toLocaleString()}</p>
 
-        {projects.map((project) => (
-          <React.Fragment key={project.project_id}>
-            <div className="cell">{project.project_id}</div>
-            <div className="cell">{project.name}</div>
-            <div className="cell">{project.description}</div>
-            <div className="cell">{project.size}</div>
-            <div className="cell">{project.created_date}</div>
-            <div className="cell">{project.creator.nickname}</div>
-          </React.Fragment>
-        ))}
-      </div>
-      <div>
-        <h3>Upload Files</h3>
-        <form action="/api/upload" method="post" encType="multipart/form-data">
-          <input type="file" name="file" />
-          <button type="submit">Upload</button>
-        </form>
+      <h3>Upload Files</h3>
+      <form onSubmit={handleUploadSubmit}>
+        <input type="file" name="file" required onChange={handleUploadChange} />
+        <input type="text" name="description" placeholder="Description (optional)" onChange={handleUploadChange} />
+        <input type="text" name="short_comment" placeholder="Short Comment (optional)" onChange={handleUploadChange} />
+        <button type="submit">Upload</button>
+      </form>
 
-        <h3>Download Files</h3>
+      <h3>Download Files</h3>
+      <form onSubmit={handleDownload}>
         <ul>
-          {files.map((file) => (
-            <li key={file}>
-              <a href={`/api/download/${file}`}>{file}</a>
+          {files.map(file => (
+            <li key={file.version_id}>
+              <input
+                type="checkbox"
+                value={file.version_id}
+                onChange={handleFileSelect}
+              />
+              {file.file_name} ({file.file_size} bytes)
             </li>
           ))}
         </ul>
-      </div>
+        <button type="submit">Download Selected Files</button>
+      </form>
     </div>
   );
 };
 
-export default ProjectsPage;
+export default ProjectPage;

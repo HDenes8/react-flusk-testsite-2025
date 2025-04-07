@@ -47,3 +47,31 @@
   background: red;
   color: white;
 }
+
+.filter-buttons {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.filter-buttons button {
+  padding: 8px 16px;
+  color: #000000;
+  border: 1px solid #ddd;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.filter-buttons button:hover {
+  background-color: #e0e0e0;
+  color: #000000;
+}
+
+.filter-buttons .active {
+  background-color: #000000;
+  color: white;
+  border-color: #000000;
+}

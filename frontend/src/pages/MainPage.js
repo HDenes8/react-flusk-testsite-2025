@@ -79,7 +79,7 @@ const MainPage = () => {
   };
 
   const openProject = () => {
-    navigate('/project');
+    navigate('/ProjectsPage');
   };
 
   return (

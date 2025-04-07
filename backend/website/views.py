@@ -174,72 +174,86 @@ def get_projects():
     return jsonify(projects_data)
 
 # Settings
-@views.route('/settings', methods=['POST', 'GET'])
-@login_required 
-def settings():
+@views.route('/api/user', methods=['GET'])
+@login_required
+def get_user():
+    user = current_user
+    user_data = {
+        'email': user.email,
+        'full_name': user.full_name,
+        'nickname': user.nickname,
+        'mobile': user.mobile,
+        'job': user.job,
+        'profile_pic': user.profile_pic
+    }
+    return jsonify(user_data)
+
+@views.route('/api/profile_pics', methods=['GET'])
+@login_required
+def get_profile_pics():
     profile_pics_folder = os.path.join(current_app.static_folder, 'profile_pics')
     profile_pics = [f for f in os.listdir(profile_pics_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
-    
+
     if "default.png" not in profile_pics:
         profile_pics.append("default.png")
+    return jsonify(profile_pics)
 
-    if request.method == 'POST':
-        email = request.form.get('email')
-        full_name = request.form.get('fullName')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
+@views.route('/api/user/update', methods=['POST'])
+@login_required
+def update_user():
+    data = request.get_json()
+    user = current_user
 
-        nickname = request.form.get('nickname')
-        mobile = request.form.get('mobile')
-        job = request.form.get('job')
-        selected_pic = request.form.get('profile_pic')
+    email = data.get('email')
+    full_name = data.get('fullName')
+    password1 = data.get('password1')
+    password2 = data.get('password2')
+    nickname = data.get('nickname')
+    mobile = data.get('mobile')
+    job = data.get('job')
+    selected_pic = data.get('profilePic')
 
-        errors = False
+    if email and email != user.email:
+        if len(email) < 4:
+            return jsonify({"error": "Email must be greater than 3 characters."}), 400
+        elif User_profile.query.filter_by(email=email).first():
+            return jsonify({"error": "Email already exists."}), 400
 
-        if email and email != current_user.email:
-            if len(email) < 4:
-                return jsonify({"error": "Email must be greater than 3 characters."}), 400
-            elif User_profile.query.filter_by(email=email).first():
-                return jsonify({"error": "Email already exists."}), 400
+    if full_name and full_name != user.full_name:
+        if len(full_name) < 2:
+            return jsonify({"error": "Full name must be greater than 1 character."}), 400
 
-        if full_name and full_name != current_user.full_name:
-            if len(full_name) < 2:
-                return jsonify({"error": "Full name must be greater than 1 character."}), 400
+    if password1 or password2:
+        if password1 != password2:
+            return jsonify({"error": "Passwords don't match."}), 400
+        elif len(password1) < 7:
+            return jsonify({"error": "Password must be at least 7 characters."}), 400
+        elif password1 and check_password_hash(user.password, password1):
+            return jsonify({"error": "Password can't be the old one."}), 400
 
-        if password1 or password2:
-            if password1 != password2:
-                return jsonify({"error": "Passwords don't match."}), 400
-            elif len(password1) < 7:
-                return jsonify({"error": "Password must be at least 7 characters."}), 400
-            elif password1 and check_password_hash(current_user.password, password1):
-                return jsonify({"error": "Password can't be the old one."}), 400
+    if email and email != user.email:
+        user.email = email
+    if full_name and full_name != user.full_name:
+        user.full_name = full_name
+    if nickname and nickname != user.nickname:
+        user.nickname = nickname
+    if mobile and mobile != user.mobile:
+        user.mobile = mobile
+    if job and job != user.job:
+        user.job = job
+    if selected_pic:
+        profile_pics_folder = os.path.join(current_app.static_folder, 'profile_pics')
+        profile_pics = [f for f in os.listdir(profile_pics_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        if selected_pic in profile_pics:
+            user.profile_pic = selected_pic
 
-        if errors:
-            return jsonify({"error": "There were issues with the form."}), 400
+    if password1:
+        user.password = generate_password_hash(password1, method='pbkdf2:sha256')
 
-        user = current_user
+    db.session.commit()
+    return jsonify({"message": "Your changes have been saved!"})
 
-        if email and email != user.email:
-            user.email = email
-        if full_name and full_name != user.full_name:
-            user.full_name = full_name
-        if nickname and nickname != user.nickname:
-            user.nickname = nickname
-        if mobile and mobile != user.mobile:
-            user.mobile = mobile
-        if job and job != user.job:
-            user.job = job
-        if selected_pic:
-            if selected_pic in profile_pics:
-                if selected_pic != user.profile_pic:
-                    user.profile_pic = selected_pic
 
-        if password1:
-            user.password = generate_password_hash(password1, method='pbkdf2:sha256')
-
-        db.session.commit()
-
-        return jsonify({"message": "Your changes have been saved!"})
 
 # Create new project
 @views.route('/create-project', methods=['POST'])

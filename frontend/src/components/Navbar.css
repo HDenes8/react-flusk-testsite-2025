@@ -24,6 +24,11 @@
     padding: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  .navbar-sidebar.collapsed .navbar-sidebar-header h2 {
+    display: none;
+  }
+  
   
   .navbar-collapse-button {
     background: none;
@@ -45,17 +50,25 @@
   }
   
   .navbar-sidebar-nav li {
-    padding: 0.8rem 1rem;
+    padding: 1rem 1.2rem;   /* increased padding */
+    font-size: 1.1rem;      /* slightly larger text */
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;              /* slightly more space between icon and text */
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
   }
   
-  .navbar-sidebar-nav li:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+  .navbar-sidebar-nav li svg {
+    font-size: 1.2rem;  /* makes the icons slightly bigger */
   }
+  
+  
+  .navbar-sidebar-nav li:hover {
+    background-color: #f3f3f3;
+    transform: scale(1.02);
+  }
+  
   
   .navbar-sidebar-nav li.active {
     background-color: rgba(255, 255, 255, 0.2);
