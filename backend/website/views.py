@@ -124,6 +124,59 @@ def download_file(filename):
 
 # Projects start 
 
+@views.route('/projects', methods=['POST', 'GET'])
+@login_required
+def projects():
+    creator_alias = aliased(User_profile)
+    projects = db.session.query(Project, User_profile, creator_alias).\
+        select_from(User_profile).\
+        join(User_Project, User_Project.user_id == User_profile.user_id).\
+        join(Project, Project.project_id == User_Project.project_id).\
+        join(creator_alias, creator_alias.user_id == Project.creator_id).\
+        filter(User_Project.user_id == current_user.user_id).\
+        all()
+    
+    projects_data = [{
+        "project_id": proj.Project.project_id,
+        "name": proj.Project.name,
+        "creator": proj.creator_alias.full_name,
+    } for proj in projects]
+
+    files = os.listdir(current_app.config['UPLOAD_FOLDER'])
+
+    return jsonify({"projects": projects_data}, files=files)
+
+@views.route('/api/projects', methods=['GET'])
+@login_required
+def get_projects():
+    user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
+
+    projects_data = []
+    for user_project in user_projects:
+        project = Project.query.get(user_project.project_id)
+
+        last_version = db.session.query(File_version).join(File_data).filter(
+            File_data.project_id == project.project_id
+        ).order_by(File_version.upload_date.desc()).first()
+
+        if last_version and last_version.upload_date:
+            last_modified = last_version.upload_date.strftime('%Y-%m-%d')
+        else:
+            last_modified = None
+
+        projects_data.append({
+            "id": project.project_id,
+            "name": project.name,
+            "role": user_project.role,
+            "lastModified": last_modified,
+            "date": project.created_date.strftime('%Y-%m-%d') if project.created_date else None,
+            "ownerName": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
+            "ownerAvatar": f"/static/profile_pics/{User_profile.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
+            "status": "success"
+        })
+
+    return jsonify(projects_data)
+
 # Create project
 projects_bp = Blueprint('projects', __name__)
 @projects_bp.route("/api/projects", methods=["POST"])
