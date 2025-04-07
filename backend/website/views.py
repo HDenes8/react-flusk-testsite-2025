@@ -147,7 +147,7 @@ def projects():
 def get_projects():
     user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
 
-    project_roles = []
+    projects_data = []
     for user_project in user_projects:
         project = Project.query.get(user_project.project_id)
 
