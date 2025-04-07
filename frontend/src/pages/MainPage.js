@@ -78,8 +78,10 @@ const MainPage = () => {
     setMenuOpen(menuOpen === projectId ? null : projectId);
   };
 
-  const openProject = () => {
-    navigate('/ProjectsPage');
+  // Modified openProject function
+  const openProject = (projectId) => {
+    // Navigating to the project page by passing the project ID
+    navigate(`/project/${projectId}`);
   };
 
   return (
@@ -141,7 +143,8 @@ const MainPage = () => {
                     {menuOpen === project.id && (
                       <div ref={menuRef} className="horizontal-menu">
                         <span>{project.description || 'No description available'}</span>
-                        <button className="open-project-button" onClick={openProject}>Open Project</button>
+                        {/* Pass the project id to the openProject function */}
+                        <button className="open-project-button" onClick={() => openProject(project.id)}>Open Project</button>
                       </div>
                     )}
                   </td>

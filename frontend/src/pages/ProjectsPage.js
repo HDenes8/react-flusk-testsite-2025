@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const ProjectPage = ({ projectId }) => {
+const ProjectPage = ({ project_id }) => {
   const [project, setProject] = useState(null);
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -11,13 +11,13 @@ const ProjectPage = ({ projectId }) => {
   });
 
   useEffect(() => {
-    fetch(`/api/project/${projectId}`)
+    fetch(`/project/${project_id}`)
       .then(res => res.json())
       .then(data => {
         setProject(data.project);
         setFiles(data.files);
       });
-  }, [projectId]);
+  }, [project_id]);
 
   const handleFileSelect = (e) => {
     const value = e.target.value;
@@ -41,19 +41,22 @@ const ProjectPage = ({ projectId }) => {
     formData.append('file', uploadData.file);
     formData.append('description', uploadData.description);
     formData.append('short_comment', uploadData.short_comment);
-    formData.append('project_id', projectId);
+    formData.append('project_id', project_id);
 
-    await fetch('/upload', {
+    await fetch('/api/projects/upload', {
       method: 'POST',
       body: formData,
     });
 
-    // Optionally re-fetch files
+    // Optionally re-fetch files after upload
+    fetch(`/project/${project_id}`)
+      .then(res => res.json())
+      .then(data => setFiles(data.files));
   };
 
   const handleDownload = async (e) => {
     e.preventDefault();
-    const response = await fetch('/download', {
+    const response = await fetch('/api/projects/download', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ selected_files: selectedFiles }),
@@ -81,9 +84,24 @@ const ProjectPage = ({ projectId }) => {
 
       <h3>Upload Files</h3>
       <form onSubmit={handleUploadSubmit}>
-        <input type="file" name="file" required onChange={handleUploadChange} />
-        <input type="text" name="description" placeholder="Description (optional)" onChange={handleUploadChange} />
-        <input type="text" name="short_comment" placeholder="Short Comment (optional)" onChange={handleUploadChange} />
+        <input
+          type="file"
+          name="file"
+          required
+          onChange={handleUploadChange}
+        />
+        <input
+          type="text"
+          name="description"
+          placeholder="Description (optional)"
+          onChange={handleUploadChange}
+        />
+        <input
+          type="text"
+          name="short_comment"
+          placeholder="Short Comment (optional)"
+          onChange={handleUploadChange}
+        />
         <button type="submit">Upload</button>
       </form>
 
