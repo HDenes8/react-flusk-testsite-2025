@@ -6,84 +6,58 @@ import './MainPage.css';
 const MainPage = () => {
   const [projects, setProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [selectedRole, setSelectedRole] = useState('');
   const [menuOpen, setMenuOpen] = useState(null);
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
+  // Fetch projects from the backend
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const projectsResponse = await axios.get('/api/projects', { validateStatus: false });
-
+  
         if (projectsResponse.status === 401 || projectsResponse.status === 302) {
           navigate('/login');
           return;
         }
-
-        setProjects(projectsResponse.data || []);
-        setFilteredProjects(projectsResponse.data || []);
+  
+        // Case-insensitive role filtering
+        const ownerProjects = (projectsResponse.data || []).filter(project => 
+          project.role.toLowerCase() === 'owner'
+        );
+  
+        setProjects(ownerProjects);
       } catch (error) {
         console.error('Error fetching projects:', error);
         navigate('/login');
       }
     };
-
+  
     fetchProjects();
   }, [navigate]);
-
-  useEffect(() => {
-    // Close menu when clicking outside of it
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
+  
+  // Handle search
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    filterProjects(query, selectedRole);
   };
 
-  const handleRoleFilter = (e) => {
-    setSelectedRole(e.target.value);
-    filterProjects(searchQuery, e.target.value);
-  };
-
-  const filterProjects = (query, role) => {
-    let filtered = projects;
-
-    if (query) {
-      filtered = filtered.filter((project) =>
-        project.name.toLowerCase().includes(query)
-      );
-    }
-
-    if (role) {
-      filtered = filtered.filter((project) => project.role === role);
-    }
-
-    setFilteredProjects(filtered);
-  };
+  // Filtered list based on search
+  const filteredProjects = projects.filter((project) =>
+    project.name.toLowerCase().includes(searchQuery)
+  );
 
   const toggleMenu = (projectId) => {
     setMenuOpen(menuOpen === projectId ? null : projectId);
   };
 
   const openProject = () => {
-    navigate('/ProjectsPage');
+    navigate('/project');
   };
 
   return (
     <div className="main-page-container">
+      {/* Search Bar */}
       <div className="search-filter-container">
         <input
           type="text"
@@ -92,23 +66,15 @@ const MainPage = () => {
           value={searchQuery}
           onChange={handleSearch}
         />
-
-        <select className="filter-dropdown" value={selectedRole} onChange={handleRoleFilter}>
-          <option value="">All Roles</option>
-          {[...new Set(projects.map((project) => project.role))].map((role) => (
-            <option key={role} value={role}>
-              {role}
-            </option>
-          ))}
-        </select>
       </div>
 
+      {/* Project List */}
       <section className="project-list">
         <table>
           <thead>
             <tr>
               <th>Project Name</th>
-              <th>My Roles</th>
+              <th>My Role</th>
               <th>Last Modified</th>
               <th>Date</th>
               <th>Owner</th>
@@ -122,7 +88,7 @@ const MainPage = () => {
                   <td>
                     {project.name}{' '}
                     <span className={`status ${project.status}`}>
-                      {project.status === 'success' ? '✔' : '!' }
+                      {project.status === 'success' ? '✔' : '!'}
                     </span>
                   </td>
                   <td>{project.role}</td>
@@ -134,7 +100,7 @@ const MainPage = () => {
                       alt={project.ownerName}
                       className="owner-avatar"
                     />
-                    <span className="ownername">{project.ownerName}</span>
+                    <span>{project.ownerName}</span>
                   </td>
                   <td className="actions">
                     <button className="dots-button" onClick={() => toggleMenu(project.id)}>⋯</button>
@@ -149,7 +115,7 @@ const MainPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6">No projects found</td>
+                <td colSpan="5">No projects found</td>
               </tr>
             )}
           </tbody>

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import './sign_up.css';
 
-const Login = () => {
+const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -76,7 +76,7 @@ const Login = () => {
           <h4>or</h4>
         </div>
 
-        <Link to="/sign-up" className="btn btn-secondary">
+        <Link to="/signup" className="btn btn-secondary">
           Register
         </Link>
       </form>
@@ -84,4 +84,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;
