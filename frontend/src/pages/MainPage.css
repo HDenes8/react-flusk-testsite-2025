@@ -1,461 +1,137 @@
-/* Global styles */
-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
-}
-
-/* Global styles specific to MainPage */
-.main-page-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
-}
-
-/* Main container */
+/* MainPage.css */
 .main-page-container {
-  display: flex;
-  height: 100vh;
+  width: 100%;
+  padding-top: 20px; /* Adjust this value as needed to create space */
 }
 
-/* Sidebar */
-.sidebar {
-  width: 250px;
-  background-color: #ffffff; /* Set background to white */
-  border-right: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: width 0.3s ease;
-}
-
-.sidebar.collapsed {
-  width: 80px;
-}
-
-.sidebar.collapsed .sidebar-header h2,
-.sidebar.collapsed .sidebar-nav li span {
-  display: none;
-}
-
-.sidebar-header {
-  padding: 20px;
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-align: center;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 0;
-}
-
-.sidebar-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar-nav li {
-  padding: 15px 20px;
-  cursor: pointer;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: background-color 0.2s ease;
-}
-
-.sidebar-nav li.active {
-  background-color: #f0f0f0;
-  font-weight: bold;
-  border-left: 4px solid #007bff;
-}
-
-.sidebar-nav li:hover {
-  background-color: #f9f9f9;
-}
-
-.sidebar-footer {
-  padding: 20px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #888;
-  border-top: 1px solid #ddd;
-}
-
-.collapse-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  color: #333;
-}
-
-.collapse-button:hover {
-  color: #007bff;
-}
-
-/* Sidebar specific to MainPage */
-.main-page-sidebar {
-  width: 250px;
-  background-color: #ffffff; /* Set background to white */
-  border-right: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: width 0.3s ease;
-}
-
-.main-page-sidebar.collapsed {
-  width: 60px;
-}
-
-.main-page-sidebar.collapsed .main-page-sidebar-header h2,
-.main-page-sidebar.collapsed .main-page-sidebar-nav li span {
-  display: none;
-}
-
-.main-page-sidebar-header {
-  padding: 20px;
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-align: center;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.main-page-sidebar-nav {
-  flex: 1;
-  padding: 0;
-}
-
-.main-page-sidebar-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.main-page-sidebar-nav li {
-  padding: 15px 20px;
-  cursor: pointer;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: background-color 0.2s ease;
-}
-
-.main-page-sidebar-nav li.active {
-  background-color: #f0f0f0;
-  font-weight: bold;
-  border-left: 4px solid #1b1b1b;
-}
-
-.main-page-sidebar-nav li:hover {
-  background-color: #f9f9f9;
-}
-
-.main-page-sidebar-footer {
-  padding: 20px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #888;
-  border-top: 1px solid #ddd;
-}
-
-.main-page-collapse-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  color: #333;
-}
-
-.main-page-collapse-button:hover {
-  color: #007bff;
-}
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  padding: 20px;
-  background-color: #f9f9f9;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Main header */
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 5px; /* Reduced padding below the header */
-  margin-bottom: 0; /* Remove extra margin below the header */
-}
-
-.main-header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-/* Search filter container */
 .search-filter-container {
   display: flex;
-  align-items: center;
-  margin-top: 5px; /* Reduced spacing below the main header */
-  margin-bottom: 50px; /* Increased spacing above the projects table */
-  margin-left: 0; /* Align to the left */
-  gap: 10px; /* Add spacing between the search bar and the filter button */
-  height: 40px;
-}
-
-/* Search bar styling */
-.search-bar {
-  flex: 0 1 350px; /* Increased width of the search bar */
-  padding: 10px 20px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  height: 22px; /* Set consistent height */
-  margin-right: 10px; /* Add spacing between the search bar and the filter button */
-}
-
-/* Filter button styling */
-.filter-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  background-color: white;
-  color: grey;
-  border: 1px solid #ccc;
-  border-radius: 6px; /* Make the button more rounded */
-  font-size: 14px;
-  cursor: pointer;
-  height: 40px; /* Match the height of the search bar */
-}
-
-.filter-button:hover {
-  background-color: #f0f0f0; /* Slightly darker background on hover */
-}
-
-.filter-button .filter-icon {
-  margin-right: 8px; /* Add spacing between the icon and the text */
-  font-size: 16px; /* Adjust icon size */
-}
-
-/* Main Content specific to MainPage */
-.main-page-content {
-  flex: 1;
-  padding: 20px;
-  background-color: #f9f9f9;
-  display: flex;
-  flex-direction: column;
-}
-
-.main-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.main-page-header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-.main-page-search-filter {
-  display: flex;
-  align-items: center;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
-.main-page-search-filter input {
+.search-bar {
+  flex-grow: 1;
   padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  width: 300px;
+  border-radius: 4px;
+  max-width: 300px;
 }
 
-.main-page-filter-button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
+.filter-button {
+  padding: 10px 20px;
+  background-color: #ffffff;
+  color: rgb(97, 96, 96);
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
 }
 
-.main-page-filter-button:hover {
-  background-color: #0056b3;
+.project-list {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-/* Project List */
 .project-list table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
 .project-list th,
 .project-list td {
   padding: 15px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
 }
 
 .project-list th {
-  background-color: #f0f0f0;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.project-list td {
-  font-size: 14px;
-}
-
-.project-list .status {
-  font-size: 0.9rem;
-  margin-left: 5px;
-}
-
-.project-list .status.success {
-  color: green;
-}
-
-.project-list .status.warning {
-  color: orange;
+  background-color: #f8f9fa;
+  font-weight: 600;
 }
 
 .owner-avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  object-fit: cover;
+  margin-right: 10px;
+  vertical-align: middle;
 }
 
-/* Project List specific to MainPage */
-.main-page-project-list table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.main-page-project-list th,
-.main-page-project-list td {
-  padding: 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.main-page-project-list th {
-  background-color: #f0f0f0;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.main-page-project-list td {
-  font-size: 14px;
-}
-
-.main-page-project-list .main-page-status {
-  font-size: 0.9rem;
-  margin-left: 5px;
-}
-
-.main-page-project-list .main-page-status.success {
-  color: green;
-}
-
-.main-page-project-list .main-page-status.warning {
-  color: orange;
-}
-
-.main-page-owner-avatar {
-  width: 30px;
-  height: 30px;
+.status {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  object-fit: cover;
+  text-align: center;
+  line-height: 20px;
+  font-size: 12px;
+  margin-left: 10px;
 }
 
-/* User Profile Section */
-.user-profile {
+.status.success {
+  background-color: #000000;
+  color: white;
+}
+
+.status.warning {
+  background-color: #f39c12;
+  color: white;
+}
+
+.status.error {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.ownername span {
+  display: inline-block;
+  font-size: 12px;
+  color: #000000;
+  text-align: center;
+}
+
+.dots-button {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  color: #000 !important;
+  background-color: white !important
+
+}
+
+.actions {
+  position: relative;
   display: flex;
   align-items: center;
+}
+
+.horizontal-menu {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
   gap: 10px;
 }
 
-.user-profile img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-profile span {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.user-profile button {
-  background: none;
+.open-project-button {
+  background-color: black!important;
+  color: rgb(0, 0, 0);
   border: none;
+  padding: 5px 10px;
   cursor: pointer;
-  font-size: 18px;
-  color: #333;
 }
 
-.user-profile button:hover {
-  color: #007bff;
-}
-
-/* User Profile Section specific to MainPage */
-.main-page-user-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.main-page-user-profile img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.main-page-user-profile span {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.main-page-user-profile button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  color: #333;
-}
-
-.main-page-user-profile button:hover {
-  color: #007bff;
+.open-project-button:hover {
+  background-color: #333;
 }

@@ -14,8 +14,7 @@ from sqlalchemy.orm import aliased
 
 views = Blueprint('views', __name__)
 
-# members
-
+# Members
 @views.route('/members', methods=['GET', 'POST'])
 @login_required 
 def members():
@@ -31,31 +30,22 @@ def members():
 
     return jsonify({"user_id": current_user.user_id, "projects": project_roles})
 
-
-# members end
-
-#invitations
-#invitations
-
-
+# Invitations
 @views.route('/invitations', methods=['GET'])
 @login_required
 def invitations():
-    # Get selected statuses from checkboxes
     filter_status = request.args.getlist('status')
-
-    # If no checkbox is selected, default to "pending"
     if not filter_status:
         filter_status = ['pending']
 
-    # Fetch invitations that match selected statuses
     user_invitations = Invitation.query.filter(
         ((Invitation.invited_user_id == current_user.user_id) | 
          (Invitation.invited_email == current_user.email))
     ).filter(Invitation.status.in_(filter_status)).order_by(Invitation.invite_date.desc()).all()
 
     invitations_data = [{
-        "id": inv.id,
+        "project_name": inv.project.name,
+        "id": inv.invitation_id,
         "project_id": inv.project_id,
         "status": inv.status,
         "invite_date": inv.invite_date.strftime('%Y-%m-%d')
@@ -63,60 +53,16 @@ def invitations():
     
     return jsonify({"invitations": invitations_data})
 
-#sending inv
-
-# sending invitation
-@views.route('/invite', methods=['POST'])
-@login_required
-def invite():
-    project_id = request.form.get('project_id')
-    email_or_id = request.form.get('email_or_id')
-
-    user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
-    if not user_project or user_project.role not in ['owner', 'admin', 'editor']:
-        return jsonify({"error": "You do not have permission to send invites."}), 403
-
-    if email_or_id.isdigit():
-        invited_user = User_profile.query.filter_by(user_id=int(email_or_id)).first()
-        if not invited_user:
-            return jsonify({"error": "User ID not found."}), 404
-        invited_email = None
-        invited_user_id = invited_user.user_id
-    else:
-        invited_user = User_profile.query.filter_by(email=email_or_id).first()
-        invited_email = email_or_id
-        invited_user_id = invited_user.user_id if invited_user else None
-
-    existing_invite = Invitation.query.filter_by(project_id=project_id, invited_email=invited_email, invited_user_id=invited_user_id).first()
-    if existing_invite:
-        return jsonify({"error": "An invitation has already been sent."}), 400
-
-    new_invite = Invitation(
-        invited_email=invited_email,
-        invited_user_id=invited_user_id,
-        referrer_id=current_user.user_id,
-        project_id=project_id
-    )
-    db.session.add(new_invite)
-    db.session.commit()
-
-    return jsonify({"message": "Invitation sent successfully!"})
-
-#sending inv end
-
-#accept inv
 
 @views.route('/accept_invite/<int:invitation_id>', methods=['POST'])
 @login_required
 def accept_invite(invitation_id):
     invitation = Invitation.query.get(invitation_id)
-
     if not invitation or (invitation.invited_user_id and invitation.invited_user_id != current_user.user_id) \
         or (invitation.invited_email and invitation.invited_email != current_user.email):
         return jsonify({"error": "Invalid invitation."}), 400
 
     existing_membership = User_Project.query.filter_by(user_id=current_user.user_id, project_id=invitation.project_id).first()
-
     if existing_membership:
         return jsonify({"error": "You are already a member of this project."}), 400
     else:
@@ -127,34 +73,20 @@ def accept_invite(invitation_id):
 
     return jsonify({"message": "Invitation accepted."})
 
-#accept inv end
-
-#deny inv
 @views.route('/deny_invite/<int:invitation_id>', methods=['POST'])
 @login_required
 def deny_invite(invitation_id):
     invitation = Invitation.query.get(invitation_id)
-
     if not invitation or (invitation.invited_user_id and invitation.invited_user_id != current_user.user_id) \
         or (invitation.invited_email and invitation.invited_email != current_user.email):
-        flash('Invalid invitation.', category='error')
-        return redirect(url_for('views.invitations'))
+        return jsonify({"error": "Invalid invitation."}), 400
 
-    # Mark the invitation as denied
     invitation.status = 'declined'
     db.session.commit()
 
     return jsonify({"message": "Invitation denied."})
-#deny inv end
 
-#invitations end
-#invitations end
-
-
-
-#Upload / download
-
-# Allowed file extensions
+# Upload / download
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
@@ -167,7 +99,6 @@ def upload_file():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files['file']
-
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
@@ -187,18 +118,12 @@ def download_file(filename):
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
     else:
         return jsonify({"error": "File not found."}), 404
-    
-#Upload / download end
 
-#projects
-
+# Projects
 @views.route('/projects', methods=['POST', 'GET'])
 @login_required
 def projects():
-
-    # Create an alias for the User_profile table for the creator
     creator_alias = aliased(User_profile)
-
     projects = db.session.query(Project, User_profile, creator_alias).\
         select_from(User_profile).\
         join(User_Project, User_Project.user_id == User_profile.user_id).\
@@ -213,10 +138,6 @@ def projects():
         "creator": proj.creator_alias.full_name,
     } for proj in projects]
 
-    # user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
-    # project_ids = [up.project_id for up in user_projects]
-    # projects = Project.query.filter(Project.project_id.in_(project_ids)).all()
-
     files = os.listdir(current_app.config['UPLOAD_FOLDER'])
 
     return jsonify({"projects": projects_data}, files=files)
@@ -230,12 +151,10 @@ def get_projects():
     for user_project in user_projects:
         project = Project.query.get(user_project.project_id)
 
-        # Join File_version with File_data to get the latest version for the project
         last_version = db.session.query(File_version).join(File_data).filter(
             File_data.project_id == project.project_id
         ).order_by(File_version.upload_date.desc()).first()
 
-        # Safely handle the case where last_version is None
         if last_version and last_version.upload_date:
             last_modified = last_version.upload_date.strftime('%Y-%m-%d')
         else:
@@ -254,142 +173,136 @@ def get_projects():
 
     return jsonify(projects_data)
 
-#projects end
+# Settings
+@views.route('/api/user', methods=['GET'])
+@login_required
+def get_user():
+    user = current_user
+    user_data = {
+        'email': user.email,
+        'full_name': user.full_name,
+        'nickname': user.nickname,
+        'mobile': user.mobile,
+        'job': user.job,
+        'profile_pic': user.profile_pic
+    }
+    return jsonify(user_data)
 
-
-#settings
-
-@views.route('/settings', methods=['POST', 'GET'])
-@login_required 
-def settings():
+@views.route('/api/profile_pics', methods=['GET'])
+@login_required
+def get_profile_pics():
     profile_pics_folder = os.path.join(current_app.static_folder, 'profile_pics')
     profile_pics = [f for f in os.listdir(profile_pics_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
-    
+
     if "default.png" not in profile_pics:
         profile_pics.append("default.png")
+    return jsonify(profile_pics)
 
-    if request.method == 'POST':
-        email = request.form.get('email')
-        full_name = request.form.get('fullName')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
+@views.route('/api/user/update', methods=['POST'])
+@login_required
+def update_user():
+    data = request.get_json()
+    user = current_user
 
-        nickname = request.form.get('nickname')
-        mobile = request.form.get('mobile')
-        job = request.form.get('job')
-        selected_pic = request.form.get('profile_pic')
+    email = data.get('email')
+    full_name = data.get('fullName')
+    password1 = data.get('password1')
+    password2 = data.get('password2')
+    nickname = data.get('nickname')
+    mobile = data.get('mobile')
+    job = data.get('job')
+    selected_pic = data.get('profilePic')
 
-        errors = False
+    if email and email != user.email:
+        if len(email) < 4:
+            return jsonify({"error": "Email must be greater than 3 characters."}), 400
+        elif User_profile.query.filter_by(email=email).first():
+            return jsonify({"error": "Email already exists."}), 400
 
-        if email and email != current_user.email:
-            if len(email) < 4:
-                return jsonify({"error": "Email must be greater than 3 characters."}), 400
-            elif User_profile.query.filter_by(email=email).first():
-                return jsonify({"error": "Email already exists."}), 400
+    if full_name and full_name != user.full_name:
+        if len(full_name) < 2:
+            return jsonify({"error": "Full name must be greater than 1 character."}), 400
 
-        if full_name and full_name != current_user.full_name:
-            if len(full_name) < 2:
-                return jsonify({"error": "Full name must be greater than 1 character."}), 400
+    if password1 or password2:
+        if password1 != password2:
+            return jsonify({"error": "Passwords don't match."}), 400
+        elif len(password1) < 7:
+            return jsonify({"error": "Password must be at least 7 characters."}), 400
+        elif password1 and check_password_hash(user.password, password1):
+            return jsonify({"error": "Password can't be the old one."}), 400
 
-        if password1 or password2:
-            if password1 != password2:
-                return jsonify({"error": "Passwords don't match."}), 400
-            elif len(password1) < 7:
-                return jsonify({"error": "Password must be at least 7 characters."}), 400
-            elif password1 and check_password_hash(current_user.password, password1):
-                return jsonify({"error": "Password can't be the old one."}), 400
+    if email and email != user.email:
+        user.email = email
+    if full_name and full_name != user.full_name:
+        user.full_name = full_name
+    if nickname and nickname != user.nickname:
+        user.nickname = nickname
+    if mobile and mobile != user.mobile:
+        user.mobile = mobile
+    if job and job != user.job:
+        user.job = job
+    if selected_pic:
+        profile_pics_folder = os.path.join(current_app.static_folder, 'profile_pics')
+        profile_pics = [f for f in os.listdir(profile_pics_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        if selected_pic in profile_pics:
+            user.profile_pic = selected_pic
 
-        if errors:
-            return jsonify({"error": "There were issues with the form."}), 400
+    if password1:
+        user.password = generate_password_hash(password1, method='pbkdf2:sha256')
 
-        user = current_user
+    db.session.commit()
+    return jsonify({"message": "Your changes have been saved!"})
 
-        if email and email != user.email:
-            user.email = email
-        if full_name and full_name != user.full_name:
-            user.full_name = full_name
-        if nickname and nickname != user.nickname:
-            user.nickname = nickname
-        if mobile and mobile != user.mobile:
-            user.mobile = mobile
-        if job and job != user.job:
-            user.job = job
-        if selected_pic:
-            if selected_pic in profile_pics:
-                if selected_pic != user.profile_pic:
-                    user.profile_pic = selected_pic
 
-        if password1:
-            user.password = generate_password_hash(password1, method='pbkdf2:sha256')
 
-        db.session.commit()
-
-        return jsonify({"message": "Your changes have been saved!"})
-
-#settings end
-
-#create new project
-
-@views.route('/create_project', methods=['GET', 'POST'])
+# Create new project
+@views.route('/create-project', methods=['POST'])
 @login_required
 def create_project():
-    project_users = User_profile.query.join(User_Project, User_profile.user_id == User_Project.user_id) \
-        .filter(User_Project.project_id.in_(
-            db.session.query(User_Project.project_id)
-            .filter_by(user_id=current_user.user_id)
-        )).all()
+    data = request.get_json()
+    project_name = data.get('projectName')
+    description = data.get('description')
+    invited_users = data.get('inviteUsers')
+    invited_emails = data.get('inviteEmail')
 
-    if request.method == 'POST':
-        project_name = request.form.get('projectName')
-        description = request.form.get('description')
-        invited_users = request.form.getlist('inviteUsers')
-        invited_emails = request.form.get('inviteEmails')
+    if not project_name or not description:
+        return jsonify({"error": "Project name and description are required."}), 400
 
-        if len(project_name) < 1:
-            return jsonify({"error": "Project name is required."}), 400
-        elif len(description) < 1:
-            return jsonify({"error": "Project description is required."}), 400
-        else:
-            new_project = Project(
-                name=project_name, 
-                description=description, 
-                project_activity_status=True, 
-                creator_id=current_user.user_id)
+    new_project = Project(
+        name=project_name,
+        description=description,
+        project_activity_status=True,
+        creator_id=current_user.user_id
+    )
 
-            db.session.add(new_project)
-            db.session.commit()
+    db.session.add(new_project)
+    db.session.commit()
 
-            creator_relation = User_Project(
-                user_id = current_user.user_id,
-                project_id=new_project.project_id,
-                role='owner'
+    creator_relation = User_Project(
+        user_id=current_user.user_id,
+        project_id=new_project.project_id,
+        role='owner'
+    )
+
+    db.session.add(creator_relation)
+
+    if invited_emails:
+        email_list = [email.strip() for email in invited_emails.replace("\n", ",").split(",") if email.strip()]
+        for email in email_list:
+            invited_user = User_profile.query.filter_by(email=email).first()
+            new_invite = Invitation(
+                invited_email=email,
+                invited_user_id=invited_user.user_id if invited_user else None,
+                referrer_id=current_user.user_id,
+                project_id=new_project.project_id
             )
+            db.session.add(new_invite)
 
-            db.session.add(creator_relation)
+    db.session.commit()
 
-            # Process email invitations
-            if invited_emails:
-                email_list = [email.strip() for email in invited_emails.replace("\n", ",").split(",") if email.strip()]
-                for email in email_list:
-                    invited_user = User_profile.query.filter_by(email=email).first()
-                    new_invite = Invitation(
-                        invited_email=email,
-                        invited_user_id=invited_user.user_id if invited_user else None,
-                        referrer_id=current_user.user_id,
-                        project_id=new_project.project_id
-                    )
-                    db.session.add(new_invite)
+    return jsonify({"message": "Project created successfully!"})
 
-            db.session.commit()
-
-            return jsonify({"message": "Project created successfully!"})
-        
-    return jsonify({"message": "Please provide project details."})
-
-#create new project end
-
-#home
-
+# Home
 @views.route('/mainpage', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -398,43 +311,10 @@ def home():
     if not user:
         return jsonify({"error": "User not found"}), 404
     
-    #SQLAlchemy JOIN
-    # roles = db.session.query(
-    #     User_Project.role.label("role"),
-    #     Project.name.label("project_name"),
-    #     Project.created_date.label("created_date"),
-    #     User_profile.full_name.label("creator_name")
-    # ).join(Project, User_Project.project_id == Project.project_id) \
-    # .outerjoin(User_profile, Project.creator_id == User_profile.user_id) \
-    # .filter(User_Project.user_id == user.user_id) \
-    # .all()
-
-
-    # print("Roles Query Result:", roles)  # Debugging 
-
-    # roles_list = [dict(role._mapping) for role in roles]
-
-
-    #tárolt eljárás
     query = text("SELECT * FROM get_user_projects(:user_id_param)")
     result = db.session.execute(query, {"user_id_param": user.user_id}).mappings()
 
     roles_list = [dict(row) for row in result]  
-
-    #old method
-    # roles=[]
-    # user_project = User_Project.query.filter_by(user_id=user.user_id).all()
-
-    # for up in user_project:
-    #     project = Project.query.get(up.project_id)
-
-    #     creator = User_profile.query.get(project.creator_id)
-
-    #     roles.append({
-    #         'project' : project,
-    #         'role' : up.role,
-    #         'creator': creator.full_name if creator else "Unknown"
-    #     })
 
     response_data = {
         "user": {
@@ -447,10 +327,8 @@ def home():
     }
 
     return jsonify(response_data)
-#home end
 
-#profile
-
+# Profile
 @views.route('/api/profile', methods=['GET'])
 @login_required
 def get_profile():
@@ -465,5 +343,3 @@ def get_profile():
     }
 
     return jsonify(profile_data)
-
-#profile end
