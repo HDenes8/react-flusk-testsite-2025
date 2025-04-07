@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import './ProjectsPage.css';  // Assuming you have some CSS for styling
 
-const ProjectPage = ({ project_id }) => {
+const ProjectPage = () => {
+  const { project_id } = useParams();  // Extracts the project_id from the route parameter
   const [project, setProject] = useState(null);
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -11,30 +14,33 @@ const ProjectPage = ({ project_id }) => {
   });
 
   useEffect(() => {
+    // Fetch project data from the API
     fetch(`/project/${project_id}`)
       .then(res => res.json())
       .then(data => {
         setProject(data.project);
-        setFiles(data.files);
+        setFiles(data.files);  // Assuming files data is part of the response
       });
   }, [project_id]);
 
-  const handleFileSelect = (e) => {
-    const value = e.target.value;
-    setSelectedFiles(prev =>
-      e.target.checked ? [...prev, value] : prev.filter(id => id !== value)
-    );
+  // Handle file input change for upload
+  const handleFileChange = (e) => {
+    setUploadData({
+      ...uploadData,
+      file: e.target.files[0],  // Getting the first file
+    });
   };
 
-  const handleUploadChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'file') {
-      setUploadData(prev => ({ ...prev, file: files[0] }));
-    } else {
-      setUploadData(prev => ({ ...prev, [name]: value }));
-    }
+  // Handle text input for description and short comment
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUploadData({
+      ...uploadData,
+      [name]: value,
+    });
   };
 
+  // Handle file upload
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -43,18 +49,34 @@ const ProjectPage = ({ project_id }) => {
     formData.append('short_comment', uploadData.short_comment);
     formData.append('project_id', project_id);
 
-    await fetch('/api/projects/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const response = await fetch('/api/projects/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-    // Optionally re-fetch files after upload
-    fetch(`/project/${project_id}`)
-      .then(res => res.json())
-      .then(data => setFiles(data.files));
+      if (response.ok) {
+        // Update files list after successful upload
+        const updatedProject = await response.json();
+        setFiles(updatedProject.files);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
   };
 
-  const handleDownload = async (e) => {
+  // Handle file selection for download
+  const handleFileSelect = (e) => {
+    const value = e.target.value;
+    setSelectedFiles(prev => (
+      e.target.checked
+        ? [...prev, value]
+        : prev.filter(id => id !== value)
+    ));
+  };
+
+  // Handle file download
+  const handleDownloadSubmit = async (e) => {
     e.preventDefault();
     const response = await fetch('/api/projects/download', {
       method: 'POST',
@@ -83,42 +105,63 @@ const ProjectPage = ({ project_id }) => {
       <p>Created on: {new Date(project.created_date).toLocaleString()}</p>
 
       <h3>Upload Files</h3>
-      <form onSubmit={handleUploadSubmit}>
+      <form onSubmit={handleUploadSubmit} encType="multipart/form-data">
         <input
           type="file"
           name="file"
           required
-          onChange={handleUploadChange}
+          onChange={handleFileChange}
         />
         <input
           type="text"
           name="description"
           placeholder="Description (optional)"
-          onChange={handleUploadChange}
+          onChange={handleInputChange}
         />
         <input
           type="text"
           name="short_comment"
           placeholder="Short Comment (optional)"
-          onChange={handleUploadChange}
+          onChange={handleInputChange}
         />
+        <input type="hidden" name="project_id" value={project.project_id} />
         <button type="submit">Upload</button>
       </form>
 
-      <h3>Download Files</h3>
-      <form onSubmit={handleDownload}>
-        <ul>
-          {files.map(file => (
-            <li key={file.version_id}>
-              <input
-                type="checkbox"
-                value={file.version_id}
-                onChange={handleFileSelect}
-              />
-              {file.file_name} ({file.file_size} bytes)
-            </li>
+      <h3>Files</h3>
+      <table className="files-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>File Name</th>
+            <th>File Size</th>
+            <th>Description</th>
+            <th>Short Comment</th>
+            <th>Upload Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {files.map((file) => (
+            <tr key={file.version_id}>
+              <td>
+                <input
+                  type="checkbox"
+                  value={file.version_id}
+                  onChange={handleFileSelect}
+                />
+              </td>
+              <td>{file.file_name}</td>
+              <td>{file.file_size} bytes</td>
+              <td>{file.description}</td>
+              <td>{file.short_comment}</td>
+              <td>{new Date(file.upload_date).toLocaleString()}</td>
+            </tr>
           ))}
-        </ul>
+        </tbody>
+      </table>
+
+      <h3>Download Selected Files</h3>
+      <form onSubmit={handleDownloadSubmit}>
         <button type="submit">Download Selected Files</button>
       </form>
     </div>

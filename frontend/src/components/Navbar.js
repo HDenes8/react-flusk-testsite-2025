@@ -91,7 +91,7 @@ const Navbar = () => {
         <h1>{getPageTitle()}</h1>
         <div className="user-profile">
           <img src={profile.avatar} alt="User" />
-          <span>{profile.name || 'Loading... one minute please. . .'}</span>
+          <span>{profile.name || 'Loading...'}</span>
           <button onClick={handleLogout}>
             <FaSignOutAlt />
           </button>
@@ -120,6 +120,8 @@ function getPageTitle() {
       return 'Settings';
     case '/about':
       return 'About';
+    case '/ProjectsPage':
+      return 'Projects Page';
     default:
       return 'Sortify';
   }

@@ -81,7 +81,7 @@ const MainPage = () => {
   // Modified openProject function
   const openProject = (projectId) => {
     // Navigating to the project page by passing the project ID
-    navigate(`/project/${projectId}`);
+    navigate(`/ProjectsPage/${projectId}`);
   };
 
   return (

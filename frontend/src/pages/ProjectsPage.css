@@ -1,23 +1,68 @@
-.table {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+.project-page {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.cell {
-  padding: 10px;
+.project-page h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.project-page p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.project-page form {
+  margin: 20px 0;
+  padding: 20px;
   border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
-.nav-item {
-  margin-right: 10px;
+.project-page form input[type="text"],
+.project-page form input[type="file"] {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.nav-link {
-  text-decoration: none;
-  color: #007bff;
+.project-page form button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.nav-link:hover {
-  text-decoration: underline;
+.project-page form button:hover {
+  background-color: #0056b3;
+}
+
+.project-page table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.project-page table, .project-page th, .project-page td {
+  border: 1px solid #ddd;
+}
+
+.project-page th, .project-page td {
+  padding: 12px;
+  text-align: left;
+}
+
+.project-page th {
+  background-color: #f4f4f4;
+}
+
+.project-page td {
+  text-align: center;
 }
