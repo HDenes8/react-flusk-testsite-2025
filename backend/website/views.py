@@ -288,18 +288,13 @@ def get_project_versions(project_id):
 @views.route('/project/<int:project_id>', methods=['GET'])
 @login_required
 def project_page(project_id):
-    # Fetch the project by ID
-    print(f"Fetching project with ID: {project_id}")  # Debugging
     project = Project.query.get(project_id)
     if not project:
-        print(f"Project with ID {project_id} not found.")  # Debugging
         return jsonify({"error": "Project not found."}), 404
 
-    # Fetch files for the project
     files = File_version.query.join(File_data, File_version.file_id == File_data.file_data_id).\
         filter(File_data.project_id == project_id, File_version.last_version == True).all()
 
-    # Prepare the response data
     project_data = {
         "id": project.project_id,
         "name": project.name,
@@ -309,7 +304,7 @@ def project_page(project_id):
     }
 
     files_data = [{
-        "file_id": file.file_version_id,
+        "version_id": file.version_id,
         "filename": file.file_name,
         "file_size": file.file_size,
         "file_type": file.file_type,
