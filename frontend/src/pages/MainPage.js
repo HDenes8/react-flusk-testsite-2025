@@ -16,23 +16,28 @@ const MainPage = () => {
     const fetchProjects = async () => {
       try {
         const projectsResponse = await axios.get('/api/projects', { validateStatus: false });
-
+  
+        console.log('🚀 Raw response:', projectsResponse.data);  // NEW
+        const { roles = [] } = projectsResponse.data;
+  
+        console.log('✅ Extracted roles:', roles);  // NEW
+  
         if (projectsResponse.status === 401 || projectsResponse.status === 302) {
           navigate('/login');
           return;
         }
-
+  
         setProjects(projectsResponse.data || []);
         setFilteredProjects(projectsResponse.data || []);
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error('❌ Error fetching projects:', error);
         navigate('/login');
       }
     };
-
+  
     fetchProjects();
   }, [navigate]);
-
+  
   useEffect(() => {
     // Close menu when clicking outside of it
     const handleClickOutside = (event) => {
@@ -137,7 +142,7 @@ const MainPage = () => {
                       className="owner-avatar"
                     />
                     <span className="ownername">{project.ownerName}</span>
-                  </td>
+                  </td> 
                   <td className="actions">
                     <button className="dots-button" onClick={() => toggleMenu(project.id)}>⋯</button>
                     {menuOpen === project.id && (
