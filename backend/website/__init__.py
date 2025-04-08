@@ -17,7 +17,7 @@ def create_app():
     #app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@db:5432/sortify'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/sortify'
-    app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=3)
+    app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=1)
 
     UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)    
