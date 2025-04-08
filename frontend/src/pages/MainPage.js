@@ -28,14 +28,14 @@ const MainPage = () => {
         setProjects(response.data.roles || []);
         setFilteredProjects(response.data.roles || []);
       } catch (error) {
-        console.error('Error fetching main page data:', error);
+        console.error('❌ Error fetching main page data:', error);
         navigate('/login');
       }
     };
 
     fetchMainPageData();
   }, [navigate]);
-
+  
   useEffect(() => {
     // Close menu when clicking outside of it
     const handleClickOutside = (event) => {

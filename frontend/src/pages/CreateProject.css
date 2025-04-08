@@ -7,6 +7,23 @@
   margin-bottom: 15px;
 }
 
+.form-group-email {
+  margin-right: 26px;
+  overflow-y: auto;
+  height: 105px;
+}
+
+.form-control-email {
+  overflow-y: auto;
+  height: 60px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #fafafa;
+}
+
 label {
   display: block;
   margin-bottom: 5px;
@@ -16,6 +33,14 @@ input, textarea {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #fafafa;
+  font-style: Arial, sans-serif;
+  resize: none;
 }
 
 button {
@@ -28,4 +53,11 @@ button {
 
 button:hover {
   background-color: #b4b4b4b4;
+}
+
+.attention {
+  display: inline;
+  color: rgb(182, 182, 182);
+  font-weight:;
+  margin-top: 10px;
 }
