@@ -40,7 +40,7 @@ const CreateProject = () => {
       <h3 align="center">Create New Project</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="projectName">Project Name *</label>
+          <label htmlFor="projectName">Project Name: *</label>
           <input
             type="text"
             className="form-control"
@@ -53,7 +53,7 @@ const CreateProject = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="description">Description *</label>
+          <label htmlFor="description">Description: *</label>
           <input
             type="text"
             className="form-control"
@@ -65,11 +65,13 @@ const CreateProject = () => {
             required
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="inviteEmail">Emails to invite</label>
-          <input
+        <div className="form-group-email">
+          <label htmlFor="inviteEmail">Emails to invite: <p className="attention">make sure you leave a comma (,) mark between the emails!</p></label>
+          <textarea
+            rows="4"
+            cols="50"
             type="text"
-            className="form-control"
+            className="form-control-email"
             id="inviteEmail"
             name="inviteEmail"
             placeholder="Enter email"
