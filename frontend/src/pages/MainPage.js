@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import './MainPage.css';
 
 const MainPage = () => {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState([]); // Store project roles
+  const [user, setUser] = useState(null); // Store user data
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [selectedRole, setSelectedRole] = useState('');
@@ -13,24 +14,26 @@ const MainPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchMainPageData = async () => {
       try {
-        const projectsResponse = await axios.get('/api/projects', { validateStatus: false });
+        const response = await axios.get('/api/mainpage', { validateStatus: false });
 
-        if (projectsResponse.status === 401 || projectsResponse.status === 302) {
+        if (response.status === 401 || response.status === 302) {
           navigate('/login');
           return;
         }
 
-        setProjects(projectsResponse.data || []);
-        setFilteredProjects(projectsResponse.data || []);
+        // Set user and project data
+        setUser(response.data.user);
+        setProjects(response.data.roles || []);
+        setFilteredProjects(response.data.roles || []);
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error('Error fetching main page data:', error);
         navigate('/login');
       }
     };
 
-    fetchProjects();
+    fetchMainPageData();
   }, [navigate]);
 
   useEffect(() => {
@@ -63,7 +66,7 @@ const MainPage = () => {
 
     if (query) {
       filtered = filtered.filter((project) =>
-        project.name.toLowerCase().includes(query)
+        project.project_name.toLowerCase().includes(query)
       );
     }
 
@@ -78,15 +81,13 @@ const MainPage = () => {
     setMenuOpen(menuOpen === projectId ? null : projectId);
   };
 
-  // Modified openProject function
   const openProject = (projectId) => {
-    // Navigating to the project page by passing the project ID
     navigate(`/ProjectsPage/${projectId}`);
   };
 
   return (
     <div className="main-page-container">
-      <div className="search-filter-container">
+            <div className="search-filter-container">
         <input
           type="text"
           className="search-bar"
@@ -120,31 +121,32 @@ const MainPage = () => {
           <tbody>
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => (
-                <tr key={project.id}>
+                <tr key={project.project_id}>
                   <td>
-                    {project.name}{' '}
-                    <span className={`status ${project.status}`}>
-                      {project.status === 'success' ? '✔' : '!' }
+                    {project.project_name}{' '}
+                    <span className={`status ${project.status || 'unknown'}`}>
+                      {project.status === 'success' ? '✔' : '!'}
                     </span>
                   </td>
                   <td>{project.role}</td>
-                  <td>{project.lastModified || '-'}</td>
-                  <td>{project.date || '-'}</td>
+                  <td>{project.last_modified_date || '-'}</td>
+                  <td>{project.created_date || '-'}</td>
                   <td>
                     <img
-                      src={project.ownerAvatar}
-                      alt={project.ownerName}
+                      src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
+                      
+                      alt={project.creator_name || 'Unknown'}
                       className="owner-avatar"
                     />
-                    <span className="ownername">{project.ownerName}</span>
+
+                    <span className="ownername">{project.creator_name || 'Unknown'}</span>
                   </td>
                   <td className="actions">
-                    <button className="dots-button" onClick={() => toggleMenu(project.id)}>⋯</button>
-                    {menuOpen === project.id && (
+                    <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>
+                    {menuOpen === project.project_id && (
                       <div ref={menuRef} className="horizontal-menu">
                         <span>{project.description || 'No description available'}</span>
-                        {/* Pass the project id to the openProject function */}
-                        <button className="open-project-button" onClick={() => openProject(project.id)}>Open Project</button>
+                        <button className="open-project-button" onClick={() => openProject(project.project_id)}>Open Project</button>
                       </div>
                     )}
                   </td>

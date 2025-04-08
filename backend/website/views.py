@@ -448,7 +448,7 @@ def create_project():
     return jsonify({"message": "Project created successfully!"})
 
 # Home
-@views.route('/mainpage', methods=['GET', 'POST'])
+@views.route('/api/mainpage', methods=['GET', 'POST'])
 @login_required
 def home():
     user = User_profile.query.get(current_user.user_id)
