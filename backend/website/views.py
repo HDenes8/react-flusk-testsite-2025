@@ -16,6 +16,7 @@ import datetime
 import uuid
 
 views = Blueprint('views', __name__)
+projects_bp = Blueprint('projects', __name__)
 
 # Members
 @views.route('/members', methods=['GET', 'POST'])
@@ -178,7 +179,6 @@ def get_projects():
     return jsonify(projects_data)
 
 # Create project
-projects_bp = Blueprint('projects', __name__)
 @projects_bp.route("/api/projects", methods=["POST"])
 def create_project():
     data = request.get_json()
@@ -203,8 +203,8 @@ def create_project():
     }), 201
 
 # Upload file + create version
-projects_bp = Blueprint('projects', __name__)
 @projects_bp.route("/api/projects/<int:project_id>/upload", methods=["POST"])
+@login_required
 def upload_file(project_id):
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
@@ -215,49 +215,56 @@ def upload_file(project_id):
 
     project = Project.query.get_or_404(project_id)
 
-    filename = file.filename
-    version_id = str(uuid.uuid4())
-    timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    stored_filename = f"{timestamp}_{filename}"
+    try:
+        # Save the file
+        filename = secure_filename(file.filename)
+        upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id))
+        os.makedirs(upload_folder, exist_ok=True)
+        file_path = os.path.join(upload_folder, filename)
+        file.save(file_path)
 
-    upload_folder = os.path.join("backend", "uploads", str(project.project_id))
-    os.makedirs(upload_folder, exist_ok=True)
-    file_path = os.path.join(upload_folder, stored_filename)
-    file.save(file_path)
+        # Get description and short_comment from the form data
+        description = request.form.get("description", "")
+        short_comment = request.form.get("short_comment", "")
 
-    # Create File_data entry
-    file_data = File_data(
-        description="File description",  
-        short_comment="Short comment",  
-        project_id=project.project_id
-    )
-    db.session.add(file_data)
-    db.session.commit()
+        # Create File_data entry
+        file_data = File_data(
+            description=description,
+            short_comment=short_comment,
+            project_id=project.project_id
+        )
+        db.session.add(file_data)
+        db.session.commit()
 
-    # Create File_version entry for this file
-    version = File_version(
-        version_number=1,  
-        file_name=filename,
-        file_type=file.mimetype,
-        file_size=len(file.read()), 
-        description="Initial version",
-        last_version=True,  
-        short_comment="First version",
-        file_id=file_data.file_data_id,  
-        user_id=current_user.user_id  
-    )
-    db.session.add(version)
-    db.session.commit()
+        # Create File_version entry for this file
+        version = File_version(
+            version_number=1,
+            file_name=filename,
+            file_type=file.mimetype,
+            file_size=os.path.getsize(file_path),
+            description=description,  # Use the provided description
+            last_version=True,
+            short_comment=short_comment,
+            file_id=file_data.file_data_id,
+            user_id=current_user.user_id
+        )
+        db.session.add(version)
+        db.session.commit()
 
-    return jsonify({
-        "message": "File uploaded",
-        "version": {
-            "version_id": version.version_id,
-            "filename": version.file_name,
-            "timestamp": version.upload_date.isoformat(),
-            "file_size": version.file_size
-        }
-    }), 201
+        return jsonify({
+            "message": "File uploaded successfully!",
+            "file": {
+                "file_name": version.file_name,
+                "file_size": version.file_size,
+                "file_type": version.file_type,
+                "description": version.description,  # Return the saved description
+                "short_comment": version.short_comment,
+                "upload_date": version.upload_date.isoformat()
+            }
+        }), 201
+    except Exception as e:
+        print("Upload error:", str(e))  # Log it to terminal for debugging
+        return jsonify({"error": str(e)}), 500
 
 # Get all versions for a project
 @projects_bp.route("/api/projects/<int:project_id>/versions", methods=["GET"])
@@ -288,33 +295,38 @@ def get_project_versions(project_id):
 @views.route('/project/<int:project_id>', methods=['GET'])
 @login_required
 def project_page(project_id):
-    project = Project.query.get(project_id)
-    if not project:
-        return jsonify({"error": "Project not found."}), 404
+    try:
+        project = Project.query.get(project_id)
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
 
-    files = File_version.query.join(File_data, File_version.file_id == File_data.file_data_id).\
-        filter(File_data.project_id == project_id, File_version.last_version == True).all()
+        files = File_version.query.join(File_data, File_version.file_id == File_data.file_data_id).\
+            filter(File_data.project_id == project_id, File_version.last_version == True).all()
 
-    project_data = {
-        "id": project.project_id,
-        "name": project.name,
-        "description": project.description,
-        "created_at": project.created_date.isoformat() if project.created_date else None,
-        "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
-    }
+        project_data = {
+            "id": project.project_id,
+            "name": project.name,
+            "description": project.description,
+            "created_date": project.created_date.isoformat() if project.created_date else None,
+            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
+        }
 
-    files_data = [{
-        "version_id": file.version_id,
-        "filename": file.file_name,
-        "file_size": file.file_size,
-        "file_type": file.file_type,
-        "upload_date": file.upload_date.isoformat() if file.upload_date else None
-    } for file in files]
+        files_data = [{
+            "version_id": file.version_id,
+            "file_name": file.file_name,
+            "file_size": file.file_size,
+            "file_type": file.file_type,
+            "upload_date": file.upload_date.isoformat() if file.upload_date else None,
+            "description": file.description,
+            "short_comment": file.short_comment
+        } for file in files]
 
-    return jsonify({
-        "project": project_data,
-        "files": files_data
-    })
+        return jsonify({
+            "project": project_data,
+            "files": files_data
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 #project_page end
 
