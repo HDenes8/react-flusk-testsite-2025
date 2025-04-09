@@ -64,8 +64,8 @@ const Navbar = () => {
             <li className={window.location.pathname === '/MyProjectsPage' ? 'active' : ''} onClick={() => navigate('/MyProjectsPage')}>
               <FaFolder /> {!sidebarCollapsed && 'My Projects'}
             </li>
-            <li className={window.location.pathname === '/favorites' ? 'active' : ''} onClick={() => navigate('/favorites')}>
-              <FaHeart /> {!sidebarCollapsed && 'Favourite'}
+            <li className={window.location.pathname === '/favourite' ? 'active disabled' : 'disabled'}>
+              <FaHeart style={{ color: 'grey', cursor: 'not-allowed' }} /> {!sidebarCollapsed && 'Favourite (not working)'}
             </li>
             <li className={window.location.pathname === '/invitations' ? 'active' : ''} onClick={() => navigate('/invitations')}>
               <FaEnvelope /> {!sidebarCollapsed && 'Invitation'}
@@ -76,11 +76,12 @@ const Navbar = () => {
             <li className={window.location.pathname === '/settings' ? 'active' : ''} onClick={() => navigate('/settings')}>
               <FaCog /> {!sidebarCollapsed && 'Settings'}
             </li>
-            <li className={window.location.pathname === '/about' ? 'active' : ''} onClick={() => navigate('/about')}>
+            {/* Push About button to the bottom */}
+            <li className={window.location.pathname === '/about' ? 'active' : ''} onClick={() => navigate('/about')} style={{ marginTop: 'auto' }}>
               <FaInfoCircle /> {!sidebarCollapsed && 'About'}
             </li>
           </ul>
-        </nav>
+        </nav>  
         <div className="navbar-sidebar-footer">
           <p>© 2025 Sortify</p>
         </div>
@@ -110,8 +111,8 @@ function getPageTitle() {
       return 'Main Page';
     case '/MyProjectsPage':
       return 'My Projects';
-    case '/favorites':
-      return 'Favorites';
+    case '/favourite':
+      return 'Favourite';
     case '/invitations':
       return 'Invitations';
     case '/create-project':

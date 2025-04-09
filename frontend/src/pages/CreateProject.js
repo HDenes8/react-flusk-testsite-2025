@@ -26,7 +26,7 @@ const CreateProject = () => {
     try {
       await axios.post('/create-project', formData, { withCredentials: true });
       alert('Project created successfully');
-      navigate('/projects'); // ✅ This will now work
+      navigate('/MyProjectsPage'); // ✅ This will now work
     } catch (error) {
       console.error('Error creating project:', error);
       alert('Failed to create project');
