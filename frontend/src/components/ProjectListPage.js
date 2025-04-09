@@ -1,60 +1,57 @@
+// src/pages/ProjectListPage.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../pages/MainPage.css';
+import '../pages/MainPage.css'; // You can rename this to ProjectListPage.css if needed
 
-const MainPage = () => {
-  const [projects, setProjects] = useState([]); // Store project roles
-  const [user, setUser] = useState(null); // Store user data
+const ProjectListPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
+  const [projects, setProjects] = useState([]);
+  const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
-  const [selectedRole, setSelectedRole] = useState('');
+  const [selectedRole, setSelectedRole] = useState(defaultRoleFilter);
   const [menuOpen, setMenuOpen] = useState(null);
   const menuRef = useRef(null);
   const navigate = useNavigate();
+
   const formatDate = (dateString) => {
-  const date = new Date(dateString); // Convert the string to a Date object
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  
-  return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
-  }
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
+  };
 
   useEffect(() => {
-    const fetchMainPageData = async () => {
+    const fetchData = async () => {
       try {
         const response = await axios.get('/api/mainpage', { validateStatus: false });
-
         if (response.status === 401 || response.status === 302) {
           navigate('/login');
           return;
         }
 
-        // Set user and project data
         setUser(response.data.user);
         setProjects(response.data.roles || []);
-        setFilteredProjects(response.data.roles || []);
+        applyFilters(response.data.roles || [], searchQuery, defaultRoleFilter);
       } catch (error) {
-        console.error('❌ Error fetching main page data:', error);
+        console.error('❌ Error fetching project data:', error);
         navigate('/login');
       }
     };
 
-    fetchMainPageData();
-  }, [navigate]);
-  
+    fetchData();
+  }, [navigate, defaultRoleFilter]);
+
   useEffect(() => {
-    // Close menu when clicking outside of it
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(null);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -64,16 +61,16 @@ const MainPage = () => {
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    filterProjects(query, selectedRole);
+    applyFilters(projects, query, selectedRole);
   };
 
   const handleRoleFilter = (e) => {
     setSelectedRole(e.target.value);
-    filterProjects(searchQuery, e.target.value);
+    applyFilters(projects, searchQuery, e.target.value);
   };
 
-  const filterProjects = (query, role) => {
-    let filtered = projects;
+  const applyFilters = (data, query, role) => {
+    let filtered = data;
 
     if (query) {
       filtered = filtered.filter((project) =>
@@ -98,7 +95,7 @@ const MainPage = () => {
 
   return (
     <div className="main-page-container">
-            <div className="search-filter-container">
+      <div className="search-filter-container">
         <input
           type="text"
           className="search-bar"
@@ -107,18 +104,20 @@ const MainPage = () => {
           onChange={handleSearch}
         />
 
-        <select className="filter-dropdown" value={selectedRole} onChange={handleRoleFilter}>
-          <option value="">All Roles</option>
-          {[...new Set(projects.map((project) => project.role))].map((role) => (
-            <option key={role} value={role}>
-              {role}
-            </option>
-          ))}
-        </select>
+        {showFilterDropdown && (
+          <select className="filter-dropdown" value={selectedRole} onChange={handleRoleFilter}>
+            <option value="">All Roles</option>
+            {[...new Set(projects.map((project) => project.role))].map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <section className="project-list">
-        <table>
+      <table>
           <thead>
             <tr>
               <th>Project Name</th>
@@ -173,4 +172,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default ProjectListPage;
