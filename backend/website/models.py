@@ -69,7 +69,7 @@ class File_version(db.Model):
     version_id = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer)
     file_name = db.Column(db.String(255))
-    file_type = db.Column(db.String(50))
+    file_type = db.Column(db.String(100))
     file_size = db.Column(db.Integer)
     description = db.Column(db.Text)
     last_version = db.Column(db.Boolean, default=False)

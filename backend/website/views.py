@@ -91,7 +91,7 @@ def deny_invite(invitation_id):
     return jsonify({"message": "Invitation denied."})
 
 # Upload / download
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'tar', 'gz', '7z', 'docx', 'xlsx', 'pptx'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -103,6 +103,8 @@ def upload_file():
         return jsonify({"error": "No file part"}), 400
 
     file = request.files['file']
+    print("Received file:", file.filename)
+
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
@@ -110,8 +112,10 @@ def upload_file():
         filename = secure_filename(file.filename)
         file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
-        return jsonify({"message": "File uploaded successfully!"})
+        print("Saved to:", file_path)
+        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
     else:
+        print("Rejected file extension:", file.filename)
         return jsonify({"error": "Invalid file type!"}), 400
 
 @views.route('/download/<filename>')
