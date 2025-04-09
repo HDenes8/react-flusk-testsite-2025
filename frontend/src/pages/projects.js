@@ -120,8 +120,8 @@ const Projects = () => {
               <tr key={project.project_id}>
                 <td>
                   {project.project_name}{' '}
-                  <span className={`status ${project.status || 'unknown'}`}>
-                    {project.status === 'success' ? '✔' : '!'}
+                  <span className={`has_latest ${project.has_latest || 'unknown'}`}>
+                    {project.has_latest === true ? '✔' : '!'}
                   </span>
                 </td>
                 <td>{project.role}</td>
