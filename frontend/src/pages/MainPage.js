@@ -12,6 +12,17 @@ const MainPage = () => {
   const [menuOpen, setMenuOpen] = useState(null);
   const menuRef = useRef(null);
   const navigate = useNavigate();
+  const formatDate = (dateString) => {
+  const date = new Date(dateString); // Convert the string to a Date object
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+  return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
+  }
 
   useEffect(() => {
     const fetchMainPageData = async () => {
@@ -119,45 +130,43 @@ const MainPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
-                <tr key={project.project_id}>
-                  <td>
-                    {project.project_name}{' '}
-                    <span className={`status ${project.status || 'unknown'}`}>
-                      {project.status === 'success' ? '✔' : '!'}
-                    </span>
-                  </td>
-                  <td>{project.role}</td>
-                  <td>{project.last_modified_date || '-'}</td>
-                  <td>{project.created_date || '-'}</td>
-                  <td>
-                    <img
-                      src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
-                      
-                      alt={project.creator_name || 'Unknown'}
-                      className="owner-avatar"
-                    />
-
-                    <span className="ownername">{project.creator_name || 'Unknown'}</span>
-                  </td>
-                  <td className="actions">
-                    <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>
-                    {menuOpen === project.project_id && (
-                      <div ref={menuRef} className="horizontal-menu">
-                        <span>{project.description || 'No description available'}</span>
-                        <button className="open-project-button" onClick={() => openProject(project.project_id)}>Open Project</button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6">No projects found</td>
+          {filteredProjects.length > 0 ? (
+            filteredProjects.map((project) => (
+              <tr key={project.project_id}>
+                <td>
+                  {project.project_name}{' '}
+                  <span className={`status ${project.status || 'unknown'}`}>
+                    {project.status === 'success' ? '✔' : '!'}
+                  </span>
+                </td>
+                <td>{project.role}</td>
+                <td>{project.last_modified_date ? formatDate(project.last_modified_date) : '-'}</td>
+                <td>{project.created_date ? formatDate(project.created_date) : '-'}</td>
+                <td>
+                  <img
+                    src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
+                    alt={project.creator_name || 'Unknown'}
+                    className="owner-avatar"
+                  />
+                  <span className="ownername">{project.creator_name || 'Unknown'}</span>
+                </td>
+                <td className="actions">
+                  <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>
+                  {menuOpen === project.project_id && (
+                    <div ref={menuRef} className="horizontal-menu">
+                      <span>{project.description || 'No description available'}</span>
+                      <button className="open-project-button" onClick={() => openProject(project.project_id)}>Open Project</button>
+                    </div>
+                  )}
+                </td>
               </tr>
-            )}
-          </tbody>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6">No projects found</td>
+            </tr>
+          )}
+        </tbody>
         </table>
       </section>
     </div>
