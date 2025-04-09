@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './MainPage.css';
+import '../pages/MainPage.css';
 
-const Projects = () => {
+const MainPage = () => {
   const [projects, setProjects] = useState([]); // Store project roles
   const [user, setUser] = useState(null); // Store user data
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [selectedRole, setSelectedRole] = useState('');
   const [menuOpen, setMenuOpen] = useState(null);
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const Projects = () => {
   }
 
   useEffect(() => {
-    const fetchProjectsData = async () => {
+    const fetchMainPageData = async () => {
       try {
         const response = await axios.get('/api/mainpage', { validateStatus: false });
 
@@ -33,22 +34,19 @@ const Projects = () => {
           return;
         }
 
-        // Set user and filter projects to only include "owner" roles
+        // Set user and project data
         setUser(response.data.user);
-        const ownerProjects = (response.data.roles || []).filter(
-          (project) => project.role.toLowerCase() === 'owner'
-        );
-        setProjects(ownerProjects);
-        setFilteredProjects(ownerProjects);
+        setProjects(response.data.roles || []);
+        setFilteredProjects(response.data.roles || []);
       } catch (error) {
-        console.error('Error fetching projects data:', error);
+        console.error('❌ Error fetching main page data:', error);
         navigate('/login');
       }
     };
 
-    fetchProjectsData();
+    fetchMainPageData();
   }, [navigate]);
-
+  
   useEffect(() => {
     // Close menu when clicking outside of it
     const handleClickOutside = (event) => {
@@ -66,16 +64,25 @@ const Projects = () => {
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    filterProjects(query);
+    filterProjects(query, selectedRole);
   };
 
-  const filterProjects = (query) => {
+  const handleRoleFilter = (e) => {
+    setSelectedRole(e.target.value);
+    filterProjects(searchQuery, e.target.value);
+  };
+
+  const filterProjects = (query, role) => {
     let filtered = projects;
 
     if (query) {
       filtered = filtered.filter((project) =>
         project.project_name.toLowerCase().includes(query)
       );
+    }
+
+    if (role) {
+      filtered = filtered.filter((project) => project.role === role);
     }
 
     setFilteredProjects(filtered);
@@ -91,8 +98,7 @@ const Projects = () => {
 
   return (
     <div className="main-page-container">
-
-      <div className="search-filter-container">
+            <div className="search-filter-container">
         <input
           type="text"
           className="search-bar"
@@ -100,6 +106,15 @@ const Projects = () => {
           value={searchQuery}
           onChange={handleSearch}
         />
+
+        <select className="filter-dropdown" value={selectedRole} onChange={handleRoleFilter}>
+          <option value="">All Roles</option>
+          {[...new Set(projects.map((project) => project.role))].map((role) => (
+            <option key={role} value={role}>
+              {role}
+            </option>
+          ))}
+        </select>
       </div>
 
       <section className="project-list">
@@ -120,8 +135,8 @@ const Projects = () => {
               <tr key={project.project_id}>
                 <td>
                   {project.project_name}{' '}
-                  <span className={`has_latest ${project.has_latest || 'unknown'}`}>
-                    {project.has_latest === true ? '✔' : '!'}
+                  <span className={`status ${project.has_latest === true ? 'success' : 'error'}`}>
+                    {project.has_latest === true ? '✔' : '❕'}
                   </span>
                 </td>
                 <td>{project.role}</td>
@@ -158,4 +173,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default MainPage;

@@ -61,7 +61,7 @@ const Navbar = () => {
             <li className={window.location.pathname === '/MainPage' ? 'active' : ''} onClick={() => navigate('/MainPage')}>
               <FaHome /> {!sidebarCollapsed && 'Main Page'}
             </li>
-            <li className={window.location.pathname === '/projects' ? 'active' : ''} onClick={() => navigate('/projects')}>
+            <li className={window.location.pathname === '/MyProjectsPage' ? 'active' : ''} onClick={() => navigate('/MyProjectsPage')}>
               <FaFolder /> {!sidebarCollapsed && 'My Projects'}
             </li>
             <li className={window.location.pathname === '/favorites' ? 'active' : ''} onClick={() => navigate('/favorites')}>
@@ -108,7 +108,7 @@ function getPageTitle() {
   switch(path) {
     case '/MainPage':
       return 'Main Page';
-    case '/projects':
+    case '/MyProjectsPage':
       return 'My Projects';
     case '/favorites':
       return 'Favorites';

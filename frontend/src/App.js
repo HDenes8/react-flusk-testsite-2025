@@ -5,7 +5,7 @@ import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import SignUp from './pages/SignUp';
 import ProjectsPage from './pages/ProjectsPage';
-import Projects from './pages/projects';
+import MyProjectsPage from './pages/MyProjectsPage';
 import Invitations from './pages/Invitations';
 import Settings from './pages/Settings';
 import CreateProject from './pages/CreateProject';
@@ -27,9 +27,9 @@ function App() {
             <MainPage />
           </Layout>
         } />
-        <Route path="/projects" element={
+        <Route path="/MyProjectsPage" element={
           <Layout>
-            <Projects />
+            <MyProjectsPage />
           </Layout>
         } />
         <Route path="/invitations" element={
