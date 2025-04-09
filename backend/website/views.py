@@ -9,7 +9,7 @@ from flask import send_from_directory
 import os
 from werkzeug.utils import secure_filename
 
-from sqlalchemy import text
+from sqlalchemy import text, func
 from sqlalchemy.orm import aliased
 
 import datetime
@@ -220,33 +220,58 @@ def upload_file(project_id):
     project = Project.query.get_or_404(project_id)
 
     try:
-        # Save the file
         filename = secure_filename(file.filename)
         upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id))
         os.makedirs(upload_folder, exist_ok=True)
-        file_path = os.path.join(upload_folder, filename)
-        file.save(file_path)
 
-        # Get description and short_comment from the form data
+        # Form fields
         description = request.form.get("description", "")
-        short_comment = request.form.get("short_comment", "")
+        short_comment = request.form.get("short_comment", "")[:20]
 
-        # Create File_data entry
-        file_data = File_data(
+        # Check if a folder for this file already exists (based on filename or another identifier)
+        file_folder = os.path.join(upload_folder, filename)
+        os.makedirs(file_folder, exist_ok=True)  # Create folder for the file if it doesn't exist
+
+        # Look for existing File_data (file library)
+        file_data = File_data.query.filter_by(
+            project_id=project.project_id,
             description=description,
-            short_comment=short_comment,
-            project_id=project.project_id
-        )
-        db.session.add(file_data)
+            short_comment=short_comment
+        ).first()
+
+        if not file_data:
+            file_data = File_data(
+                project_id=project.project_id,
+                description=description,
+                short_comment=short_comment
+            )
+            db.session.add(file_data)
+            db.session.commit()
+
+        # Determine the next version number
+        latest_version = db.session.query(func.max(File_version.version_number)).filter_by(
+            file_id=file_data.file_data_id
+        ).scalar() or 0
+        new_version_number = latest_version + 1
+
+        # Mark old versions as not the latest
+        File_version.query.filter_by(file_id=file_data.file_data_id, last_version=True).update({
+            "last_version": False
+        })
         db.session.commit()
 
-        # Create File_version entry for this file
+        # Save the file to the new folder with versioned name
+        versioned_filename = f"{filename}_v{new_version_number}{os.path.splitext(filename)[1]}"
+        file_path = os.path.join(file_folder, versioned_filename)
+        file.save(file_path)
+
+        # Create new File_version entry
         version = File_version(
-            version_number=1,
+            version_number=new_version_number,
             file_name=filename,
             file_type=file.mimetype,
             file_size=os.path.getsize(file_path),
-            description=description,  # Use the provided description
+            description=description,
             last_version=True,
             short_comment=short_comment,
             file_id=file_data.file_data_id,
@@ -261,7 +286,8 @@ def upload_file(project_id):
                 "file_name": version.file_name,
                 "file_size": version.file_size,
                 "file_type": version.file_type,
-                "description": version.description,  # Return the saved description
+                "version_number": version.version_number,
+                "description": version.description,
                 "short_comment": version.short_comment,
                 "upload_date": version.upload_date.isoformat()
             }
@@ -269,6 +295,7 @@ def upload_file(project_id):
     except Exception as e:
         print("Upload error:", str(e))  # Log it to terminal for debugging
         return jsonify({"error": str(e)}), 500
+
 
 # Get all versions for a project
 @projects_bp.route("/api/projects/<int:project_id>/versions", methods=["GET"])
