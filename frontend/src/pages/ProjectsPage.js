@@ -14,7 +14,7 @@ const ProjectsPage = () => {
     description: '',
     short_comment: '',
   });
-
+  
   useEffect(() => {
     fetch(`/project/${project_id}`)
       .then(res => res.json())
