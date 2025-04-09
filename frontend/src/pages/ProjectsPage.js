@@ -16,12 +16,25 @@ const ProjectsPage = () => {
   });
   
   useEffect(() => {
-    fetch(`/project/${project_id}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchProjectData = async () => {
+      try {
+        const response = await fetch(`/project/${project_id}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error fetching project data:", errorData.error);
+          alert(`Error: ${errorData.error}`);
+          return;
+        }
+        const data = await response.json();
         setProject(data.project);
         setFiles(data.files);
-      });
+      } catch (error) {
+        console.error("Error fetching project data:", error);
+        alert("An error occurred while fetching project data.");
+      }
+    };
+
+    fetchProjectData();
   }, [project_id]);
 
   const handleFileChange = (e) => {
@@ -42,24 +55,37 @@ const ProjectsPage = () => {
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('file', uploadData.file);
-    formData.append('description', uploadData.description);
-    formData.append('short_comment', uploadData.short_comment);
-    formData.append('project_id', project_id);
+    formData.append("file", uploadData.file);
+    formData.append("description", uploadData.description);
+    formData.append("short_comment", uploadData.short_comment);
 
     try {
-      const response = await fetch('/api/projects/upload', {
-        method: 'POST',
+      const response = await fetch(`/api/projects/${project_id}/upload`, {
+        method: "POST",
         body: formData,
       });
 
-      if (response.ok) {
-        const updatedProject = await response.json();
-        setFiles(updatedProject.files);
-        setShowUploadModal(false); // Close modal after upload
+      const rawText = await response.text();
+      console.log("Raw upload response:", rawText);
+
+      try {
+        const jsonData = JSON.parse(rawText);
+
+        if (response.ok) {
+          setFiles((prevFiles) => [...prevFiles, jsonData.file]);
+          setShowUploadModal(false);
+          alert("File uploaded successfully!");
+        } else {
+          alert(`Error: ${jsonData.error || 'Upload failed'}`);
+        }
+      } catch (parseError) {
+        console.error("Failed to parse JSON response:", parseError);
+        alert("Unexpected server response. Please try again.");
       }
+
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error("Error uploading file:", error);
+      alert("An error occurred while uploading the file.");
     }
   };
 
