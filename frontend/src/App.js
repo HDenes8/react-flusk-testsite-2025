@@ -22,7 +22,7 @@ function App() {
             <LoginPage />
           </Layout>
         } />
-        <Route path="/mainpage" element={
+        <Route path="/MainPage" element={
           <Layout>
             <MainPage />
           </Layout>
