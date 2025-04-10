@@ -228,6 +228,8 @@ def upload_file(project_id):
         description = request.form.get("description", "")
         short_comment = request.form.get("short_comment", "")[:20]
 
+        if len(short_comment) < 4:
+            return {"message": "Title must be greater than 3 characters.", "status": "error"}, 400
         # Check if a folder for this file already exists (based on filename or another identifier)
         file_folder = os.path.join(upload_folder, filename)
         os.makedirs(file_folder, exist_ok=True)  # Create folder for the file if it doesn't exist

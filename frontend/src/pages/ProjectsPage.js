@@ -171,16 +171,16 @@ const ProjectsPage = () => {
               <input type="file" name="file" required onChange={handleFileChange} />
               <input
                 type="text"
-                name="description"
-                placeholder="Description (optional)"
+                name="short_comment"
+                placeholder="Title" /* behind the scenes its still short_comment 2025/04/10 */
                 onChange={handleInputChange}
               />
               <input
                 type="text"
-                name="short_comment"
-                placeholder="Short Comment (optional)"
+                name="description"
+                placeholder="Description (optional)"
                 onChange={handleInputChange}
-              />
+              />              
               <div className="modal-buttons">
                 <button type="submit">Upload</button>
                 <button type="button" onClick={() => setShowUploadModal(false)}>Cancel</button>
