@@ -136,10 +136,10 @@ const ProjectsPage = () => {
         <thead>
           <tr>
             <th>Select</th>
+            <th>Title</th>
             <th>File Name</th>
             <th>File Size</th>
             <th>Description</th>
-            <th>Short Comment</th>
             <th>Upload Date</th>
           </tr>
         </thead>
@@ -153,10 +153,10 @@ const ProjectsPage = () => {
                   onChange={handleFileSelect}
                   />
               </td>
+              <td>{file.short_comment}</td>
               <td>{file.file_name}</td>
               <td>{file.file_size} bytes</td>
               <td>{file.description}</td>
-              <td>{file.short_comment}</td>
               <td>{new Date(file.upload_date).toLocaleString()}</td>
             </tr>
           ))}
