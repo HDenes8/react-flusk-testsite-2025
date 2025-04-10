@@ -49,19 +49,19 @@ const Invitations = () => {
     <div className="invitations-container">
       <div className="filter-buttons">
   <button
-    className={filter === 'pending' ? 'active' : ''}
+    className={`pending ${filter === 'pending' ? 'active' : ''}`}
     onClick={() => { setFilter('pending'); fetchInvitations('pending'); }}
   >
     Pending
   </button>
   <button
-    className={filter === 'accepted' ? 'active' : ''}
+    className={`accepted ${filter === 'accepted' ? 'active' : ''}`}
     onClick={() => { setFilter('accepted'); fetchInvitations('accepted'); }}
   >
     Accepted
   </button>
   <button
-    className={filter === 'declined' ? 'active' : ''}
+    className={`declined ${filter === 'declined' ? 'active' : ''}`}
     onClick={() => { setFilter('declined'); fetchInvitations('declined'); }}
   >
     Declined
@@ -89,8 +89,10 @@ const Invitations = () => {
                   <td>
                     {filter === 'pending' && (
                       <>
-                        <button onClick={() => acceptInvitation(invite.id)}>Accept</button>
-                        <button onClick={() => denyInvitation(invite.id)}>Deny</button>
+                      <div className="invitation-actions">
+                        <button className="btn-accept" onClick={() => acceptInvitation(invite.id)}>Accept</button>
+                        <button className="btn-deny" onClick={() => denyInvitation(invite.id)}>Deny</button>
+                      </div>
                       </>
                     )}
                   </td>

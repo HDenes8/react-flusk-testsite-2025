@@ -1,6 +1,6 @@
 .project-page {
   padding: 20px;
-  max-width: 900px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -21,6 +21,13 @@
   border-radius: 8px;
 }
 
+.file-info {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
 .project-page form input[type="text"],
 .project-page form input[type="file"] {
   display: block;
@@ -34,24 +41,28 @@
 .project-page form button {
   padding: 10px 20px;
   border: none;
-  background-color: #000000;
-  color: white;
+  background-color: #ece9e9b7;
+  color: black;
   border-radius: 4px;
   cursor: pointer;
+  border: 1px solid #00000054; /* Border color */
 }
 
 .project-page form button:hover {
   background-color: #000000;
+  color: white;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition effect */
+  border: 1px solid #00000054; /* Border color */
 }
 
 .project-page table {
   width: 100%;
-  margin-top: 20px;
   border-collapse: collapse;
+  background-color: white;
 }
 
 .project-page table, .project-page th, .project-page td {
-  border: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 .project-page th, .project-page td {
@@ -64,20 +75,35 @@
 }
 
 .project-page td {
-  text-align: center;
+  text-align: left;
 }
 
 .top-buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 20px;
+  justify-content: flex-end; /* Pushes buttons to the right */
+  align-items: center; /* Vertically aligns the buttons if needed */
+  gap: 10px; /* Adds spacing between buttons */
+  margin-bottom: 20px; /* Spacing below the buttons */
+  margin-left: auto; /* Pushes the buttons to the far-right side */
+  margin-right: 5%; /* Ensures no extra space to the right */
+  width: 25%; /* Allows the buttons to occupy only the required width */
 }
+
 
 .top-buttons button {
   padding: 8px 16px;
-  font-size: 16px;
+  font-size: 12px;
   cursor: pointer;
+  border-radius: 8px; /* Rounded corners */
+  background-color: #ffffff; /* Default background color */
+  color: #000000; /* Default text color */
+  border: 1px solid #00000054; /* Border color */ 
+}
+
+.top-buttons button:hover {
+  background-color: #000000; /* Background color on hover */
+  color: white; /* Text color on hover */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition effect */
 }
 
 .modal-overlay {
@@ -109,6 +135,8 @@
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 40px;
   margin-top: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
 }

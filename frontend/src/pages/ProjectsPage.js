@@ -131,6 +131,7 @@ const ProjectsPage = () => {
       <p>Created on: {new Date(project.created_date).toLocaleString()}</p>
 
       <h3>Files</h3>
+      <section className="file-info">
       <table className="files-table">
         <thead>
           <tr>
@@ -150,7 +151,7 @@ const ProjectsPage = () => {
                   type="checkbox"
                   value={file.version_id}
                   onChange={handleFileSelect}
-                />
+                  />
               </td>
               <td>{file.file_name}</td>
               <td>{file.file_size} bytes</td>
@@ -161,6 +162,7 @@ const ProjectsPage = () => {
           ))}
         </tbody>
       </table>
+      </section>
 
       {/* Upload Modal */}
       {showUploadModal && (
