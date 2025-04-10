@@ -202,8 +202,7 @@ const SignUp = () => {
           Submit
         </button>
         <br />
-        <span>By clicking Submit, you agree to our Terms of Service and Privacy Policy</span>
-
+        <span className="privacypolicy">By clicking Submit, you agree to our Terms of Service and Privacy Policy</span>
         <div className="already-account">
           <Link to="/login">Already have an account?</Link>
         </div>

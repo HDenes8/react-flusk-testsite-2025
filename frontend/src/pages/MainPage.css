@@ -18,14 +18,50 @@
   max-width: 300px;
 }
 
-.filter-button {
-  padding: 10px 20px;
+/* General style for the dropdown button */
+.filter-dropdown {
+  padding: 5px 5px;
   background-color: #ffffff;
   color: rgb(97, 96, 96);
-  border: none;
+  border: 1px solid #ddd; /* Adds a subtle border */
   border-radius: 4px;
   cursor: pointer;
+  font-size: 14px; /* Adjust font size */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+.filter-dropdown:hover {
+  background-color: #f4f4f4; /* Light grey on hover */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Adds subtle shadow */
+}
+
+/* Style for the dropdown menu */
+.filter-dropdown-container {
+  position: absolute; /* Position relative to the button */
+  margin-top: 5px; /* Space below the button */
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Adds depth with shadow */
+  width: 50px; /* Adjust width of dropdown */
+  z-index: 10; /* Ensures dropdown is above other elements */
+}
+
+/* Style for dropdown options */
+.filter-dropdown-container option {
+  padding: 8px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #ffffff;
+  color: rgb(50, 50, 50);
+  border: none;
+  text-align: center; /* Align text to the center */
+}
+
+.filter-dropdown-container option:hover {
+  background-color: #f4f4f4; /* Light grey hover effect */
+}
+
 
 .project-list {
   background-color: white;
@@ -43,12 +79,13 @@
 .project-list td {
   padding: 15px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 3px solid #eee;
 }
 
 .project-list th {
   background-color: #f8f9fa;
   font-weight: 600;
+  border-bottom: 3px solid #ddd;
 }
 
 .owner-avatar {
@@ -105,33 +142,77 @@
 
 .actions {
   position: relative;
-  display: flex;
+  display: auto;
   align-items: center;
 }
 
 .horizontal-menu {
-  display: flex;
+  min-width: 120px; /* Ensures a minimum width */
+  width: auto; /* Allows resizing dynamically */
+  max-width: 150px; /* Prevents it from becoming too large */
+  display: block;
   align-items: center;
   background: white;
   border: 1px solid #ccc;
-  padding: 5px 10px;
+  padding: 15px; /* Increased padding for more space inside the box */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  white-space: nowrap;
-  gap: 10px;
+  white-space: normal; /* Allows text to wrap properly */
+  margin: 10px;
+  border-radius: 5px; /* Rounded corners */
+  z-index: 1000; /* Ensures it appears above other elements */
 }
 
-.open-project-button {
-  background-color: black!important;
-  color: rgb(0, 0, 0);
+.horizontal-menu span {
+  display: block; /* Ensures the description spans its own line */
+  margin-bottom: 15px; /* Adds space between the description and the button */
+  font-size: 14px; /* Adjust the font size for readability */
+}
+
+.description-box {
+  padding: 15px; /* Adds space inside */
+  background-color: #f9f9f9; /* Light background for contrast */
+  border: 1px solid #ddd; /* Border for visibility */
+  border-radius: 5px; /* Rounded corners */
+  margin-bottom: 15px; /* Space below the description box */
+  font-size: 14px; /* Text readability */
+  color: #333; /* Text color */
+  max-width: 100%; /* Prevents overflow */
+  max-height: 300px; /* Limit the height to prevent overflow */
+  overflow-y: auto; /* Adds vertical scrolling for overflow content */
+  white-space: normal; /* Allows text to wrap naturally */
+  word-wrap: break-word; /* Breaks long words to prevent overflow */
+  overflow-wrap: break-word; /* Ensures long words wrap within their container */
+}
+
+.description-text {
+  display: inline-block; /* Ensures each word stays intact */
+}
+
+.open-project {
+  display: flex;
+  width: 100%;
+  gap: 10px; /* Space between buttons, if there are multiple */
+  justify-content: center;
+}
+
+.open-project button {
+  width: auto; /* Makes button size dynamic instead of full-width */
+  padding: 8px 12px;
+  color: #000000;
+  background-color: #d6d6d6; /* Light grey background */
   border: none;
-  padding: 5px 10px;
   cursor: pointer;
+  border-radius: 5px; /* Rounded corners */
+  border: 1px solid #00000000; /* Border color */
+  word-wrap: break-word; /* Ensures long words wrap nicely */
 }
 
-.open-project-button:hover {
+.open-project button:hover {
   background-color: #333;
+  color: white;
+  transition: background 0.2s ease;
 }

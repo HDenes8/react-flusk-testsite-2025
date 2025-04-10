@@ -1,8 +1,8 @@
 import React from 'react';
-import ProjectListPage from '../components/ProjectListPage';
+import MainPage from './MainPage';
 
 const MyProjectsPage = () => {
-  return <ProjectListPage defaultRoleFilter="owner" showFilterDropdown={false} />;
+  return <MainPage defaultRoleFilter="owner" showFilterDropdown={false} />;
 };
 
 export default MyProjectsPage;

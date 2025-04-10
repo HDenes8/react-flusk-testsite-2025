@@ -30,48 +30,75 @@
 }
 
 /* Gombok */
-.project-list button {
+.invitation-actions { /* Div */
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  justify-content: left;
+}
+
+.btn-accept,
+.btn-deny {
+  width: 20%;
   padding: 8px 12px;
-  margin-right: 5px;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  color: #000000;
+  background-color: #d6d6d6;
+  border-radius: 5px; /* Rounded corners */
+  border: 1px solid #03030342; /* Border color */
+  word-wrap: break-word; /* text wrapping */
 }
 
-.project-list button:first-of-type {
-  background: green;
+.btn-accept:hover {
+  background: #008000cc;
   color: white;
+  transition: background 0.2s ease;
 }
 
-.project-list button:last-of-type {
-  background: red;
+.btn-deny:hover {
+  background: #be0202cc;
   color: white;
+  transition: background 0.2s ease;
 }
 
 .filter-buttons {
+  width: 20%;
   margin-bottom: 20px;
   display: flex;
+  position: relative;
   gap: 10px;
-  justify-content: center;
+  justify-content: left;
+  align-items: center;
 }
 
-.filter-buttons button {
+.pending,
+.accepted,
+.declined {
   padding: 8px 16px;
   color: #000000;
   border: 1px solid #ddd;
-  background-color: #f0f0f0;
+  background-color: #ffffff;
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.2s ease;
 }
 
-.filter-buttons button:hover {
-  background-color: #e0e0e0;
+.pending:hover,
+.accepted:hover,
+.declined:hover {
+  background-color: #b6b6b6;
   color: #000000;
 }
 
 .filter-buttons .active {
   background-color: #000000;
+  color: white;
+  border-color: #000000;
+}
+
+.filter-buttons .active:hover {
+  background-color: #222222;
   color: white;
   border-color: #000000;
 }
