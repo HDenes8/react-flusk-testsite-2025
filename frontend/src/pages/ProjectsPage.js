@@ -2,6 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './ProjectsPage.css';
 
+// Utility function for dynamic file size formatting
+function formatFileSize(sizeInBytes) {
+  const units = ["bytes", "KB", "MB", "GB", "TB"];
+  let size = sizeInBytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+
+  // Round up the size to the nearest integer
+  return `${Math.ceil(size)} ${units[unitIndex]}`;
+}
+
 const ProjectsPage = () => {
   const { project_id } = useParams();
   const [project, setProject] = useState(null);
@@ -14,6 +29,15 @@ const ProjectsPage = () => {
     description: '',
     short_comment: '',
   });
+  const [expandedFile, setExpandedFile] = useState(null); // State to track the dropdown menu
+  const toggleFileDropdown = (fileId) => {
+    setExpandedFile(expandedFile === fileId ? null : fileId); // Toggle dropdown menu for a specific file
+  };
+  
+  const closeFileDropdown = () => {
+    setExpandedFile(null); // Close the dropdown
+  };
+  
   
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -26,8 +50,12 @@ const ProjectsPage = () => {
           return;
         }
         const data = await response.json();
+
+        // Sort files by upload_date in descending order (newest first)
+        const sortedFiles = data.files.sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
+        
         setProject(data.project);
-        setFiles(data.files);
+        setFiles(sortedFiles);
       } catch (error) {
         console.error("Error fetching project data:", error);
         alert("An error occurred while fetching project data.");
@@ -124,6 +152,7 @@ const ProjectsPage = () => {
       <div className="top-buttons">
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
+        <button onClick={() => setShowDownloadModal(true)}>Members</button>
       </div>
 
       <h1>{project.name}</h1>
@@ -132,36 +161,64 @@ const ProjectsPage = () => {
 
       <h3>Files</h3>
       <section className="file-info">
-      <table className="files-table">
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Title</th>
-            <th>File Name</th>
-            <th>File Size</th>
-            <th>Description</th>
-            <th>Upload Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {files.map((file) => (
-            <tr key={file.version_id}>
-              <td>
-                <input
-                  type="checkbox"
-                  value={file.version_id}
-                  onChange={handleFileSelect}
-                  />
-              </td>
-              <td>{file.short_comment}</td>
-              <td>{file.file_name}</td>
-              <td>{file.file_size} bytes</td>
-              <td>{file.description}</td>
-              <td>{new Date(file.upload_date).toLocaleString()}</td>
+        <table className="files-table">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>Title</th>
+              <th>File Name</th>
+              <th>File Size</th>
+              <th>Description</th>
+              <th>Upload Date</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {files.length === 0 ? (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  No files uploaded yet.
+                </td>
+              </tr>
+            ) : (
+              files.map((file) => (
+                <tr key={file.version_id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      value={file.version_id}
+                      onChange={handleFileSelect}
+                    />
+                  </td>
+                  <td>{file.short_comment}</td>
+                  <td>{file.file_name}</td>
+                  <td>{formatFileSize(file.file_size)}</td>
+                  <td>{file.description}</td>
+                  <td>{new Date(file.upload_date).toLocaleString()}</td>
+                  <td>
+                    <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>...</button>
+                    {expandedFile === file.version_id && (
+                      <div className="file-dropdown">
+                        <p><strong>Description:</strong> {file.description || 'No description available'}</p>
+                        <ul>
+                          {file.versions ? (
+                            file.versions.map((version) => (
+                              <li key={version.version_id}>
+                                Version {version.version_number} - {new Date(version.upload_date).toLocaleString()}
+                              </li>
+                            ))
+                          ) : (
+                            <li>No other versions available.</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </section>
 
       {/* Upload Modal */}
@@ -182,7 +239,7 @@ const ProjectsPage = () => {
                 name="description"
                 placeholder="Description (optional)"
                 onChange={handleInputChange}
-              />              
+              />
               <div className="modal-buttons">
                 <button type="submit">Upload</button>
                 <button type="button" onClick={() => setShowUploadModal(false)}>Cancel</button>
