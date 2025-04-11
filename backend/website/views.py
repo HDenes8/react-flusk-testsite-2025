@@ -217,22 +217,21 @@ def upload_file(project_id):
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
+    # Check file size (1GB max)
+    max_size = 1 * 1024 * 1024 * 1024  # 1GB in bytes
+    if len(file.read()) > max_size:
+        return jsonify({"error": "File size exceeds the 1GB limit"}), 400
+    file.seek(0)  # Reset file pointer after size check
+
     project = Project.query.get_or_404(project_id)
 
     try:
-        filename = secure_filename(file.filename)
-        upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id))
-        os.makedirs(upload_folder, exist_ok=True)
-
         # Form fields
         description = request.form.get("description", "")
         short_comment = request.form.get("short_comment", "")[:20]
 
         if len(short_comment) < 4:
-            return {"message": "Title must be greater than 3 characters.", "status": "error"}, 400
-        # Check if a folder for this file already exists (based on filename or another identifier)
-        file_folder = os.path.join(upload_folder, filename)
-        os.makedirs(file_folder, exist_ok=True)  # Create folder for the file if it doesn't exist
+            return jsonify({"error": "Title must be greater than 3 characters."}), 400
 
         # Look for existing File_data (file library)
         file_data = File_data.query.filter_by(
@@ -242,6 +241,7 @@ def upload_file(project_id):
         ).first()
 
         if not file_data:
+            # Create a new File_data entry if it doesn't exist
             file_data = File_data(
                 project_id=project.project_id,
                 description=description,
@@ -250,11 +250,23 @@ def upload_file(project_id):
             db.session.add(file_data)
             db.session.commit()
 
+        # Use file_data_id as the folder name
+        folder_name = str(file_data.file_data_id)
+        upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id), folder_name)
+        os.makedirs(upload_folder, exist_ok=True)
+
+        # Extract filename and extension
+        filename = secure_filename(file.filename)
+        name, ext = os.path.splitext(filename)
+
         # Determine the next version number
-        latest_version = db.session.query(func.max(File_version.version_number)).filter_by(
-            file_id=file_data.file_data_id
-        ).scalar() or 0
-        new_version_number = latest_version + 1
+        latest_version = db.session.query(func.max(File_version.version_number)).filter(
+            File_version.file_id == file_data.file_data_id
+        ).scalar()
+        version_number = (latest_version or 0) + 1
+
+        # Construct the new filename
+        new_filename = f"{name}_v{version_number}{ext}"
 
         # Mark old versions as not the latest
         File_version.query.filter_by(file_id=file_data.file_data_id, last_version=True).update({
@@ -262,15 +274,14 @@ def upload_file(project_id):
         })
         db.session.commit()
 
-        # Save the file to the new folder with versioned name
-        versioned_filename = f"{filename}_v{new_version_number}{os.path.splitext(filename)[1]}"
-        file_path = os.path.join(file_folder, versioned_filename)
+        # Save the file with the new versioned name
+        file_path = os.path.join(upload_folder, new_filename)
         file.save(file_path)
 
-        # Create new File_version entry
+        # Create a new File_version entry
         version = File_version(
-            version_number=new_version_number,
-            file_name=filename,
+            version_number=version_number,
+            file_name=new_filename,
             file_type=file.mimetype,
             file_size=os.path.getsize(file_path),
             description=description,
