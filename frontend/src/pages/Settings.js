@@ -15,7 +15,7 @@ const Settings = () => {
     password2: '',
     profilePic: ''
   });
-
+  
   useEffect(() => {
     fetchUserData();
     fetchProfilePics();
