@@ -108,8 +108,8 @@
 }
 
 .status.success {
-  background-color: #000000;
-  color: white;
+  background-color: #006900;
+  color: rgb(255, 255, 255);
 }
 
 .status.warning {
