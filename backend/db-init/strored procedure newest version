@@ -24,7 +24,7 @@ BEGIN
         p.project_id,
         p.name::TEXT AS project_name,
         up.role::TEXT AS role,
-        p.created_date::TIMESTAMP WITHOUT TIME ZONE AS created_date,
+        p.created_date::TIMESTAMP WITH TIME ZONE 'UTC' AS created_date,
         COALESCE(u.full_name, 'Unknown')::TEXT AS creator_name,
         u.profile_pic::TEXT AS creator_profile_picture,
         NOT EXISTS (

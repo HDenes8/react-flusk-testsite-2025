@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './ProjectsPage.css';
 
 // Utility function for dynamic file size formatting
@@ -29,6 +29,7 @@ const ProjectsPage = () => {
     description: '',
     short_comment: '',
   });
+  const navigate = useNavigate();
   const [expandedFile, setExpandedFile] = useState(null); // State to track the dropdown menu
   const toggleFileDropdown = (fileId) => {
     setExpandedFile(expandedFile === fileId ? null : fileId); // Toggle dropdown menu for a specific file
@@ -152,7 +153,7 @@ const ProjectsPage = () => {
       <div className="top-buttons">
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
-        <button onClick={() => setShowDownloadModal(true)}>Members</button>
+        <button onClick={() => navigate("/MembersPage")}>Members</button>
       </div>
 
       <h1>{project.name}</h1>
