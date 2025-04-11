@@ -49,11 +49,11 @@ BEGIN
             LIMIT 1
         ), 'Unknown') AS last_modified_by,
         COALESCE((
-            SELECT MAX(fv.upload_date)::TIMESTAMP WITHOUT TIME ZONE
+            SELECT MAX(fv.upload_date)::TIMESTAMP WITH TIME ZONE AT TIME ZONE 'UTC'
             FROM file_version fv
             JOIN file_data fd ON fv.file_id = fd.file_data_id
             WHERE fd.project_id = p.project_id
-        ), p.created_date::TIMESTAMP WITHOUT TIME ZONE) AS last_modified_date
+        ), p.created_date::TIMESTAMP WITH TIME ZONE AT TIME ZONE 'UTC') AS last_modified_date
     FROM user_project up
     JOIN project p ON up.project_id = p.project_id
     LEFT JOIN user_profile u ON p.creator_id = u.user_id
