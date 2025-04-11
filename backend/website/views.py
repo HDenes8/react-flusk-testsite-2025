@@ -128,46 +128,34 @@ def download_file(filename):
     else:
         return jsonify({"error": "File not found."}), 404
     
-@projects_bp.route("/api/projects/download", methods=["POST"])
+@projects_bp.route("/api/projects/download/<int:file_version_id>", methods=["GET"])
 @login_required
-def download_files():
-    data = request.get_json()
-    selected_files = data.get("selected_files", [])
+def download_file_by_id(file_version_id):
+    # Query the file version
+    file_version = File_version.query.get(file_version_id)
+    if not file_version:
+        return jsonify({"error": f"File version {file_version_id} not found"}), 404
 
-    if not selected_files:
-        return jsonify({"error": "No files selected for download"}), 400
+    # Query the associated file data
+    file_data = File_data.query.get(file_version.file_id)
+    if not file_data:
+        return jsonify({"error": f"File data for version {file_version_id} not found"}), 404
 
-    try:
-        # Collect file paths for the selected files
-        file_paths = []
-        for file_id in selected_files:
-            file_version = File_version.query.get(file_id)
-            if not file_version:
-                return jsonify({"error": f"File version {file_id} not found"}), 404
+    # Construct the file path
+    project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
+    file_folder = os.path.join(project_folder, str(file_data.file_data_id))
+    file_path = os.path.join(file_folder, file_version.file_name)
 
-            # Construct the file path
-            file_data = File_data.query.get(file_version.file_id)
-            project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
-            file_folder = os.path.join(project_folder, str(file_data.file_data_id))
-            file_path = os.path.join(file_folder, file_version.file_name)
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
 
-            if not os.path.exists(file_path):
-                return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
-
-            file_paths.append(file_path)
-
-        # Create a ZIP archive of the selected files
-        zip_filename = "selected_files.zip"
-        zip_path = os.path.join(current_app.config['UPLOAD_FOLDER'], zip_filename)
-        with zipfile.ZipFile(zip_path, "w") as zipf:
-            for file_path in file_paths:
-                zipf.write(file_path, os.path.basename(file_path))
-
-        # Send the ZIP file to the user
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], zip_filename, as_attachment=True)
-    except Exception as e:
-        print("Download error:", str(e))  # Log it to terminal for debugging
-        return jsonify({"error": str(e)}), 500
+    # Send the file to the user
+    return send_from_directory(
+        directory=file_folder,
+        path=file_version.file_name,
+        as_attachment=True
+    )
 
 # Projects start 
 

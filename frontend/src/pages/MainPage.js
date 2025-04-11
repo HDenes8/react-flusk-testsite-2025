@@ -10,6 +10,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [selectedRole, setSelectedRole] = useState(defaultRoleFilter);
   const [menuOpen, setMenuOpen] = useState(null);
+  const [selectedFileIds, setSelectedFileIds] = useState([]); // Define selectedFileIds here
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -90,6 +91,23 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
 
   const openProject = (projectId) => {
     navigate(`/ProjectsPage/${projectId}`);
+  };
+
+  const handleDownloadSelected = () => {
+    if (selectedFileIds.length === 0) {
+      alert("No files selected for download.");
+      return;
+    }
+  
+    // Trigger download for each selected file
+    selectedFileIds.forEach((fileId) => {
+      const link = document.createElement("a");
+      link.href = `/api/projects/download/${fileId}`;
+      link.setAttribute("download", ""); // Force download behavior
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
   };
 
   return (
