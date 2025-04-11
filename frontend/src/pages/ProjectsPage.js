@@ -120,22 +120,36 @@ const ProjectsPage = () => {
 
   const handleDownloadSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch('/api/projects/download', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ selected_files: selectedFiles }),
-    });
 
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'files.zip';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setShowDownloadModal(false); // Close modal after download
+    if (selectedFiles.length === 0) {
+      alert("No files selected for download.");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/projects/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selected_files: selectedFiles }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'selected_files.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setShowDownloadModal(false); // Close modal after download
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || 'Failed to download files'}`);
+      }
+    } catch (error) {
+      console.error("Error downloading files:", error);
+      alert("An error occurred while downloading the files.");
     }
   };
 
