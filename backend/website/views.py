@@ -141,9 +141,11 @@ def download_files():
         # Collect file paths for the selected files
         file_paths = []
         for file_id in selected_files:
+            if not str(file_id).isdigit():
+                return jsonify({"error": f"Invalid file ID: {file_id}"}), 400
+
             file_version = File_version.query.get(int(file_id))
-            if not file_version:
-                return jsonify({"error": f"File version {file_id} not found"}), 404
+
             
             file_data = File_data.query.get(file_version.file_id)
             project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
@@ -182,8 +184,6 @@ def download_files():
 
             if not os.path.exists(file_path):
                 return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
-
-            file_paths.append(file_path)
 
         # Create a ZIP archive of the selected files
         zip_filename = "selected_files.zip"
