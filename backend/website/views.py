@@ -173,6 +173,9 @@ def download_files():
                 db.session.add(last_download)
             
             db.session.commit()
+    except Exception as e:
+        print("Download error:", str(e))  # Log it for debugging
+        return jsonify({"error": "An unexpected error occurred while downloading the file."}), 500
 
     # Construct the file path
     project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
