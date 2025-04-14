@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from .models import File_data, User_profile, User_Project, Project, Invitation, File_version
+from .models import File_data, User_profile, User_Project, Project, Invitation, File_version, Last_download
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -141,9 +141,38 @@ def download_files():
         # Collect file paths for the selected files
         file_paths = []
         for file_id in selected_files:
-            file_version = File_version.query.get(file_id)
+            file_version = File_version.query.get(int(file_id))
             if not file_version:
                 return jsonify({"error": f"File version {file_id} not found"}), 404
+            
+            file_data = File_data.query.get(file_version.file_id)
+            project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
+            file_folder = os.path.join(project_folder, str(file_data.file_data_id))
+            file_path = os.path.join(file_folder, file_version.file_name)
+
+            if not os.path.exists(file_path):
+                return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
+            
+            file_paths.append(file_path)
+
+            last_download = Last_download.query.filter_by(
+                file_id=file_data.file_data_id,
+                user_id=current_user.user_id,
+            ).first()
+
+            if last_download:
+                last_download.version_id = file_version.version_id
+                last_download.download_date = func.now()
+            else:
+                last_download = Last_download(
+                    file_id=file_data.file_data_id,
+                    version_id=file_version.version_id,
+                    user_id=current_user.user_id,
+                    download_date= func.now()
+                )
+                db.session.add(last_download)
+            
+            db.session.commit()
 
             # Construct the file path
             file_data = File_data.query.get(file_version.file_id)
@@ -258,10 +287,27 @@ def upload_file(project_id):
     file = request.files["file"]
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
+    
+    # Get the user's role in the specific project
+    user_project = User_Project.query.filter_by(
+        user_id=current_user.user_id,
+        project_id=project_id
+    ).first()
+
+    if not user_project:
+        return jsonify({"error": "You are not a member of this project"}), 403
+    
+    if user_project.role == "reader":
+        return jsonify({"error": "You don't have permission to upload files"}), 403
 
     # Check file size (1GB max)
     max_size = 1 * 1024 * 1024 * 1024  # 1GB in bytes
-    if len(file.read()) > max_size:
+
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+
+    if size > max_size:
         return jsonify({"error": "File size exceeds the 1GB limit"}), 400
     file.seek(0)  # Reset file pointer after size check
 
@@ -449,6 +495,7 @@ def update_user():
 
     email = data.get('email')
     full_name = data.get('fullName')
+    current_password = data.get('currentPassword')
     password1 = data.get('password1')
     password2 = data.get('password2')
     nickname = data.get('nickname')
@@ -467,6 +514,8 @@ def update_user():
             return jsonify({"error": "Full name must be greater than 1 character."}), 400
 
     if password1 or password2:
+        if not current_password or not check_password_hash(user.password, current_password):
+            return jsonify({"error": "Current password is required."}), 400
         if password1 != password2:
             return jsonify({"error": "Passwords don't match."}), 400
         elif len(password1) < 7:
