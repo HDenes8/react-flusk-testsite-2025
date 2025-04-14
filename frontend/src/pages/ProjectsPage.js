@@ -29,41 +29,12 @@ const ProjectsPage = () => {
     description: '',
     short_comment: '',
   });
-  const handleDownloadSelected = () => {
-    if (selectedFileIds.length === 0) {
-      alert("No files selected for download.");
-      return;
-    }
-  
-    // Trigger download for each selected file
-    selectedFileIds.forEach((fileId) => {
-      const link = document.createElement("a");
-      link.href = `/api/projects/download/${fileId}`;
-      link.setAttribute("target", "_blank"); // Open in a new tab to avoid navigation
-      link.setAttribute("download", ""); // Force download behavior
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-  };
-  
-  const [selectedFileIds, setSelectedFileIds] = useState([]);
   const navigate = useNavigate();
   const [expandedFile, setExpandedFile] = useState(null); // State to track the dropdown menu
   const toggleFileDropdown = (fileId) => {
     setExpandedFile(expandedFile === fileId ? null : fileId); // Toggle dropdown menu for a specific file
   };
-
-  const toggleFileSelection = (fileId) => {
-    setSelectedFileIds((prevSelected) => {
-      if (prevSelected.includes(fileId)) {
-        return prevSelected.filter((id) => id !== fileId);
-      } else {
-        return [...prevSelected, fileId];
-      }
-    });
-  };
-    
+  
   const closeFileDropdown = () => {
     setExpandedFile(null); // Close the dropdown
   };
@@ -163,17 +134,14 @@ const ProjectsPage = () => {
       });
 
       if (response.ok) {
-
-        selectedFileIds.forEach(fileId => {
-          const a = document.createElement('a');
-          a.href = `/api/projects/download/${fileId}`;
-          a.download = ''; // This forces download behavior
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        });
-        
-
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'selected_files.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         setShowDownloadModal(false); // Close modal after download
       } else {
         const errorData = await response.json();
@@ -198,8 +166,6 @@ const ProjectsPage = () => {
     <div className="project-page">
       <div className="top-buttons">
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
-        <button onClick={handleDownloadSelected}>Download Selected</button>
-
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
         <button onClick={() => navigate("/MembersPage")}>Members</button>
       </div>
@@ -235,10 +201,9 @@ const ProjectsPage = () => {
                   <td>
                     <input
                       type="checkbox"
-                      checked={selectedFileIds.includes(file.version_id)}
-                      onChange={() => toggleFileSelection(file.version_id)}
-                    />                  
-
+                      value={file.version_id}
+                      onChange={handleFileSelect}
+                    />
                   </td>
                   <td>{file.short_comment}</td>
                   <td>{file.file_name}</td>
@@ -307,9 +272,7 @@ const ProjectsPage = () => {
             <p>You have selected {selectedFiles.length} file(s) to download.</p>
             <form onSubmit={handleDownloadSubmit}>
               <div className="modal-buttons">
-                <button onClick={handleDownloadSelected}>Download Selected</button>
-
-
+                <button type="submit">Download</button>
                 <button type="button" onClick={() => setShowDownloadModal(false)}>Cancel</button>
               </div>
             </form>
