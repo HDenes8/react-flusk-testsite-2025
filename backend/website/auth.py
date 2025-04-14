@@ -72,7 +72,7 @@ def is_valid_phone_number(number):
         except phonenumbers.NumberParseException:
             return False
 
-@auth.route('/sign-up', methods=['POST'])
+@auth.route('/signup', methods=['POST'])
 def sign_up():
     if request.method == 'POST':
         data = request.get_json()  # Parse JSON data from the request
