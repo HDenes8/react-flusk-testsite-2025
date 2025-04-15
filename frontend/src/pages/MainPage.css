@@ -2,6 +2,7 @@
 .main-page-container {
   width: 100%;
   padding-top: 20px; /* Adjust this value as needed to create space */
+  margin: 0 auto; /* Center the container */
 }
 
 .search-filter-container {
@@ -67,7 +68,7 @@
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  overflow: visible;
+  overflow: hidden;
 }
 
 .project-list table {
@@ -149,7 +150,7 @@
 .horizontal-menu {
   min-width: 120px; /* Ensures a minimum width */
   width: auto; /* Allows resizing dynamically */
-  max-width: 150px; /* Prevents it from becoming too large */
+  max-width: 500px; /* Prevents it from becoming too large */
   display: block;
   align-items: center;
   background: white;

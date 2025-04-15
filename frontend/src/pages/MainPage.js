@@ -10,7 +10,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [selectedRole, setSelectedRole] = useState(defaultRoleFilter);
   const [menuOpen, setMenuOpen] = useState(null);
-  const [selectedFileIds, setSelectedFileIds] = useState([]); // Define selectedFileIds here
+  const [selectedFileIds, setSelectedFileIds] = useState([]); // Added this line
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -86,7 +86,12 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   };
 
   const toggleMenu = (projectId) => {
-    setMenuOpen(menuOpen === projectId ? null : projectId);
+    console.log(`Toggling menu for project ID: ${projectId}`);
+    if (menuOpen === projectId) {
+      setMenuOpen(null); // Close menu
+    } else {
+      setMenuOpen(projectId); // Open menu
+    }
   };
 
   const openProject = (projectId) => {
@@ -98,12 +103,11 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
       alert("No files selected for download.");
       return;
     }
-  
-    // Trigger download for each selected file
+
     selectedFileIds.forEach((fileId) => {
       const link = document.createElement("a");
       link.href = `/api/projects/download/${fileId}`;
-      link.setAttribute("download", ""); // Force download behavior
+      link.setAttribute("download", "");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -134,7 +138,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
       </div>
 
       <section className="project-list">
-      <table>
+        <table>
           <thead>
             <tr>
               <th>Project Name</th>
@@ -146,49 +150,49 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
             </tr>
           </thead>
           <tbody>
-          {filteredProjects.length > 0 ? (
-            filteredProjects.map((project) => (
-              <tr key={project.project_id}>
-                <td>
-                  {project.project_name}{' '}
-                  <span className={`status ${project.has_latest === true ? 'success' : 'error'}`}>
-                    {project.has_latest === true ? '✔' : '❕'}
-                  </span>
-                </td>
-                <td>{project.role}</td>
-                <td>{project.last_modified_date ? formatDate(project.last_modified_date) : '-'}</td>
-                <td>{project.created_date ? formatDate(project.created_date) : '-'}</td>
-                <td>
-                  <img
-                    src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
-                    alt={project.creator_name || 'Unknown'}
-                    className="owner-avatar"
-                  />
-                  <span className="ownername">{project.creator_name || 'Unknown'}</span>
-                </td>
-                <td className="actions">
-                  <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>
-                  {menuOpen === project.project_id && (
-                    <div ref={menuRef} className="horizontal-menu">
-                      <div className="description-box">
-                      <span className="description-text">
-                        {project.description && <strong>Description:</strong>} {project.description || 'No description available'}
-                      </span>
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project) => (
+                <tr key={project.project_id}>
+                  <td>
+                    {project.project_name}{' '}
+                    <span className={`status ${project.has_latest === true ? 'success' : 'error'}`}>
+                      {project.has_latest === true ? '✔' : '❕'}
+                    </span>
+                  </td>
+                  <td>{project.role}</td>
+                  <td>{project.last_modified_date ? formatDate(project.last_modified_date) : '-'}</td>
+                  <td>{project.created_date ? formatDate(project.created_date) : '-'}</td>
+                  <td>
+                    <img
+                      src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
+                      alt={project.creator_name || 'Unknown'}
+                      className="owner-avatar"
+                    />
+                    <span className="ownername">{project.creator_name || 'Unknown'}</span>
+                  </td>
+                  <td className="actions">
+                    <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>
+                    {menuOpen === project.project_id && (
+                      <div ref={menuRef} className="horizontal-menu" id={`menu-${project.project_id}`}>
+                        <div className="description-box">
+                          <span className="description-text">
+                            {project.description && <strong>Description:</strong>} {project.description || 'No description available'}
+                          </span>
+                        </div>
+                        <div className="open-project">
+                          <button onClick={() => openProject(project.project_id)}>Open Project</button>
+                        </div>
                       </div>
-                      <div className="open-project">
-                        <button onClick={() => openProject(project.project_id)}>Open Project</button>
-                      </div>
-                    </div>
-                  )}
-                </td>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6">No projects found</td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6">No projects found</td>
-            </tr>
-          )}
-        </tbody>
+            )}
+          </tbody>
         </table>
       </section>
     </div>
