@@ -514,8 +514,11 @@ def update_user():
             return jsonify({"error": "Full name must be greater than 1 character."}), 400
 
     if password1 or password2:
-        if not current_password or not check_password_hash(user.password, current_password):
-            return jsonify({"error": "Current password is required."}), 400
+        if password1 or password2:
+            if not current_password:
+                return jsonify({"error": "Current password is required."}), 400
+            if not check_password_hash(user.password, current_password):
+                return jsonify({"error": "Current password is incorrect."}), 400
         if password1 != password2:
             return jsonify({"error": "Passwords don't match."}), 400
         elif len(password1) < 7:
