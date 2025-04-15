@@ -61,7 +61,7 @@ class Invitation(db.Model):
 class File_data(db.Model):
     file_data_id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.Text)
-    short_comment = db.Column(db.String(20))
+    short_comment = db.Column(db.String(100))
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.project_id'))
 
@@ -73,7 +73,7 @@ class File_version(db.Model):
     file_size = db.Column(db.Integer)
     description = db.Column(db.Text)
     last_version = db.Column(db.Boolean, default=False)
-    short_comment = db.Column(db.String(20))
+    short_comment = db.Column(db.String(100))
     upload_date = db.Column(db.DateTime(timezone=True), default=text("CURRENT_TIMESTAMP(0)"))
 
     file_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))
