@@ -11,21 +11,27 @@ const Settings = () => {
     email: '',
     mobile: '',
     job: '',
+    currentPassword: '',
     password1: '',
     password2: '',
     profilePic: ''
   });
-  
+
+  const [errors, setErrors] = useState({
+    currentPassword: false,
+    password1: false,
+    password2: false
+  });
+
   useEffect(() => {
     fetchUserData();
     fetchProfilePics();
   }, []);
 
-  // Fetch user data from the backend API
   const fetchUserData = async () => {
     try {
       const response = await axios.get('/api/user');
-      console.log('Fetched user data:', response.data); // Debugging line
+      console.log('Fetched user data:', response.data);
       setUser(response.data);
       setFormData({
         fullName: response.data.full_name || '',
@@ -33,18 +39,20 @@ const Settings = () => {
         email: response.data.email || '',
         mobile: response.data.mobile || '',
         job: response.data.job || '',
-        profilePic: response.data.profile_pic || ''  // Assuming this is the image file name
+        currentPassword: '',
+        password1: '',
+        password2: '',
+        profilePic: response.data.profile_pic || ''
       });
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
 
-  // Fetch profile pictures from the backend API
   const fetchProfilePics = async () => {
     try {
       const response = await axios.get('/api/profile_pics');
-      console.log('Fetched profile pics:', response.data); // Debugging line
+      console.log('Fetched profile pics:', response.data);
       setProfilePics(response.data);
     } catch (error) {
       console.error('Error fetching profile pictures:', error);
@@ -57,20 +65,53 @@ const Settings = () => {
       ...formData,
       [name]: value
     });
+    setErrors({
+      ...errors,
+      [name]: false
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (formData.password1 !== formData.password2) {
+      setErrors({ ...errors, password2: true });
       alert('Passwords do not match');
       return;
     }
+
     try {
       await axios.post('/api/user/update', formData);
       alert('Profile updated successfully');
-      fetchUserData();  // Refresh user data after update
+      fetchUserData();
     } catch (error) {
       console.error('Error updating profile:', error);
+      const err = error.response?.data?.error || '';
+      const updatedErrors = {
+        currentPassword: false,
+        password1: false,
+        password2: false
+      };
+
+      if (
+        err === 'Current password is required.' ||
+        err === 'Current password is incorrect.'
+      ) {
+        updatedErrors.currentPassword = true;
+      }
+      if (err === "Passwords don't match.") {
+        updatedErrors.password1 = true;
+        updatedErrors.password2 = true;
+      }
+      if (err === "Password can't be the old one.") {
+        updatedErrors.password1 = true;
+      }
+      if (err === 'Password must be at least 7 characters.') {
+        updatedErrors.password1 = true;
+      }
+
+      setErrors(updatedErrors);
+      alert(err);
     }
   };
 
@@ -146,10 +187,22 @@ const Settings = () => {
           />
         </div>
         <div className="form-group">
+          <label htmlFor="currentPassword">Current Password *</label>
+          <input
+            type="password"
+            className={`form-control ${errors.currentPassword ? 'is-invalid' : ''}`}
+            id="currentPassword"
+            name="currentPassword"
+            placeholder="Current password"
+            value={formData.currentPassword}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
           <label htmlFor="password1">Password *</label>
           <input
             type="password"
-            className="form-control"
+            className={`form-control ${errors.password1 ? 'is-invalid' : ''}`}
             id="password1"
             name="password1"
             placeholder="Change password"
@@ -161,7 +214,7 @@ const Settings = () => {
           <label htmlFor="password2">Password (Confirm) *</label>
           <input
             type="password"
-            className="form-control"
+            className={`form-control ${errors.password2 ? 'is-invalid' : ''}`}
             id="password2"
             name="password2"
             placeholder="Confirm changing password"
@@ -169,7 +222,12 @@ const Settings = () => {
             onChange={handleChange}
           />
         </div>
-        <button type="button" id="selectProfilePicButton" className="btn btn-primary" onClick={() => document.getElementById('profilePicMenu').style.display = 'block'}>
+        <button
+          type="button"
+          id="selectProfilePicButton"
+          className="btn btn-primary"
+          onClick={() => document.getElementById('profilePicMenu').style.display = 'block'}
+        >
           Select Profile Picture
         </button>
         <div id="profilePicMenu" className="profile-pic-menu" style={{ display: 'none' }}>
@@ -193,7 +251,9 @@ const Settings = () => {
           </div>
         </div>
         <br />
-        <button type="submit" className="btn btn-primary" name="submit">Save Changes</button>
+        <button type="submit" className="btn btn-primary" name="submit">
+          Save Changes
+        </button>
       </form>
     </div>
   );

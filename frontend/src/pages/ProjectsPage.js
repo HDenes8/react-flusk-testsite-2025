@@ -208,13 +208,15 @@ const ProjectsPage = () => {
                   <td>{file.short_comment}</td>
                   <td>{file.file_name}</td>
                   <td>{formatFileSize(file.file_size)}</td>
-                  <td>{file.description}</td>
+                  <td>{new Date(file.upload_date).toLocaleString()}</td>
                   <td>{new Date(file.upload_date).toLocaleString()}</td>
                   <td>
                     <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>...</button>
                     {expandedFile === file.version_id && (
-                      <div className="file-dropdown">
+                      <div className="horizontal-menu">
+                        <div className="description-box">
                         <p><strong>Description:</strong> {file.description || 'No description available'}</p>
+                        </div>
                         <ul>
                           {file.versions ? (
                             file.versions.map((version) => (
@@ -226,6 +228,10 @@ const ProjectsPage = () => {
                             <li>No other versions available.</li>
                           )}
                         </ul>
+                        <div className="open-project">
+                        <button onClick={() => navigate(project.project_id)}>Open Versions</button>
+                        <button onClick={() => navigate(project.project_id)}>Upload Versions</button>
+                      </div>
                       </div>
                     )}
                   </td>
