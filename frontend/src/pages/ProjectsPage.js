@@ -2,83 +2,68 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './ProjectsPage.css';
 
-// Utility function for dynamic file size formatting
 function formatFileSize(sizeInBytes) {
   const units = ["bytes", "KB", "MB", "GB", "TB"];
   let size = sizeInBytes;
   let unitIndex = 0;
-
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex++;
   }
-
-  // Round up the size to the nearest integer
   return `${Math.ceil(size)} ${units[unitIndex]}`;
 }
 
 const ProjectsPage = () => {
   const { project_id } = useParams();
+  const navigate = useNavigate();
+
   const [project, setProject] = useState(null);
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [uploadData, setUploadData] = useState({
-    file: null,
-    description: '',
-    short_comment: '',
-  });
-  const navigate = useNavigate();
-  const [expandedFile, setExpandedFile] = useState(null); // State to track the dropdown menu
+  const [uploadData, setUploadData] = useState({ file: null, description: '', short_comment: '' });
+  const [versionUploadTarget, setVersionUploadTarget] = useState(null);
+  const [versionUploadData, setVersionUploadData] = useState({ file: null, description: '' });
+  const [expandedFile, setExpandedFile] = useState(null);
+
   const toggleFileDropdown = (fileId) => {
-    setExpandedFile(expandedFile === fileId ? null : fileId); // Toggle dropdown menu for a specific file
+    setExpandedFile(expandedFile === fileId ? null : fileId);
   };
-  
+
   const closeFileDropdown = () => {
-    setExpandedFile(null); // Close the dropdown
+    setExpandedFile(null);
   };
-  
-  
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      try {
-        const response = await fetch(`/project/${project_id}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error fetching project data:", errorData.error);
-          alert(`Error: ${errorData.error}`);
-          return;
-        }
-        const data = await response.json();
 
-        // Sort files by upload_date in descending order (newest first)
-        const sortedFiles = data.files.sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
-        
-        setProject(data.project);
-        setFiles(sortedFiles);
-      } catch (error) {
-        console.error("Error fetching project data:", error);
-        alert("An error occurred while fetching project data.");
+  const fetchProjectData = async () => {
+    try {
+      const response = await fetch(`/project/${project_id}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error}`);
+        return;
       }
-    };
+      const data = await response.json();
+      const sortedFiles = data.files.sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
+      setProject(data.project);
+      setFiles(sortedFiles);
+    } catch (error) {
+      console.error("Error fetching project data:", error);
+      alert("An error occurred while fetching project data.");
+    }
+  };
 
+  useEffect(() => {
     fetchProjectData();
   }, [project_id]);
 
   const handleFileChange = (e) => {
-    setUploadData({
-      ...uploadData,
-      file: e.target.files[0],
-    });
+    setUploadData({ ...uploadData, file: e.target.files[0] });
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUploadData({
-      ...uploadData,
-      [name]: value,
-    });
+    setUploadData({ ...uploadData, [name]: value });
   };
 
   const handleUploadSubmit = async (e) => {
@@ -95,32 +80,54 @@ const ProjectsPage = () => {
       });
 
       const rawText = await response.text();
-      console.log("Raw upload response:", rawText);
+      const jsonData = JSON.parse(rawText);
 
-      try {
-        const jsonData = JSON.parse(rawText);
-
-        if (response.ok) {
-          setFiles((prevFiles) => [...prevFiles, jsonData.file]);
-          setShowUploadModal(false);
-          alert("File uploaded successfully!");
-        } else {
-          alert(`Error: ${jsonData.error || 'Upload failed'}`);
-        }
-      } catch (parseError) {
-        console.error("Failed to parse JSON response:", parseError);
-        alert("Unexpected server response. Please try again.");
+      if (response.ok) {
+        setShowUploadModal(false);
+        alert("File uploaded successfully!");
+        fetchProjectData(); // Refresh the file list
+      } else {
+        alert(`Error: ${jsonData.error || 'Upload failed'}`);
       }
-
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("An error occurred while uploading the file.");
     }
   };
 
+  const handleVersionUploadSubmit = async (e) => {
+    e.preventDefault();
+    if (!versionUploadTarget) return;
+
+    const formData = new FormData();
+    formData.append("file", versionUploadData.file);
+    formData.append("description", versionUploadData.description);
+    formData.append("short_comment", versionUploadTarget.short_comment);
+
+    try {
+      const response = await fetch(`/api/projects/${project_id}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const jsonData = await response.json();
+
+      if (response.ok) {
+        setVersionUploadTarget(null);
+        setVersionUploadData({ file: null, description: '' });
+        alert("Version uploaded!");
+        fetchProjectData(); // Refresh file list
+      } else {
+        alert(`Error: ${jsonData.error}`);
+      }
+    } catch (err) {
+      console.error("Upload version failed:", err);
+      alert("Failed to upload version.");
+    }
+  };
+
   const handleDownloadSubmit = async (e) => {
     e.preventDefault();
-
     if (selectedFiles.length === 0) {
       alert("No files selected for download.");
       return;
@@ -142,7 +149,7 @@ const ProjectsPage = () => {
         document.body.appendChild(a);
         a.click();
         a.remove();
-        setShowDownloadModal(false); // Close modal after download
+        setShowDownloadModal(false);
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error || 'Failed to download files'}`);
@@ -191,9 +198,7 @@ const ProjectsPage = () => {
           <tbody>
             {files.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ textAlign: "center" }}>
-                  No files uploaded yet.
-                </td>
+                <td colSpan="7" style={{ textAlign: "center" }}>No files uploaded yet.</td>
               </tr>
             ) : (
               files.map((file) => (
@@ -208,14 +213,14 @@ const ProjectsPage = () => {
                   <td>{file.short_comment}</td>
                   <td>{file.file_name}</td>
                   <td>{formatFileSize(file.file_size)}</td>
-                  <td>{new Date(file.upload_date).toLocaleString()}</td>
+                  <td>{file.description}</td>
                   <td>{new Date(file.upload_date).toLocaleString()}</td>
                   <td>
                     <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>...</button>
                     {expandedFile === file.version_id && (
                       <div className="horizontal-menu">
                         <div className="description-box">
-                        <p><strong>Description:</strong> {file.description || 'No description available'}</p>
+                          <p><strong>Description:</strong> {file.description || 'No description available'}</p>
                         </div>
                         <ul>
                           {file.versions ? (
@@ -229,9 +234,12 @@ const ProjectsPage = () => {
                           )}
                         </ul>
                         <div className="open-project">
-                        <button onClick={() => navigate(project.project_id)}>Open Versions</button>
-                        <button onClick={() => navigate(project.project_id)}>Upload Versions</button>
-                      </div>
+                          <button onClick={() => navigate(project.project_id)}>Open Versions</button>
+                          <button onClick={() => {
+                            setVersionUploadTarget(file);
+                            closeFileDropdown();
+                          }}>Upload New Version</button>
+                        </div>
                       </div>
                     )}
                   </td>
@@ -252,7 +260,7 @@ const ProjectsPage = () => {
               <input
                 type="text"
                 name="short_comment"
-                placeholder="Title" /* behind the scenes its still short_comment 2025/04/10 */
+                placeholder="Title"
                 onChange={handleInputChange}
               />
               <input
@@ -264,6 +272,29 @@ const ProjectsPage = () => {
               <div className="modal-buttons">
                 <button type="submit">Upload</button>
                 <button type="button" onClick={() => setShowUploadModal(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Version Modal */}
+      {versionUploadTarget && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Upload New Version for "{versionUploadTarget.file_name}"</h2>
+            <form onSubmit={handleVersionUploadSubmit} encType="multipart/form-data">
+              <input type="file" required onChange={(e) =>
+                setVersionUploadData({ ...versionUploadData, file: e.target.files[0] })} />
+              <input
+                type="text"
+                placeholder="Description (optional)"
+                onChange={(e) =>
+                  setVersionUploadData({ ...versionUploadData, description: e.target.value })}
+              />
+              <div className="modal-buttons">
+                <button type="submit">Upload Version</button>
+                <button type="button" onClick={() => setVersionUploadTarget(null)}>Cancel</button>
               </div>
             </form>
           </div>
