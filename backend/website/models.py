@@ -60,8 +60,8 @@ class Invitation(db.Model):
 
 class File_data(db.Model):
     file_data_id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.Text)
-    short_comment = db.Column(db.String(100))
+    title = db.Column(db.String(100))
+    description = db.Column(db.Text)    
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.project_id'))
 
@@ -71,20 +71,21 @@ class File_version(db.Model):
     file_name = db.Column(db.String(255))
     file_type = db.Column(db.String(100))
     file_size = db.Column(db.Integer)
-    description = db.Column(db.Text)
     last_version = db.Column(db.Boolean, default=False)
-    short_comment = db.Column(db.String(100))
+    comment = db.Column(db.String(100))
     upload_date = db.Column(db.DateTime(timezone=True), default=text("CURRENT_TIMESTAMP(0)"))
 
-    file_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))
+    file_data_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user_profile.user_id'))
+
+    file_data = db.relationship('File_data', backref='versions')
 
 class Last_download(db.Model):
     last_download_id = db.Column(db.Integer, primary_key=True)
     version_id = db.Column(db.Integer, db.ForeignKey('file_version.version_id'))  #actual file version
     download_date = db.Column(db.DateTime(timezone=True), default=text("CURRENT_TIMESTAMP(0)"))
 
-    file_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))
+    file_data_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user_profile.user_id'))
 
 
