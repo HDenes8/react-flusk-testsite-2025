@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './ProjectsPage.css';
 
@@ -27,6 +27,8 @@ const ProjectsPage = () => {
   const [versionUploadData, setVersionUploadData] = useState({ file: null, description: '' });
   const [expandedFile, setExpandedFile] = useState(null);
 
+  const dropdownRef = useRef(null); // To track the dropdown menu
+
   const toggleFileDropdown = (fileId) => {
     setExpandedFile(expandedFile === fileId ? null : fileId);
   };
@@ -34,6 +36,20 @@ const ProjectsPage = () => {
   const closeFileDropdown = () => {
     setExpandedFile(null);
   };
+
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        closeFileDropdown();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchProjectData = async () => {
     try {
@@ -170,7 +186,7 @@ const ProjectsPage = () => {
   if (!project) return <p>Loading...</p>;
 
   return (
-    <div className="project-page">
+    <div className="project-page-container">
       <div className="top-buttons">
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
@@ -187,10 +203,10 @@ const ProjectsPage = () => {
           <thead>
             <tr>
               <th>Select</th>
+              <th>Version</th>
               <th>Title</th>
               <th>File Name</th>
               <th>File Size</th>
-              <th>Description</th>
               <th>Upload Date</th>
               <th>Actions</th>
             </tr>
@@ -210,23 +226,35 @@ const ProjectsPage = () => {
                       onChange={handleFileSelect}
                     />
                   </td>
+                  <td>{file.version_number}</td>
                   <td>{file.short_comment}</td>
                   <td>{file.file_name}</td>
                   <td>{formatFileSize(file.file_size)}</td>
-                  <td>{file.description}</td>
                   <td>{new Date(file.upload_date).toLocaleString()}</td>
                   <td>
-                    <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>...</button>
+                <button
+                  className="dots-button"
+                  onClick={() => toggleFileDropdown(file.version_id)}
+                >
+                  ⋯
+                </button>
                     {expandedFile === file.version_id && (
-                      <div className="horizontal-menu">
+                  <div
+                    className="horizontal-menu"
+                    ref={dropdownRef} // Attach ref to the dropdown menu
+                  >
                         <div className="description-box">
-                          <p><strong>Description:</strong> {file.description || 'No description available'}</p>
+                      <p>
+                        <strong>Description:</strong>{" "}
+                        {file.description || "No description available"}
+                      </p>
                         </div>
                         <ul>
                           {file.versions ? (
                             file.versions.map((version) => (
                               <li key={version.version_id}>
-                                Version {version.version_number} - {new Date(version.upload_date).toLocaleString()}
+                            Version {version.version_number} -{" "}
+                            {new Date(version.upload_date).toLocaleString()}
                               </li>
                             ))
                           ) : (

@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./MembersPage.css"
 
 const members = [
@@ -8,6 +9,22 @@ const members = [
 ];
 
 const MembersPage = () => {
+  const navigate = useNavigate();
+
+  const handleInviteMember = () => {
+    alert("Invite Member");
+
+  };
+
+  const handleRemoveMember = () => {
+    alert("Remove Member");
+
+  };
+
+  const handleSettings = () => {
+    navigate("/settings");
+  };
+
   return (
     <div className="members-page-container">
       <div className="top-buttons">

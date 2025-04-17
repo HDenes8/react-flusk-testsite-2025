@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './MainPage.css';
 
 const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
@@ -138,7 +138,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
       </div>
 
       <section className="project-list">
-        <table>
+        <table className="projects-table">
           <thead>
             <tr>
               <th>Project Name</th>

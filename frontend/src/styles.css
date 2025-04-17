@@ -39,3 +39,27 @@
   color: white;
   font-weight: bold; /* Optional: Make the active link bold */
 }
+
+/* Global formatted table styles */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 3px solid #eee;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 3px solid #ddd;
+}
+
+td {
+  background-color: #fff;
+}

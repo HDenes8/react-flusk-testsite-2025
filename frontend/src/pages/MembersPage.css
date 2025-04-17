@@ -74,6 +74,7 @@
   .members-table table {
     width: 100%;
     border-collapse: collapse;
+    border-radius: 8px;
   }
   
   .members-table th,

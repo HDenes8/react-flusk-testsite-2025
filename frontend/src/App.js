@@ -9,8 +9,8 @@ import Invitations from './pages/Invitations';
 import CreateProject from './pages/CreateProject';
 import Settings from './pages/Settings';
 import ProjectsPage from './pages/ProjectsPage';
-import './App.css';
 import MembersPage from './pages/MembersPage';
+import './App.css';
 
 function App() {
   return (
