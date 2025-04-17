@@ -287,6 +287,7 @@ def project_page(project_id):
             "file_data_id": file.file_data_id, # maIN_FILE_ID curently
             "title": file.file_data.title,
             "file_name": file.file_name,
+            "version_number": file.version_number,
             "file_size": file.file_size,
             "file_type": file.file_type,
             "upload_date": file.upload_date.isoformat() if file.upload_date else None,
