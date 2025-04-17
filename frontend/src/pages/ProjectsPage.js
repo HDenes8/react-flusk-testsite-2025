@@ -52,6 +52,8 @@ const ProjectsPage = () => {
     };
   }, []);
 
+  // Fetch project data
+  // Fetch project data from the server
   const fetchProjectData = async () => {
     try {
       const response = await fetch(`/project/${project_id}`);
@@ -120,13 +122,14 @@ const ProjectsPage = () => {
       return;
     }
 
-    const testz = 1
+    const testz = 1234 
     console.log("Uploading new version for:", versionUploadTarget); // Debugging
-    console.log("main_file_id:", testz); // Debuging
+    console.log("comment:", testz); // Debuging
 
     const formData = new FormData();
     formData.append("file", versionUploadData.file);
     formData.append("comment", versionUploadTarget.comment);
+    formData.append("comment", testz); // Optional description
     formData.append("main_file_id", versionUploadTarget.file_data_id); // Link to the main file
 
     try {
@@ -222,6 +225,7 @@ const ProjectsPage = () => {
               <th>Version</th>
               <th>Title</th>
               <th>File Name</th>
+              <th>Comment</th>
               <th>File Size</th>
               <th>Upload Date</th>
               <th>Actions</th>
@@ -245,6 +249,7 @@ const ProjectsPage = () => {
                   <td>{file.version_number}</td>
                   <td>{file.title}</td>
                   <td>{file.file_name}</td>
+                  <td>{file.comment}</td>
                   <td>{formatFileSize(file.file_size)}</td>
                   <td>{new Date(file.upload_date).toLocaleString()}</td>
                   <td>
@@ -287,7 +292,7 @@ const ProjectsPage = () => {
                                 <tr>
                                   <th>Version</th>
                                   <th>Upload Date</th>
-                                  <th>Description</th>
+                                  <th>Comment</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -300,7 +305,7 @@ const ProjectsPage = () => {
                                     <tr key={version.version_id}>
                                       <td>{version.version_number}</td>
                                       <td>{new Date(version.upload_date).toLocaleString()}</td>
-                                      <td>{version.description}</td>
+                                      <td>{version.comment}</td>
                                     </tr>
                                   ))
                                 )}
@@ -365,9 +370,9 @@ const ProjectsPage = () => {
                 setVersionUploadData({ ...versionUploadData, file: e.target.files[0] })} />
               <input
                 type="text"
-                placeholder="Description (optional)"
+                placeholder="Comment (optional)"
                 onChange={(e) =>
-                  setVersionUploadData({ ...versionUploadData, description: e.target.value })}
+                  setVersionUploadData({ ...versionUploadData, comment: e.target.value })}
               />
               <div className="modal-buttons">
                 <button type="submit">Upload Version</button>
