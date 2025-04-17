@@ -34,6 +34,7 @@ def members():
         })
 
     return jsonify({"user_id": current_user.user_id, "projects": project_roles})
+# Members end
 
 # Invitations
 @views.route('/invitations', methods=['GET'])
@@ -57,7 +58,6 @@ def invitations():
     } for inv in user_invitations]
     
     return jsonify({"invitations": invitations_data})
-
 
 @views.route('/accept_invite/<int:invitation_id>', methods=['POST'])
 @login_required
@@ -90,34 +90,14 @@ def deny_invite(invitation_id):
     db.session.commit()
 
     return jsonify({"message": "Invitation denied."})
+# Invitations end
 
-# Upload / download
+
+# Download
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'tar', 'gz', '7z', 'docx', 'xlsx', 'pptx'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@views.route('/upload', methods=['POST'])
-@login_required
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-
-    file = request.files['file']
-    print("Received file:", file.filename)
-
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-        print("Saved to:", file_path)
-        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
-    else:
-        print("Rejected file extension:", file.filename)
-        return jsonify({"error": "Invalid file type!"}), 400
 
 @views.route('/download/<filename>')
 @login_required
@@ -199,11 +179,10 @@ def download_files():
         # Send the ZIP file to the user
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], zip_filename, as_attachment=True)
     except Exception as e:
-        print("Download error:", str(e))  # Log it to terminal for debugging
         return jsonify({"error": str(e)}), 500
+# Download end
 
 # Projects start 
-
 @views.route('/projects', methods=['POST', 'GET'])
 @login_required
 def projects():
@@ -256,6 +235,7 @@ def get_projects():
         })
 
     return jsonify(projects_data)
+# Projects end
 
 # Create project
 @projects_bp.route("/api/projects", methods=["POST"])
@@ -280,6 +260,47 @@ def create_project():
             "created_at": project.created_date.isoformat()
         }
     }), 201
+# Create project end
+
+#project_page
+@views.route('/project/<int:project_id>', methods=['GET'])
+@login_required
+def project_page(project_id):
+    try:
+        project = Project.query.get(project_id)
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
+
+        files = File_version.query.join(File_data, File_version.file_data_id == File_data.file_data_id).\
+            filter(File_data.project_id == project_id, File_version.last_version == True).all()
+
+        project_data = {
+            "id": project.project_id,
+            "name": project.name,
+            "description": project.description,
+            "created_date": project.created_date.isoformat() if project.created_date else None,
+            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
+        }
+
+        files_data = [{
+            "version_id": file.version_id,
+            "file_data_id": file.file_data_id, # maIN_FILE_ID curently
+            "title": file.file_data.title,
+            "file_name": file.file_name,
+            "file_size": file.file_size,
+            "file_type": file.file_type,
+            "upload_date": file.upload_date.isoformat() if file.upload_date else None,
+            "description": file.file_data.description,
+            "comment": file.comment
+        } for file in files]
+
+        return jsonify({
+            "project": project_data,
+            "files": files_data
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+#project_page end
 
 # Upload file + create version
 @projects_bp.route("/api/projects/<int:project_id>/upload", methods=["POST"])
@@ -321,8 +342,6 @@ def upload_file(project_id):
         title = request.form.get("title", "")[:100]
         main_file_id_raw = request.form.get("main_file_id")
         comment = request.form.get("comment", "")[:100]
-
-        print("        asd     ", main_file_id_raw)  # Debugging line to check the value
         main_file_id = int(main_file_id_raw) if main_file_id_raw and main_file_id_raw.isdigit() else None
         
 
@@ -346,7 +365,6 @@ def upload_file(project_id):
             db.session.commit()
 
         # Use the same folder for versioning (existing folder for the file)
-        print(f"file_data_id: {file_data.file_data_id}")  # Debugging line to check the ID
         folder_name = str(file_data.file_data_id)
         upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id), folder_name)
         
@@ -412,8 +430,6 @@ def upload_file(project_id):
             "project_id": file_data.project_id
         }
 
-
-
         return jsonify({
             "message": "File uploaded successfully",
             "file_data": file_data_info,
@@ -423,7 +439,31 @@ def upload_file(project_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+# Upload file + create version end
 
+# upload start might not need anyomre
+@views.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    print("Received file:", file.filename)
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        print("Saved to:", file_path)
+        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
+    else:
+        print("Rejected file extension:", file.filename)
+        return jsonify({"error": "Invalid file type!"}), 400
+#upload end
 
 
 # Get all versions for a project
@@ -451,47 +491,6 @@ def get_project_versions(project_id):
 
 #project end
 
-#project_page
-
-@views.route('/project/<int:project_id>', methods=['GET'])
-@login_required
-def project_page(project_id):
-    try:
-        project = Project.query.get(project_id)
-        if not project:
-            return jsonify({"error": "Project not found"}), 404
-
-        files = File_version.query.join(File_data, File_version.file_data_id == File_data.file_data_id).\
-            filter(File_data.project_id == project_id, File_version.last_version == True).all()
-
-        project_data = {
-            "id": project.project_id,
-            "name": project.name,
-            "description": project.description,
-            "created_date": project.created_date.isoformat() if project.created_date else None,
-            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
-        }
-
-        files_data = [{
-            "version_id": file.version_id,
-            "file_data_id": file.file_data_id, # maIN_FILE_ID curently
-            "title": file.file_data.title,
-            "file_name": file.file_name,
-            "file_size": file.file_size,
-            "file_type": file.file_type,
-            "upload_date": file.upload_date.isoformat() if file.upload_date else None,
-            "description": file.file_data.description,
-            "comment": file.comment
-        } for file in files]
-
-        return jsonify({
-            "project": project_data,
-            "files": files_data
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-#project_page end
 
 # Settings
 @views.route('/api/user', methods=['GET'])
