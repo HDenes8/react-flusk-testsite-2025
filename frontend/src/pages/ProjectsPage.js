@@ -204,7 +204,7 @@ const ProjectsPage = () => {
       <div className="top-buttons">
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
-        <button onClick={() => navigate("/MembersPage")}>Members</button>
+        <button onClick={() => navigate(`/MembersPage/${project_id}`)}>Members</button>
       </div>
 
       <h1>{project.name}</h1>
@@ -217,7 +217,7 @@ const ProjectsPage = () => {
           <thead>
             <tr>
               <th>Select</th>
-              <th>Version</th>
+              <th>Ver</th>
               <th>Title</th>
               <th>File Name</th>
               <th>Comment</th>

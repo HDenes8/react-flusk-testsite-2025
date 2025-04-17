@@ -53,7 +53,7 @@ function App() {
             <ProjectsPage />
           </Layout>
         } />
-        <Route path="/MembersPage" element={
+        <Route path="/MembersPage/:project_id" element={
           <Layout>
             <MembersPage />
           </Layout>

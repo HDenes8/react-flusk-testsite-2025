@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "./MembersPage.css"
 
 const members = [
@@ -24,6 +24,17 @@ const MembersPage = () => {
   const handleSettings = () => {
     navigate("/settings");
   };
+
+  const { project_id } = useParams();
+  const [members, setMembers] = useState([]);
+
+useEffect(() => {
+  fetch(`/api/projects/${project_id}/members`)
+    .then((res) => res.json())
+    .then((data) => setMembers(data.members))
+    .catch((error) => console.error("Error fetching members:", error));
+}, [project_id]);
+
 
   return (
     <div className="members-page-container">
