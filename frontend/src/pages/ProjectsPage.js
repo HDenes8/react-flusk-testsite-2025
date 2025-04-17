@@ -242,6 +242,7 @@ const ProjectsPage = () => {
                       onChange={handleFileSelect}
                     />
                   </td>
+                  <td>{file.version_number}</td>
                   <td>{file.title}</td>
                   <td>{file.file_name}</td>
                   <td>{formatFileSize(file.file_size)}</td>
