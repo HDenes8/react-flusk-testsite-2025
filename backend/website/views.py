@@ -402,7 +402,6 @@ def upload_file(project_id):
             "version_number": v.version_number,
             "file_name": v.file_name,
             "file_size": v.file_size,
-            "description": v.file_data.description,
             "comment": v.comment
         } for v in file_versions]
 
@@ -412,6 +411,7 @@ def upload_file(project_id):
             "description": file_data.description,
             "project_id": file_data.project_id
         }
+
 
 
         return jsonify({
@@ -474,6 +474,8 @@ def project_page(project_id):
 
         files_data = [{
             "version_id": file.version_id,
+            "file_data_id": file.file_data_id, # maIN_FILE_ID curently
+            "title": file.file_data.title,
             "file_name": file.file_name,
             "file_size": file.file_size,
             "file_type": file.file_type,

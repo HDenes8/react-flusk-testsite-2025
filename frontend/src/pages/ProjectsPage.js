@@ -45,6 +45,7 @@ const ProjectsPage = () => {
         return;
       }
       const data = await response.json();
+      console.log("   Project data:   ", data); // Debugging
       const sortedFiles = data.files.sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
       setProject(data.project);
       setFiles(sortedFiles);
@@ -103,8 +104,9 @@ const ProjectsPage = () => {
       return;
     }
 
+    const testz = 1
     console.log("Uploading new version for:", versionUploadTarget); // Debugging
-    console.log("main_file_id:", versionUploadTarget.file_data_id); // Debuging
+    console.log("main_file_id:", testz); // Debuging
 
     const formData = new FormData();
     formData.append("file", versionUploadData.file);
