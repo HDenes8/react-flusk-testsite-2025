@@ -121,28 +121,23 @@ const ProjectsPage = () => {
       alert("No file selected for version upload.");
       return;
     }
-
-    const testz = 1234 
-    console.log("Uploading new version for:", versionUploadTarget); // Debugging
-    console.log("comment:", testz); // Debuging
-
+  
     const formData = new FormData();
     formData.append("file", versionUploadData.file);
-    formData.append("comment", versionUploadTarget.comment);
-    formData.append("comment", testz); // Optional description
+    formData.append("comment", versionUploadData.comment); // ✅ Use the actual user input
     formData.append("main_file_id", versionUploadTarget.file_data_id); // Link to the main file
-
+  
     try {
       const response = await fetch(`/api/projects/${project_id}/upload`, {
         method: "POST",
         body: formData,
       });
-
+  
       const jsonData = await response.json();
-
+  
       if (response.ok) {
         setVersionUploadTarget(null);
-        setVersionUploadData({ file: null, description: '' });
+        setVersionUploadData({ file: null, comment: '' });
         alert("Version uploaded!");
         fetchProjectData(); // Refresh file list
       } else {
@@ -152,7 +147,7 @@ const ProjectsPage = () => {
       console.error("Upload version failed:", err);
       alert("Failed to upload version.");
     }
-  };
+  };  
 
   const handleDownloadSubmit = async (e) => {
     e.preventDefault();
