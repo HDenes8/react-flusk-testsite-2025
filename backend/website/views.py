@@ -21,20 +21,26 @@ views = Blueprint('views', __name__)
 projects_bp = Blueprint('projects', __name__)
 
 # Members
-@views.route('/members', methods=['GET', 'POST'])
-@login_required 
-def members():
-    user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
+@views.route('/api/projects/<project_id>/members', methods=['GET'])
+@login_required
+def members(project_id):
+    user_projects = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).all()
 
     project_roles = []
     for user_project in user_projects:
         project = Project.query.get(user_project.project_id)
         project_roles.append({
-            "project": project,
+            "project": project.project_name,  # Send project name explicitly
             "role": user_project.role
         })
 
-    return jsonify({"user_id": current_user.user_id, "projects": project_roles})
+    project_roles.append({
+        "id": user_project.user_id,  # Assuming user_id exists
+        "name": user_project.user_name,  # Add name field
+        "role": user_project.role,
+        "email": user_project.email  # Assuming email exists in User_Project
+    })
+    return jsonify({"user_id": current_user.user_id, "members": project_roles})
 # Members end
 
 # Invitations
