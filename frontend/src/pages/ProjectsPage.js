@@ -22,10 +22,11 @@ const ProjectsPage = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [uploadData, setUploadData] = useState({ file: null, description: '', short_comment: '' });
+  const [uploadData, setUploadData] = useState({ file: null, description: '', title: '' });
   const [versionUploadTarget, setVersionUploadTarget] = useState(null);
-  const [versionUploadData, setVersionUploadData] = useState({ file: null, description: '' });
+  const [versionUploadData, setVersionUploadData] = useState({ file: null, comment: '' });
   const [expandedFile, setExpandedFile] = useState(null);
+  const [fileVersions, setFileVersions] = useState({});
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
@@ -60,6 +61,7 @@ const ProjectsPage = () => {
         return;
       }
       const data = await response.json();
+      console.log("   Project data:   ", data); // Debugging
       const sortedFiles = data.files.sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date));
       setProject(data.project);
       setFiles(sortedFiles);
@@ -87,7 +89,7 @@ const ProjectsPage = () => {
     const formData = new FormData();
     formData.append("file", uploadData.file);
     formData.append("description", uploadData.description);
-    formData.append("short_comment", uploadData.short_comment);
+    formData.append("title", uploadData.title);
 
     try {
       const response = await fetch(`/api/projects/${project_id}/upload`, {
@@ -113,12 +115,19 @@ const ProjectsPage = () => {
 
   const handleVersionUploadSubmit = async (e) => {
     e.preventDefault();
-    if (!versionUploadTarget) return;
+    if (!versionUploadTarget) {
+      alert("No file selected for version upload.");
+      return;
+    }
+
+    const testz = 1
+    console.log("Uploading new version for:", versionUploadTarget); // Debugging
+    console.log("main_file_id:", testz); // Debuging
 
     const formData = new FormData();
     formData.append("file", versionUploadData.file);
-    formData.append("description", versionUploadData.description);
-    formData.append("short_comment", versionUploadTarget.short_comment);
+    formData.append("comment", versionUploadTarget.comment);
+    formData.append("main_file_id", versionUploadTarget.file_data_id); // Link to the main file
 
     try {
       const response = await fetch(`/api/projects/${project_id}/upload`, {
@@ -183,6 +192,13 @@ const ProjectsPage = () => {
     );
   };
 
+  const toggleVersionTable = (fileId) => {
+    setFileVersions(prev => ({
+      ...prev,
+      [fileId]: prev[fileId] ? null : files.find(file => file.version_id === fileId)?.versions || []
+    }));
+  };
+
   if (!project) return <p>Loading...</p>;
 
   return (
@@ -226,8 +242,7 @@ const ProjectsPage = () => {
                       onChange={handleFileSelect}
                     />
                   </td>
-                  <td>{file.version_number}</td>
-                  <td>{file.short_comment}</td>
+                  <td>{file.title}</td>
                   <td>{file.file_name}</td>
                   <td>{formatFileSize(file.file_size)}</td>
                   <td>{new Date(file.upload_date).toLocaleString()}</td>
@@ -262,11 +277,44 @@ const ProjectsPage = () => {
                           )}
                         </ul>
                         <div className="open-project">
-                          <button onClick={() => navigate(project.project_id)}>Open Versions</button>
-                          <button onClick={() => {
-                            setVersionUploadTarget(file);
-                            closeFileDropdown();
-                          }}>Upload New Version</button>
+                          <button onClick={() => toggleVersionTable(file.version_id)}>
+                            {fileVersions[file.version_id] ? 'Close Versions' : 'Open Versions'}
+                          </button>
+                          {fileVersions[file.version_id] && (
+                            <table className="versions-table">
+                              <thead>
+                                <tr>
+                                  <th>Version</th>
+                                  <th>Upload Date</th>
+                                  <th>Description</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {fileVersions[file.version_id].length === 0 ? (
+                                  <tr>
+                                    <td colSpan="3">No other versions available.</td>
+                                  </tr>
+                                ) : (
+                                  fileVersions[file.version_id].map((version) => (
+                                    <tr key={version.version_id}>
+                                      <td>{version.version_number}</td>
+                                      <td>{new Date(version.upload_date).toLocaleString()}</td>
+                                      <td>{version.description}</td>
+                                    </tr>
+                                  ))
+                                )}
+                              </tbody>
+                            </table>
+                          )}
+                          <button
+                            onClick={() => {
+                              console.log("Setting versionUploadTarget to:", file); // Debugging
+                              setVersionUploadTarget(file); // Set the file as the target for version upload
+                              closeFileDropdown(); // Close the dropdown menu
+                            }}
+                          >
+                            Upload New Version
+                          </button>
                         </div>
                       </div>
                     )}
@@ -287,7 +335,7 @@ const ProjectsPage = () => {
               <input type="file" name="file" required onChange={handleFileChange} />
               <input
                 type="text"
-                name="short_comment"
+                name="title"
                 placeholder="Title"
                 onChange={handleInputChange}
               />

@@ -34,6 +34,7 @@ def members():
         })
 
     return jsonify({"user_id": current_user.user_id, "projects": project_roles})
+# Members end
 
 # Invitations
 @views.route('/invitations', methods=['GET'])
@@ -57,7 +58,6 @@ def invitations():
     } for inv in user_invitations]
     
     return jsonify({"invitations": invitations_data})
-
 
 @views.route('/accept_invite/<int:invitation_id>', methods=['POST'])
 @login_required
@@ -90,34 +90,14 @@ def deny_invite(invitation_id):
     db.session.commit()
 
     return jsonify({"message": "Invitation denied."})
+# Invitations end
 
-# Upload / download
+
+# Download
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'tar', 'gz', '7z', 'docx', 'xlsx', 'pptx'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@views.route('/upload', methods=['POST'])
-@login_required
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-
-    file = request.files['file']
-    print("Received file:", file.filename)
-
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-        print("Saved to:", file_path)
-        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
-    else:
-        print("Rejected file extension:", file.filename)
-        return jsonify({"error": "Invalid file type!"}), 400
 
 @views.route('/download/<filename>')
 @login_required
@@ -145,20 +125,24 @@ def download_files():
                 return jsonify({"error": f"Invalid file ID: {file_id}"}), 400
 
             file_version = File_version.query.get(int(file_id))
+            if not file_version:
+                return jsonify({"error": f"File version with ID {file_id} not found"}), 404
 
-            
-            file_data = File_data.query.get(file_version.file_id)
+            file_data = File_data.query.get(file_version.file_data_id)
+            if not file_data:
+                return jsonify({"error": f"File data for version ID {file_id} not found"}), 404
+
             project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
             file_folder = os.path.join(project_folder, str(file_data.file_data_id))
             file_path = os.path.join(file_folder, file_version.file_name)
 
             if not os.path.exists(file_path):
                 return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
-            
+
             file_paths.append(file_path)
 
             last_download = Last_download.query.filter_by(
-                file_id=file_data.file_data_id,
+                file_data_id=file_data.file_data_id,
                 user_id=current_user.user_id,
             ).first()
 
@@ -167,17 +151,17 @@ def download_files():
                 last_download.download_date = func.now()
             else:
                 last_download = Last_download(
-                    file_id=file_data.file_data_id,
+                    file_data_id=file_data.file_data_id,
                     version_id=file_version.version_id,
                     user_id=current_user.user_id,
-                    download_date= func.now()
+                    download_date=func.now()
                 )
                 db.session.add(last_download)
-            
+
             db.session.commit()
 
             # Construct the file path
-            file_data = File_data.query.get(file_version.file_id)
+            file_data = File_data.query.get(file_version.file_data_id)
             project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
             file_folder = os.path.join(project_folder, str(file_data.file_data_id))
             file_path = os.path.join(file_folder, file_version.file_name)
@@ -195,11 +179,10 @@ def download_files():
         # Send the ZIP file to the user
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], zip_filename, as_attachment=True)
     except Exception as e:
-        print("Download error:", str(e))  # Log it to terminal for debugging
         return jsonify({"error": str(e)}), 500
+# Download end
 
 # Projects start 
-
 @views.route('/projects', methods=['POST', 'GET'])
 @login_required
 def projects():
@@ -252,6 +235,7 @@ def get_projects():
         })
 
     return jsonify(projects_data)
+# Projects end
 
 # Create project
 @projects_bp.route("/api/projects", methods=["POST"])
@@ -276,6 +260,47 @@ def create_project():
             "created_at": project.created_date.isoformat()
         }
     }), 201
+# Create project end
+
+#project_page
+@views.route('/project/<int:project_id>', methods=['GET'])
+@login_required
+def project_page(project_id):
+    try:
+        project = Project.query.get(project_id)
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
+
+        files = File_version.query.join(File_data, File_version.file_data_id == File_data.file_data_id).\
+            filter(File_data.project_id == project_id, File_version.last_version == True).all()
+
+        project_data = {
+            "id": project.project_id,
+            "name": project.name,
+            "description": project.description,
+            "created_date": project.created_date.isoformat() if project.created_date else None,
+            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
+        }
+
+        files_data = [{
+            "version_id": file.version_id,
+            "file_data_id": file.file_data_id, # maIN_FILE_ID curently
+            "title": file.file_data.title,
+            "file_name": file.file_name,
+            "file_size": file.file_size,
+            "file_type": file.file_type,
+            "upload_date": file.upload_date.isoformat() if file.upload_date else None,
+            "description": file.file_data.description,
+            "comment": file.comment
+        } for file in files]
+
+        return jsonify({
+            "project": project_data,
+            "files": files_data
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+#project_page end
 
 # Upload file + create version
 @projects_bp.route("/api/projects/<int:project_id>/upload", methods=["POST"])
@@ -287,7 +312,7 @@ def upload_file(project_id):
     file = request.files["file"]
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
-    
+
     # Get the user's role in the specific project
     user_project = User_Project.query.filter_by(
         user_id=current_user.user_id,
@@ -296,52 +321,61 @@ def upload_file(project_id):
 
     if not user_project:
         return jsonify({"error": "You are not a member of this project"}), 403
-    
+
     if user_project.role == "reader":
         return jsonify({"error": "You don't have permission to upload files"}), 403
 
     # Check file size (1GB max)
     max_size = 1 * 1024 * 1024 * 1024  # 1GB in bytes
-
     file.seek(0, os.SEEK_END)
     size = file.tell()
     file.seek(0)
 
     if size > max_size:
         return jsonify({"error": "File size exceeds the 1GB limit"}), 400
-    file.seek(0)  # Reset file pointer after size check
 
     project = Project.query.get_or_404(project_id)
 
     try:
         # Form fields
         description = request.form.get("description", "")
-        short_comment = request.form.get("short_comment", "")[:20]
+        title = request.form.get("title", "")[:100]
+        main_file_id_raw = request.form.get("main_file_id")
+        comment = request.form.get("comment", "")[:100]
+        main_file_id = int(main_file_id_raw) if main_file_id_raw and main_file_id_raw.isdigit() else None
+        
 
-        if len(short_comment) < 4:
-            return jsonify({"error": "Title must be greater than 3 characters."}), 400
+        if main_file_id:
+            # Version upload: Link to existing main file
+            file_data = File_data.query.get(main_file_id)
+            if not file_data:
+                return jsonify({"error": "Main file not found"}), 404
+        else:
+            # New file upload
+            if len(title) < 4:
+                return jsonify({"error": "Title must be greater than 3 characters."}), 400
 
-        # Look for existing File_data (file library)
-        file_data = File_data.query.filter_by(
-            project_id=project.project_id,
-            description=description,
-            short_comment=short_comment
-        ).first()
-
-        if not file_data:
-            # Create a new File_data entry if it doesn't exist
+            # Create a new File_data entry (if necessary)
             file_data = File_data(
                 project_id=project.project_id,
                 description=description,
-                short_comment=short_comment
+                title=title
             )
             db.session.add(file_data)
             db.session.commit()
 
-        # Use file_data_id as the folder name
+        # Use the same folder for versioning (existing folder for the file)
         folder_name = str(file_data.file_data_id)
         upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id), folder_name)
-        os.makedirs(upload_folder, exist_ok=True)
+        
+        # Check if the folder already exists, if not, create it
+        if os.path.exists(upload_folder):
+            print(f"Folder already exists: {upload_folder}")
+        else:
+            print(f"Folder does not exist. Creating: {upload_folder}")
+            os.makedirs(upload_folder, exist_ok=True)
+
+        print(f"Uploading file to: {upload_folder}")
 
         # Extract filename and extension
         filename = secure_filename(file.filename)
@@ -349,7 +383,7 @@ def upload_file(project_id):
 
         # Determine the next version number
         latest_version = db.session.query(func.max(File_version.version_number)).filter(
-            File_version.file_id == file_data.file_data_id
+            File_version.file_data_id == file_data.file_data_id
         ).scalar()
         version_number = (latest_version or 0) + 1
 
@@ -357,12 +391,12 @@ def upload_file(project_id):
         new_filename = f"{name}_v{version_number}{ext}"
 
         # Mark old versions as not the latest
-        File_version.query.filter_by(file_id=file_data.file_data_id, last_version=True).update({
+        File_version.query.filter_by(file_data_id=file_data.file_data_id, last_version=True).update({
             "last_version": False
         })
         db.session.commit()
 
-        # Save the file with the new versioned name
+        # Save the file with the new versioned name in the existing folder
         file_path = os.path.join(upload_folder, new_filename)
         file.save(file_path)
 
@@ -372,30 +406,64 @@ def upload_file(project_id):
             file_name=new_filename,
             file_type=file.mimetype,
             file_size=os.path.getsize(file_path),
-            description=description,
             last_version=True,
-            short_comment=short_comment,
-            file_id=file_data.file_data_id,
+            comment=comment,
+            file_data_id=file_data.file_data_id,
             user_id=current_user.user_id
         )
         db.session.add(version)
         db.session.commit()
 
+        # Return the list of versions (for dropdown or history list)
+        file_versions = File_version.query.filter_by(file_data_id=file_data.file_data_id).order_by(File_version.version_number.desc()).all()
+        version_history = [{
+            "version_number": v.version_number,
+            "file_name": v.file_name,
+            "file_size": v.file_size,
+            "comment": v.comment
+        } for v in file_versions]
+
+        file_data_info = {
+            "file_data_id": file_data.file_data_id,
+            "title": file_data.title,
+            "description": file_data.description,
+            "project_id": file_data.project_id
+        }
+
         return jsonify({
-            "message": "File uploaded successfully!",
-            "file": {
-                "file_name": version.file_name,
-                "file_size": version.file_size,
-                "file_type": version.file_type,
-                "version_number": version.version_number,
-                "description": version.description,
-                "short_comment": version.short_comment,
-                "upload_date": version.upload_date.isoformat()
-            }
-        }), 201
+            "message": "File uploaded successfully",
+            "file_data": file_data_info,
+            "version_history": version_history  # Provide version history to the frontend
+        }), 200
+
     except Exception as e:
-        print("Upload error:", str(e))  # Log it to terminal for debugging
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
+# Upload file + create version end
+
+# upload start might not need anyomre
+@views.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    print("Received file:", file.filename)
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        print("Saved to:", file_path)
+        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
+    else:
+        print("Rejected file extension:", file.filename)
+        return jsonify({"error": "Invalid file type!"}), 400
+#upload end
 
 
 # Get all versions for a project
@@ -409,58 +477,20 @@ def get_project_versions(project_id):
 
     versions = []
     for f in file_data:
-        file_versions = File_version.query.filter_by(file_id=f.file_data_id).all()
+        file_versions = File_version.query.filter_by(file_data_id=f.file_data_id).all()
         for v in file_versions:
             versions.append({
                 "version_id": v.version_id,
                 "filename": v.file_name,
                 "timestamp": v.upload_date.isoformat(),
-                "file_size": v.file_size
+                "file_size": v.file_size,
+                "description": f.description
             })
 
     return jsonify(versions)
 
 #project end
 
-#project_page
-
-@views.route('/project/<int:project_id>', methods=['GET'])
-@login_required
-def project_page(project_id):
-    try:
-        project = Project.query.get(project_id)
-        if not project:
-            return jsonify({"error": "Project not found"}), 404
-
-        files = File_version.query.join(File_data, File_version.file_id == File_data.file_data_id).\
-            filter(File_data.project_id == project_id, File_version.last_version == True).all()
-
-        project_data = {
-            "id": project.project_id,
-            "name": project.name,
-            "description": project.description,
-            "created_date": project.created_date.isoformat() if project.created_date else None,
-            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
-        }
-
-        files_data = [{
-            "version_id": file.version_id,
-            "file_name": file.file_name,
-            "file_size": file.file_size,
-            "file_type": file.file_type,
-            "upload_date": file.upload_date.isoformat() if file.upload_date else None,
-            "description": file.description,
-            "short_comment": file.short_comment
-        } for file in files]
-
-        return jsonify({
-            "project": project_data,
-            "files": files_data
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-#project_page end
 
 # Settings
 @views.route('/api/user', methods=['GET'])
