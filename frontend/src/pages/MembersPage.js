@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import "./MembersPage.css"
 
-const members = [
-  { id: 1, name: "Dénes", role: "Developer", email: "denes@example.com" },
-  { id: 2, name: "Anna", role: "Designer", email: "anna@example.com" },
-  { id: 3, name: "Tom", role: "Project Manager", email: "tom@example.com" },
-];
 
 const MembersPage = () => {
   const navigate = useNavigate();
@@ -27,14 +23,25 @@ const MembersPage = () => {
 
   const { project_id } = useParams();
   const [members, setMembers] = useState([]);
+  const [error, setError] = useState(null);
 
-useEffect(() => {
-  fetch(`/api/projects/${project_id}/members`)
-    .then((res) => res.json())
-    .then((data) => setMembers(data.members))
-    .catch((error) => console.error("Error fetching members:", error));
-}, [project_id]);
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await axios.get(`/api/projects/${project_id}/members`, { withCredentials: true });
+        setMembers(response.data.members);
+      } catch (err) {
+        console.error("Error fetching members:", err);
+        setError("Failed to load members.");
+      }
+    };
 
+    fetchMembers();
+  }, [project_id]);
+
+  if (error) {
+    return <p className="error-message">{error}</p>;
+  }
 
   return (
     <div className="members-page-container">
@@ -54,14 +61,20 @@ useEffect(() => {
           </tr>
         </thead>
         <tbody>
-          {members.map((member) => (
-            <tr key={member.id}>
-              <td>{member.id}</td>
-              <td>{member.name}</td>
-              <td>{member.role}</td>
-              <td>{member.email}</td>
+          {members.length > 0 ? (
+            members.map((member) => (
+              <tr key={member.id}>
+                <td>{member.id}</td>
+                <td>{member.name}</td>
+                <td>{member.role}</td>
+                <td>{member.email}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" style={{ textAlign: "center" }}>No members found.</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
