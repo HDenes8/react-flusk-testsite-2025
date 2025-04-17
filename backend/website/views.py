@@ -13,8 +13,9 @@ from sqlalchemy import text, func
 from sqlalchemy.orm import aliased
 
 import datetime
-import uuid
+import uuid 
 import zipfile
+import re
 
 views = Blueprint('views', __name__)
 projects_bp = Blueprint('projects', __name__)
@@ -388,6 +389,12 @@ def upload_file(project_id):
         ).scalar()
         version_number = (latest_version or 0) + 1
 
+        # Strip trailing _v<number> from the filename if it exists
+        version_pattern = re.compile(r'(.*)_v\d+$')
+        match = version_pattern.match(name)
+        if match:
+            name = match.group(1)
+
         # Construct the new filename
         new_filename = f"{name}_v{version_number}{ext}"
 
@@ -441,6 +448,50 @@ def upload_file(project_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 # Upload file + create version end
+
+# Dropdown/history
+@projects_bp.route("/api/files/<int:file_data_id>/versions", methods=["GET"])
+@login_required
+def get_file_versions(file_data_id):
+    try:
+        file_data = File_data.query.get(file_data_id)
+        if not file_data:
+            return jsonify({"error": "File not found"}), 404
+
+        # Optional: Check if user has access to the file/project
+        project = Project.query.get(file_data.project_id)
+        user_project = User_Project.query.filter_by(
+            user_id=current_user.user_id,
+            project_id=project.project_id
+        ).first()
+
+        if not user_project:
+            return jsonify({"error": "Access denied"}), 403
+
+        # Load versions
+        versions = File_version.query.filter_by(file_data_id=file_data_id)\
+            .order_by(File_version.version_number.desc()).all()
+
+        version_history = [{
+            "version_id": v.version_id,
+            "version_number": v.version_number,
+            "file_name": v.file_name,
+            "file_size": v.file_size,
+            "file_type": v.file_type,
+            "upload_date": v.upload_date.isoformat() if v.upload_date else None,
+            "comment": v.comment,
+            "uploader": User_profile.query.get(v.user_id).email  # Or full name if you have it
+        } for v in versions]
+
+        return jsonify({
+            "file_data_id": file_data_id,
+            "title": file_data.title,
+            "version_history": version_history
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+#dropdown/history end
 
 # upload start might not need anyomre
 @views.route('/upload', methods=['POST'])
