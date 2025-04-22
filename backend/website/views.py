@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 
 from sqlalchemy import text, func
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql import exists 
 
 import datetime
 import uuid 
@@ -273,6 +274,17 @@ def project_page(project_id):
         project = Project.query.get(project_id)
         if not project:
             return jsonify({"error": "Project not found"}), 404
+        
+        DownloadAlias = aliased(Last_download)
+        user_id = current_user.user_id
+
+        file_versions_with_user_download_flag = db.session.query(
+            File_version,
+            exists().where(
+                (DownloadAlias.version_id == File_version.version_id) &
+                (DownloadAlias.user_id == user_id)
+            ).label("is_downloaded")
+        ).join(File_data).filter(File_data.project_id == project_id).all()
 
         files = File_version.query.join(File_data, File_version.file_data_id == File_data.file_data_id).\
             filter(File_data.project_id == project_id, File_version.last_version == True).all()
@@ -298,9 +310,18 @@ def project_page(project_id):
             "comment": file.comment
         } for file in files]
 
+        download_file_results = [{
+            "version_id": fv.version_id,
+            "file_data_id": fv.file_data_id,
+            "version_number": fv.version_number,
+            "file_name": fv.file_name,
+            "downloaded": downloaded
+        } for fv, downloaded in file_versions_with_user_download_flag]
+
         return jsonify({
             "project": project_data,
-            "files": files_data
+            "files": files_data,
+            "download_file_results": download_file_results
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
