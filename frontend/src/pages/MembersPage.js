@@ -72,7 +72,7 @@ const MembersPage = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="4" style={{ textAlign: "center" }}>No members found.</td>
+              <td colSpan="6" style={{ textAlign: "center" }}>No members found.</td>
             </tr>
           )}
         </tbody>
