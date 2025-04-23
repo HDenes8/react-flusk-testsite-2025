@@ -27,6 +27,7 @@ const ProjectsPage = () => {
   const [versionUploadData, setVersionUploadData] = useState({ file: null, comment: '' });
   const [expandedFile, setExpandedFile] = useState(null);
   const [fileVersions, setFileVersions] = useState({});
+  const [download_file_results, setDownloadFileResults] = useState({}); // To track download results 
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
@@ -229,7 +230,7 @@ const ProjectsPage = () => {
           <tbody>
             {files.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ textAlign: "center" }}>No files uploaded yet.</td>
+                <td colSpan="6" style={{ textAlign: "center" }}>No files uploaded yet.</td>
               </tr>
             ) : (
               files.map((file) => (
@@ -241,7 +242,11 @@ const ProjectsPage = () => {
                       onChange={handleFileSelect}
                     />
                   </td>
-                  <td>{file.version_number}</td>
+                  <td>{file.version_number}
+                  <span className={`status ${download_file_results.downloaded === true ? 'success' : 'error'}`}>
+                  {download_file_results.downloaded === true ? '✔' : '❕'}
+                  </span>
+                  </td>
                   <td>{file.title}</td>
                   <td>{file.file_name}</td>
                   <td>{file.comment}</td>
