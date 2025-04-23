@@ -28,11 +28,23 @@ const ProjectsPage = () => {
   const [expandedFile, setExpandedFile] = useState(null);
   const [fileVersions, setFileVersions] = useState({});
   const [download_file_results, setDownloadFileResults] = useState({}); // To track download results 
+  const [error, setError] = useState(null);
+
+
+
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
   const toggleFileDropdown = (fileId) => {
     setExpandedFile(expandedFile === fileId ? null : fileId);
+  };
+
+  const toggleFileVersions = (fileId) => {
+    if (!fileVersions[fileId]) {
+      fetchFileVersions(fileId); // Fetch versions only if not loaded
+    } else {
+      setFileVersions((prev) => ({ ...prev, [fileId]: null })); // Hide versions if already displayed
+    }
   };
 
   const closeFileDropdown = () => {
@@ -76,6 +88,24 @@ const ProjectsPage = () => {
     }
   };
 
+  const fetchFileVersions = async (fileId) => {
+    try {
+      const response = await fetch(`/api/files/${fileId}/versions`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || `Failed to fetch versions for file ${fileId}`);
+        return;
+      }
+      const data = await response.json();
+      setFileVersions((prev) => ({
+        ...prev,
+        [fileId]: data.version_history,
+      }));
+    } catch (error) {
+      console.error(`Error fetching versions for file ${fileId}:`, error);
+      setError("An error occurred while fetching file versions.");
+    }
+  };
   useEffect(() => {
     fetchProjectData();
   }, [project_id]);
@@ -261,32 +291,26 @@ const ProjectsPage = () => {
                 >
                   ⋯
                 </button>
-                    {expandedFile === file.version_id && (
-                  <div
-                    className="horizontal-menu"
-                    ref={dropdownRef} // Attach ref to the dropdown menu
-                  >
-                        <div className="description-box">
-                      <p>
-                        <strong>Description:</strong>{" "}
-                        {file.description || "No description available"}
-                      </p>
-                        </div>
-                        <ul>
-                          {file.versions ? (
-                            file.versions.map((version) => (
-                              <li key={version.version_id}>
-                            Version {version.version_number} -{" "}
-                            {new Date(version.upload_date).toLocaleString()}
-                              </li>
-                            ))
-                          ) : (
-                            <li>No other versions available.</li>
-                          )}
-                        </ul>
+                    {fileVersions[file.file_data_id] && (
+                    <div className="horizontal-menu">
+                      <ul>
+                        {fileVersions[file.file_data_id].map((version) => (
+                          <li key={version.version_id}>
+                            <span>
+                              {`Version ${version.version_number}`}
+                              {" - "}
+                              {new Date(version.upload_date).toLocaleString()}
+                              {" - "}
+                              {version.comment || "No comment"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    
+                  
                         <div className="open-project">
                           <button onClick={() => toggleVersionTable(file.version_id)}>
-                            {fileVersions[file.version_id] ? 'Close Versions' : 'Open Versions'}
+                            {expandedFile === fileVersions[file.version_id] ? 'Close Versions' : 'Open Versions'}
                           </button>
                           {fileVersions[file.version_id] && (
                             <table className="versions-table">
@@ -298,7 +322,7 @@ const ProjectsPage = () => {
                                 </tr>
                               </thead>
                               <tbody>
-                                {fileVersions[file.version_id].length === 0 ? (
+                                {expandedFile === fileVersions[file.version_id].length === 0 ? (
                                   <tr>
                                     <td colSpan="3">No other versions available.</td>
                                   </tr>
