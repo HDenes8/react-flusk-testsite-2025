@@ -291,23 +291,29 @@ const ProjectsPage = () => {
                 >
                   ⋯
                 </button>
-                    {fileVersions[file.file_data_id] && (
-                    <div className="horizontal-menu">
-                      <ul>
-                        {fileVersions[file.file_data_id].map((version) => (
-                          <li key={version.version_id}>
-                            <span>
-                              {`Version ${version.version_number}`}
-                              {" - "}
-                              {new Date(version.upload_date).toLocaleString()}
-                              {" - "}
-                              {version.comment || "No comment"}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    
-                  
+                    {expandedFile === file.version_id && (
+                  <div
+                    className="horizontal-menu"
+                    ref={dropdownRef} // Attach ref to the dropdown menu asd
+                  >
+                        <div className="description-box">
+                      <p>
+                        <strong>Description:</strong>{" "}
+                        {file.description || "No description available"}
+                      </p>
+                        </div>
+                        <ul>
+                          {file.versions ? (
+                            file.versions.map((version) => (
+                              <li key={version.version_id}>
+                            Version {version.version_number} -{" "}
+                            {new Date(version.upload_date).toLocaleString()}
+                              </li>
+                            ))
+                          ) : (
+                            <li>No other versions available.</li>
+                          )}
+                        </ul>
                         <div className="open-project">
                           <button onClick={() => toggleVersionTable(file.version_id)}>
                             {expandedFile === fileVersions[file.version_id] ? 'Close Versions' : 'Open Versions'}
