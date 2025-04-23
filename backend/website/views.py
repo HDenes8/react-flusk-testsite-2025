@@ -274,20 +274,39 @@ def project_page(project_id):
         project = Project.query.get(project_id)
         if not project:
             return jsonify({"error": "Project not found"}), 404
-        
-        DownloadAlias = aliased(Last_download)
+
         user_id = current_user.user_id
 
-        file_versions_with_user_download_flag = db.session.query(
-            File_version,
-            exists().where(
-                (DownloadAlias.version_id == File_version.version_id) &
-                (DownloadAlias.user_id == user_id)
-            ).label("is_downloaded")
-        ).join(File_data).filter(File_data.project_id == project_id).all()
+        # Fetch all latest versions
+        latest_versions = File_version.query.\
+            join(File_data, File_version.file_data_id == File_data.file_data_id).\
+            filter(File_data.project_id == project_id, File_version.last_version == True).\
+            all()
 
-        files = File_version.query.join(File_data, File_version.file_data_id == File_data.file_data_id).\
-            filter(File_data.project_id == project_id, File_version.last_version == True).all()
+        # Get version IDs user has downloaded
+        downloaded_versions = db.session.query(Last_download.version_id).\
+            filter_by(user_id=user_id).distinct().all()
+        downloaded_version_ids = {vid for (vid,) in downloaded_versions}
+
+        # Prepare file list
+        files_data = []
+        download_flags = {}
+
+        for file in latest_versions:
+            downloaded = (file.user_id == user_id) or (file.version_id in downloaded_version_ids)
+            files_data.append({
+                "version_id": file.version_id,
+                "file_data_id": file.file_data_id,
+                "title": file.file_data.title,
+                "file_name": file.file_name,
+                "version_number": file.version_number,
+                "file_size": file.file_size,
+                "file_type": file.file_type,
+                "upload_date": file.upload_date.isoformat() if file.upload_date else None,
+                "description": file.file_data.description,
+                "comment": file.comment
+            })
+            download_flags[file.version_id] = downloaded
 
         project_data = {
             "id": project.project_id,
@@ -297,34 +316,15 @@ def project_page(project_id):
             "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
         }
 
-        files_data = [{
-            "version_id": file.version_id,
-            "file_data_id": file.file_data_id, # maIN_FILE_ID curently
-            "title": file.file_data.title,
-            "file_name": file.file_name,
-            "version_number": file.version_number,
-            "file_size": file.file_size,
-            "file_type": file.file_type,
-            "upload_date": file.upload_date.isoformat() if file.upload_date else None,
-            "description": file.file_data.description,
-            "comment": file.comment
-        } for file in files]
-
-        download_file_results = [{
-            "version_id": fv.version_id,
-            "file_data_id": fv.file_data_id,
-            "version_number": fv.version_number,
-            "file_name": fv.file_name,
-            "downloaded": downloaded
-        } for fv, downloaded in file_versions_with_user_download_flag]
-
         return jsonify({
             "project": project_data,
             "files": files_data,
-            "download_file_results": download_file_results
+            "download_file_results": download_flags
         })
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 #project_page end
 
 # Upload file + create version
