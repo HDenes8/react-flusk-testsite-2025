@@ -294,7 +294,7 @@ const ProjectsPage = () => {
                     {expandedFile === file.version_id && (
                   <div
                     className="horizontal-menu"
-                    ref={dropdownRef} // Attach ref to the dropdown menu asd
+                    ref={dropdownRef} // Attach ref to the dropdown menu
                   >
                         <div className="description-box">
                       <p>
