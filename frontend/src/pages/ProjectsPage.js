@@ -224,11 +224,17 @@ const ProjectsPage = () => {
   };
 
   const toggleVersionTable = (fileId) => {
-    setFileVersions(prev => ({
-      ...prev,
-      [fileId]: prev[fileId] ? null : files.find(file => file.version_id === fileId)?.versions || []
-    }));
+    if (!fileVersions[fileId]) {
+      fetchFileVersions(fileId); // Load if not yet loaded
+    } else {
+      setFileVersions((prev) => {
+        const updated = { ...prev };
+        delete updated[fileId]; // Toggle hide
+        return updated;
+      });
+    }
   };
+  
 
   if (!project) return <p>Loading...</p>;
 
@@ -266,98 +272,101 @@ const ProjectsPage = () => {
               </tr>
             ) : (
               files.map((file) => (
-                <tr key={file.version_id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      value={file.version_id}
-                      onChange={handleFileSelect}
-                    />
-                  </td>
-                  <td>{file.version_number}
-                  <span className={`status ${download_file_results[file.version_id] ? 'success' : 'error'}`}>
-                    {download_file_results[file.version_id] ? '✔' : '❕'}
-                  </span>
-                  </td>
-                  <td>{file.title}</td>
-                  <td>{file.file_name}</td>
-                  <td>{file.comment}</td>
-                  <td>{formatFileSize(file.file_size)}</td>
-                  <td>{new Date(file.upload_date).toLocaleString()}</td>
-                  <td>
-                <button
-                  className="dots-button"
-                  onClick={() => toggleFileDropdown(file.version_id)}
-                >
-                  ⋯
-                </button>
-                    {expandedFile === file.version_id && (
-                  <div
-                    className="horizontal-menu"
-                    ref={dropdownRef} // Attach ref to the dropdown menu
-                  >
-                        <div className="description-box">
-                      <p>
-                        <strong>Description:</strong>{" "}
-                        {file.description || "No description available"}
-                      </p>
+                <React.Fragment key={file.version_id}>
+                  <tr>
+                    <td>
+                      <input
+                        type="checkbox"
+                        value={file.version_id}
+                        onChange={handleFileSelect}
+                      />
+                    </td>
+                    <td>
+                      {file.version_number}
+                      <span className={`status ${download_file_results[file.version_id] ? 'success' : 'error'}`}>
+                        {download_file_results[file.version_id] ? '✔' : '❕'}
+                      </span>
+                    </td>
+                    <td>{file.title}</td>
+                    <td>{file.file_name}</td>
+                    <td>{file.comment}</td>
+                    <td>{formatFileSize(file.file_size)}</td>
+                    <td>{new Date(file.upload_date).toLocaleString()}</td>
+                    <td>
+                      <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>⋯</button>
+                      {expandedFile === file.version_id && (
+                        <div className="horizontal-menu" ref={dropdownRef}>
+                          <div className="description-box">
+                            <p><strong>Description:</strong> {file.description || "No description available"}</p>
+                          </div>
+                          <div className="open-project">
+                          
+                              <button onClick={() => toggleVersionTable(file.file_data_id)}>
+                                {fileVersions[file.file_data_id] ? 'Hide Versions' : 'Show Versions'}
+                              </button>
+                            
+                              <button
+                                onClick={() => {
+                                  setVersionUploadTarget(file);
+                                  closeFileDropdown();
+                                }}
+                              >
+                                Upload New Version
+                              </button>
+                            
+                          </div>
                         </div>
-                        <ul>
-                          {file.versions ? (
-                            file.versions.map((version) => (
-                              <li key={version.version_id}>
-                            Version {version.version_number} -{" "}
-                            {new Date(version.upload_date).toLocaleString()}
-                              </li>
-                            ))
-                          ) : (
-                            <li>No other versions available.</li>
-                          )}
-                        </ul>
-                        <div className="open-project">
-                          <button onClick={() => toggleVersionTable(file.version_id)}>
-                            {expandedFile === fileVersions[file.version_id] ? 'Close Versions' : 'Open Versions'}
-                          </button>
-                          {fileVersions[file.version_id] && (
-                            <table className="versions-table">
-                              <thead>
-                                <tr>
-                                  <th>Version</th>
-                                  <th>Upload Date</th>
-                                  <th>Comment</th>
+                      )}
+                    </td>
+                  </tr>               
+
+                  {/* Injected version history row */}
+                  {fileVersions[file.file_data_id] && (
+                    <tr className="version-history-row">
+                      <td colSpan="8">
+                        <table className="versions-table">
+                          <thead>
+                            <tr>
+                              <th>Select</th>
+                              <th>Ver</th>
+                              <th></th>
+                              <th>File Name</th>
+                              <th>Comment</th>
+                              <th>File Size</th>
+                              <th>Upload Date</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {fileVersions[file.file_data_id].length === 0 ? (
+                              <tr><td colSpan="4">No previous versions found.</td></tr>
+                            ) : (
+                              fileVersions[file.file_data_id].map((version) => (
+                                <tr key={version.version_id}>
+                                  <td>
+                                    <input
+                                      type="checkbox"
+                                      value={version.version_id}
+                                      onChange={handleFileSelect}
+                                    />
+                                  </td>
+                                  <td>{version.version_number}</td>
+                                  <td></td>
+                                  <td>{version.file_name}</td>
+                                  <td>{version.comment}</td>
+                                  <td>{formatFileSize(version.file_size)}</td>
+                                  <td>{new Date(file.upload_date).toLocaleString()}</td>
+                                  <td></td>
                                 </tr>
-                              </thead>
-                              <tbody>
-                                {expandedFile === fileVersions[file.version_id].length === 0 ? (
-                                  <tr>
-                                    <td colSpan="3">No other versions available.</td>
-                                  </tr>
-                                ) : (
-                                  fileVersions[file.version_id].map((version) => (
-                                    <tr key={version.version_id}>
-                                      <td>{version.version_number}</td>
-                                      <td>{new Date(version.upload_date).toLocaleString()}</td>
-                                      <td>{version.comment}</td>
-                                    </tr>
-                                  ))
-                                )}
-                              </tbody>
-                            </table>
-                          )}
-                          <button
-                            onClick={() => {
-                              console.log("Setting versionUploadTarget to:", file); // Debugging
-                              setVersionUploadTarget(file); // Set the file as the target for version upload
-                              closeFileDropdown(); // Close the dropdown menu
-                            }}
-                          >
-                            Upload New Version
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+
               ))
             )}
           </tbody>
