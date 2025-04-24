@@ -21,15 +21,16 @@ import re
 views = Blueprint('views', __name__)
 projects_bp = Blueprint('projects', __name__)
 
-# Members
+# Members base
 @views.route('/api/projects/<project_id>/members', methods=['GET'])
 @login_required
 def members(project_id):
     user_projects = User_Project.query.filter_by(project_id=project_id).all()
+    project = Project.query.get(project_id)
 
     project_roles = []
     for user_project in user_projects:
-        user = User_profile.query.get(user_project.user_id)  # Fetch user details
+        user = User_profile.query.get(user_project.user_id)
         project_roles.append({
             "id": user.user_id,
             "name": user.full_name,
@@ -37,8 +38,44 @@ def members(project_id):
             "email": user.email
         })
 
-    return jsonify({"user_id": current_user.user_id, "members": project_roles})
-# Members end
+    return jsonify({
+        "user_id": current_user.user_id,
+        "project_name": project.name if project else "Unknown",
+        "members": project_roles
+    })
+# Members base end
+
+# Invite members to a project
+@views.route('/api/projects/<int:project_id>/invite', methods=['POST'])
+@login_required
+def invite_member(project_id):
+    data = request.get_json()
+    invited_email = data.get('email')
+
+    if not invited_email:
+        return jsonify({"error": "Email is required"}), 400
+
+    # Check if the current user has permission to invite members
+    user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
+    if not user_project or user_project.role not in ['admin', 'owner']:
+        return jsonify({"error": "You don't have permission to invite members"}), 403
+
+    # Check if the invited user already exists
+    invited_user = User_profile.query.filter_by(email=invited_email).first()
+
+    # Create an invitation
+    new_invitation = Invitation(
+        invited_email=invited_email,
+        invited_user_id=invited_user.user_id if invited_user else None,
+        referrer_id=current_user.user_id,
+        project_id=project_id
+    )
+    db.session.add(new_invitation)
+    db.session.commit()
+
+    return jsonify({"message": "Invitation sent successfully"})
+# Invite members to a project end
+
 
 # Invitations
 @views.route('/invitations', methods=['GET'])
@@ -414,7 +451,7 @@ def upload_file(project_id):
         # Strip trailing _v<number> from the filename if it exists
         version_pattern = re.compile(r'(.*)_v\d+$')
         match = version_pattern.match(name)
-        if match:
+        if (match):
             name = match.group(1)
 
         # Construct the new filename
@@ -742,3 +779,4 @@ def get_profile():
     }
 
     return jsonify(profile_data)
+
