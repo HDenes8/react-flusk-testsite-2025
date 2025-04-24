@@ -351,12 +351,8 @@ const ProjectsPage = () => {
                                     />
                                   </td>
                                   <td>{version.version_number}
-                                  <span className={`status`}>
-                                  {download_file_results[file.version_id] ? (
-                                    <span className="status success">✔ Downloaded</span>
-                                  ) : (
-                                    <span className="status warning">❕ Not Downloaded</span>
-                                  )}
+                                  <span className={`status ${download_file_results[version.version_id] ? 'success' : 'warning'}`}>
+                                    {download_file_results[version.version_id] ? '✔' : '❕'}
                                   </span>
                                   </td>
                                   <td></td>
