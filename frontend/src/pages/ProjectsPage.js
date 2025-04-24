@@ -299,13 +299,12 @@ const ProjectsPage = () => {
                           <div className="description-box">
                             <p><strong>Description:</strong> {file.description || "No description available"}</p>
                           </div>
-                          <ul>
-                            <li>
+                          <div className="open-project">
+                          
                               <button onClick={() => toggleVersionTable(file.file_data_id)}>
                                 {fileVersions[file.file_data_id] ? 'Hide Versions' : 'Show Versions'}
                               </button>
-                            </li>
-                            <li>
+                            
                               <button
                                 onClick={() => {
                                   setVersionUploadTarget(file);
@@ -314,8 +313,8 @@ const ProjectsPage = () => {
                               >
                                 Upload New Version
                               </button>
-                            </li>
-                          </ul>
+                            
+                          </div>
                         </div>
                       )}
                     </td>
