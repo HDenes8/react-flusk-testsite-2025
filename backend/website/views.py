@@ -76,6 +76,45 @@ def invite_member(project_id):
     return jsonify({"message": "Invitation sent successfully"})
 # Invite members to a project end
 
+# Change role of a member
+@views.route('/api/projects/<int:project_id>/change-role', methods=['POST'])
+@login_required
+def change_role(project_id):
+    data = request.get_json()
+    target_user_id = data.get('user_id')
+    new_role = data.get('role')
+
+    if not target_user_id or not new_role:
+        return jsonify({"error": "User ID and new role are required"}), 400
+
+    # Check if the current user has permission to change roles
+    user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
+    if not user_project or user_project.role not in ['admin', 'owner']:
+        return jsonify({"error": "You don't have permission to change roles"}), 403
+
+    # Fetch the target user's project membership
+    target_membership = User_Project.query.filter_by(user_id=target_user_id, project_id=project_id).first()
+    if not target_membership:
+        return jsonify({"error": "Target user is not a member of this project"}), 404
+
+    # Role change restrictions
+    if user_project.role == 'admin' and target_membership.role in ['admin', 'owner']:
+        return jsonify({"error": "Admins cannot change roles of other admins or the owner"}), 403
+
+    if user_project.role == 'owner' and target_membership.role == 'owner':
+        return jsonify({"error": "Owners cannot change their own role"}), 403
+    
+    # Prevent any user from changing their own role, should not be needed but just in case
+    if current_user.user_id == target_user_id:
+        return jsonify({"error": "You cannot change your own role"}), 403
+
+
+    # Update the role
+    target_membership.role = new_role
+    db.session.commit()
+    return jsonify({"message": "Role updated successfully"})
+# Change role of a member end
+
 
 # Invitations
 @views.route('/invitations', methods=['GET'])
@@ -182,33 +221,22 @@ def download_files():
 
             file_paths.append(file_path)
 
-            last_download = Last_download.query.filter_by(
+            existing = Last_download.query.filter_by(
                 file_data_id=file_data.file_data_id,
-                user_id=current_user.user_id,
+                version_id=file_version.version_id,
+                user_id=current_user.user_id
             ).first()
 
-            if last_download:
-                last_download.version_id = file_version.version_id
-                last_download.download_date = func.now()
-            else:
-                last_download = Last_download(
+            if not existing:
+                new_download = Last_download(
                     file_data_id=file_data.file_data_id,
                     version_id=file_version.version_id,
                     user_id=current_user.user_id,
                     download_date=func.now()
                 )
-                db.session.add(last_download)
+                db.session.add(new_download)
 
             db.session.commit()
-
-            # Construct the file path
-            file_data = File_data.query.get(file_version.file_data_id)
-            project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
-            file_folder = os.path.join(project_folder, str(file_data.file_data_id))
-            file_path = os.path.join(file_folder, file_version.file_name)
-
-            if not os.path.exists(file_path):
-                return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
 
         # Create a ZIP archive of the selected files
         zip_filename = "selected_files.zip"
@@ -513,11 +541,12 @@ def upload_file(project_id):
 @login_required
 def get_file_versions(file_data_id):
     try:
+        # Fetch the file data
         file_data = File_data.query.get(file_data_id)
         if not file_data:
             return jsonify({"error": "File not found"}), 404
 
-        # Optional: Check if user has access to the file/project
+        # Check if the user has access to the project
         project = Project.query.get(file_data.project_id)
         user_project = User_Project.query.filter_by(
             user_id=current_user.user_id,
@@ -527,21 +556,35 @@ def get_file_versions(file_data_id):
         if not user_project:
             return jsonify({"error": "Access denied"}), 403
 
-        # Load versions
+        # Load all versions of the file
         versions = File_version.query.filter_by(file_data_id=file_data_id)\
             .order_by(File_version.version_number.desc()).all()
 
-        version_history = [{
-            "version_id": v.version_id,
-            "version_number": v.version_number,
-            "file_name": v.file_name,
-            "file_size": v.file_size,
-            "file_type": v.file_type,
-            "upload_date": v.upload_date.isoformat() if v.upload_date else None,
-            "comment": v.comment,
-            "uploader": User_profile.query.get(v.user_id).email  # Or full name if you have it
-        } for v in versions]
+        # Fetch all downloaded versions for the current user
+        downloaded_versions = db.session.query(Last_download.version_id).filter(
+            Last_download.file_data_id == file_data_id,
+            Last_download.user_id == current_user.user_id
+        ).distinct().all()
+        downloaded_version_ids = {vid for (vid,) in downloaded_versions}
 
+        # Build the version history with the "downloaded" status
+        version_history = []
+        for v in versions:
+            uploader = User_profile.query.get(v.user_id)
+            version_history.append({
+                "version_id": v.version_id,
+                "version_number": v.version_number,
+                "file_name": v.file_name,
+                "file_size": v.file_size,
+                "file_type": v.file_type,
+                "upload_date": v.upload_date.isoformat() if v.upload_date else None,
+                "comment": v.comment,
+                "uploader": uploader.email if uploader else "Unknown",
+                # Once downloaded, always mark as downloaded
+                "downloaded": v.version_id in downloaded_version_ids
+            })
+
+        # Return the file data and version history
         return jsonify({
             "file_data_id": file_data_id,
             "title": file_data.title,

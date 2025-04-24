@@ -337,36 +337,25 @@ const ProjectsPage = () => {
                               <th></th>
                             </tr>
                           </thead>
+                          {/* changed freshly */}
                           <tbody>
-                          {fileVersions[file.file_data_id].length === 0 ? (
-                              <tr><td colSpan="4">No previous versions found.</td></tr>
-                            ) : (
-                              fileVersions[file.file_data_id]
-                                .filter((version) => version.version_id !== file.version_id) // <-- FILTER OUT LATEST VERSION
-                                .map((version) => (
-                                  <tr key={version.version_id}>
-                                    <td>
-                                      <input
-                                        type="checkbox"
-                                        value={version.version_id}
-                                        onChange={handleFileSelect}
-                                      />
-                                    </td>
-                                    <td>{version.version_number}
-                                      <span className={`status ${download_file_results[version.version_id] ? 'success' : 'warning'}`}>
-                                        {download_file_results[version.version_id] ? '✔' : '❕'}
-                                      </span>
-                                    </td>
-                                    <td></td>
-                                    <td>{version.file_name}</td>
-                                    <td>{version.comment}</td>
-                                    <td>{formatFileSize(version.file_size)}</td>
-                                    <td>{new Date(version.upload_date).toLocaleString()}</td>
-                                    <td></td>
-                                  </tr>
-                                ))
-                            )}
-
+                          {fileVersions[file.file_data_id]?.map((version) => (
+                            <tr key={version.version_id}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  value={version.version_id}
+                                  onChange={handleFileSelect}
+                                />
+                              </td>
+                              <td>{version.version_number}</td>
+                              <td>{version.file_name}</td>
+                              <td>{version.comment}</td>
+                              <td>{formatFileSize(version.file_size)}</td>
+                              <td>{new Date(version.upload_date).toLocaleString()}</td>
+                              <td>{version.downloaded ? "✔ Downloaded" : "❕ Not Downloaded"}</td>
+                            </tr>
+                          ))}
                           </tbody>
                         </table>
                       </td>
