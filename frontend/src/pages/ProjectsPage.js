@@ -355,7 +355,7 @@ const ProjectsPage = () => {
                                   {download_file_results[file.version_id] ? (
                                     <span className="status success">✔ Downloaded</span>
                                   ) : (
-                                    <span className="status error">❕ Not Downloaded</span>
+                                    <span className="status warning">❕ Not Downloaded</span>
                                   )}
                                   </span>
                                   </td>
