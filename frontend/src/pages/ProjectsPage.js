@@ -350,12 +350,20 @@ const ProjectsPage = () => {
                                       onChange={handleFileSelect}
                                     />
                                   </td>
-                                  <td>{version.version_number}</td>
+                                  <td>{version.version_number}
+                                  <span className={`status`}>
+                                  {download_file_results[file.version_id] ? (
+                                    <span className="status success">✔ Downloaded</span>
+                                  ) : (
+                                    <span className="status warning">❕ Not Downloaded</span>
+                                  )}
+                                  </span>
+                                  </td>
                                   <td></td>
                                   <td>{version.file_name}</td>
                                   <td>{version.comment}</td>
                                   <td>{formatFileSize(version.file_size)}</td>
-                                  <td>{new Date(file.upload_date).toLocaleString()}</td>
+                                  <td>{new Date(version.upload_date).toLocaleString()}</td>
                                   <td></td>
                                 </tr>
                               ))
