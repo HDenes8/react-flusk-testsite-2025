@@ -39,11 +39,11 @@ class User_Project(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user_profile.user_id'), primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.project_id'), primary_key=True)
-    role = db.Column(db.Enum('reader', 'editor', 'admin', 'owner', name='role_enum'), default='reader')
+    role = db.Column(db.Enum('reader', 'editor', 'admin', 'owner', name='role_enum'), default='reader', nullable=True)
     connection_date = db.Column(db.DateTime(timezone=True), default=text("CURRENT_TIMESTAMP(0)"))
     user_deleted_or_left_date = db.Column(db.DateTime(timezone=True), nullable=True) 
 
-
+    is_removed = db.Column(db.Boolean, default=False)  # New field to track if the user was removed
 
 class Invitation(db.Model):
     invitation_id = db.Column(db.Integer, primary_key=True)
@@ -87,12 +87,4 @@ class Last_download(db.Model):
 
     file_data_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user_profile.user_id'))
-
-
-    
-    
-    
-
-
-
 

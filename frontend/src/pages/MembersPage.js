@@ -3,46 +3,35 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "./MembersPage.css"
 
-
 const MembersPage = () => {
   const navigate = useNavigate();
-
   const { project_id } = useParams();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
   const [projectName, setProjectName] = useState(""); 
-  const [userId, setUserId] = useState(null);         
-
+  const [userRole, setUserRole] = useState(""); // <-- NEW
 
   const fetchMembers = async () => {
     try {
       const response = await axios.get(`/api/projects/${project_id}/members`, { withCredentials: true });
       setMembers(response.data.members);
+      setUserRole(response.data.current_user_role); // <-- NEW
     } catch (err) {
       console.error("Error fetching members:", err);
       setError("Failed to load members.");
     }
   };
 
-  // On page load
   useEffect(() => {
-    fetch(`/api/projects/${project_id}/members`)
-      .then(res => res.json())
-      .then(data => {
-        setProjectName(data.project_name);
-        setUserId(data.user_id);
-        setMembers(data.members); // includes correct role from backend
-      });
+    fetchMembers();
   }, [project_id]);
 
   const handleInviteMember = async () => {
     const email = prompt("Enter the email of the member to invite:");
-
     if (!email) {
       alert("Email is required.");
       return;
     }
-
     try {
       const response = await axios.post(
         `/api/projects/${project_id}/invite`,
@@ -50,7 +39,6 @@ const MembersPage = () => {
         { withCredentials: true }
       );
       alert(response.data.message);
-      // Optionally, refresh the members list
       fetchMembers();
     } catch (err) {
       console.error("Error inviting member:", err);
@@ -58,9 +46,22 @@ const MembersPage = () => {
     }
   };
 
-  const handleRemoveMember = () => {
-    alert("Remove Member");
-
+  const handleRemoveMember = async (userId) => {
+    if (!window.confirm("Are you sure you want to remove this member?")) {
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `/api/projects/${project_id}/remove-user`,
+        { user_id: userId },
+        { withCredentials: true }
+      );
+      alert(response.data.message);
+      fetchMembers();
+    } catch (err) {
+      console.error("Error removing member:", err);
+      alert(err.response?.data?.error || "Failed to remove member.");
+    }
   };
 
   const handleChangeRole = async (userId, newRole) => {
@@ -68,7 +69,6 @@ const MembersPage = () => {
       alert("Role is required.");
       return;
     }
-
     try {
       const response = await axios.post(
         `/api/projects/${project_id}/change-role`,
@@ -76,7 +76,6 @@ const MembersPage = () => {
         { withCredentials: true }
       );
       alert(response.data.message);
-      // Optionally, refresh the members list
       fetchMembers();
     } catch (err) {
       console.error("Error changing role:", err);
@@ -96,7 +95,6 @@ const MembersPage = () => {
     <div className="members-page-container">
       <div className="top-buttons">
         <button onClick={handleInviteMember}>Invite Member</button>
-        <button onClick={() => alert("Remove Member")}>Remove Member</button>
         <button onClick={() => alert("Settings")}>Settings</button>
       </div>  
       <h1>Members</h1>
@@ -109,6 +107,7 @@ const MembersPage = () => {
             <th>Name</th>
             <th>Role</th>
             <th>Email</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +120,11 @@ const MembersPage = () => {
                   <select
                     value={member.role}
                     onChange={(e) => handleChangeRole(member.id, e.target.value)}
+                    disabled={
+                      member.role === 'owner' || 
+                      (userRole !== 'owner' && userRole !== 'admin') || 
+                      (userRole === 'admin' && member.role === 'admin') // admin can't edit another admin
+                    }
                   >
                     <option value="owner">Owner</option>
                     <option value="admin">Admin</option>
@@ -129,6 +133,18 @@ const MembersPage = () => {
                   </select>
                 </td>
                 <td>{member.email}</td>
+                <td>
+                  <button
+                    onClick={() => handleRemoveMember(member.id)}
+                    disabled={
+                      member.role === 'owner' || 
+                      (userRole !== 'owner' && userRole !== 'admin') || 
+                      (userRole === 'admin' && member.role === 'admin') // admin can't remove another admin
+                    }
+                  >
+                    Remove
+                  </button>
+                </td>
               </tr>
             ))
           ) : (

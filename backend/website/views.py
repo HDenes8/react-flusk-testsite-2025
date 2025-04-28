@@ -29,6 +29,8 @@ def members(project_id):
     project = Project.query.get(project_id)
 
     project_roles = []
+    current_user_role = None
+
     for user_project in user_projects:
         user = User_profile.query.get(user_project.user_id)
         project_roles.append({
@@ -37,9 +39,15 @@ def members(project_id):
             "role": user_project.role,
             "email": user.email
         })
+        if user.user_id == current_user.user_id:
+            current_user_role = user_project.role
+
+    if current_user_role is None:
+        return jsonify({"error": "You are not a member of this project"}), 403
 
     return jsonify({
         "user_id": current_user.user_id,
+        "current_user_role": current_user_role,  # Added current user's role for permission checking on the client
         "project_name": project.name if project else "Unknown",
         "members": project_roles
     })
@@ -100,9 +108,18 @@ def change_role(project_id):
     # Role change restrictions
     if user_project.role == 'admin' and target_membership.role in ['admin', 'owner']:
         return jsonify({"error": "Admins cannot change roles of other admins or the owner"}), 403
+    
+    if new_role.lower() == 'owner':
+        return jsonify({"error": "You cannot assign the Owner role."}), 403
+    
+    if new_role == "Owner" and not current_user.is_owner:
+        return jsonify({"error": "You cannot assign the Owner role."}), 403
 
     if user_project.role == 'owner' and target_membership.role == 'owner':
         return jsonify({"error": "Owners cannot change their own role"}), 403
+    
+    if user_project.role == 'admin' and new_role.lower() == 'admin':
+        return jsonify({"error": "Admins cannot assign the admin role to others"}), 403
     
     # Prevent any user from changing their own role, should not be needed but just in case
     if current_user.user_id == target_user_id:
@@ -115,6 +132,37 @@ def change_role(project_id):
     return jsonify({"message": "Role updated successfully"})
 # Change role of a member end
 
+# Remove a member from a project
+@views.route('/api/projects/<int:project_id>/remove-user', methods=['POST'])
+@login_required
+def remove_user_from_project(project_id):
+    data = request.get_json()
+    target_user_id = data.get('user_id')
+
+    if not target_user_id:
+        return jsonify({"error": "User ID is required"}), 400
+
+    # Check if the current user has permission to remove members
+    user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
+    if not user_project or user_project.role not in ['admin', 'owner']:
+        return jsonify({"error": "You don't have permission to remove members"}), 403
+
+    # Prevent removing the owner
+    target_membership = User_Project.query.filter_by(user_id=target_user_id, project_id=project_id).first()
+    if not target_membership:
+        return jsonify({"error": "Target user is not a member of this project"}), 404
+
+    if target_membership.role == 'owner':
+        return jsonify({"error": "You cannot remove the owner of the project"}), 403
+
+    # Mark the user as removed
+    target_membership.is_removed = True
+    target_membership.role = None  # Remove their role
+    target_membership.user_deleted_or_left_date = func.now()
+    db.session.commit()
+
+    return jsonify({"message": "User removed from the project successfully"})
+# Remove a member from a project end
 
 # Invitations
 @views.route('/invitations', methods=['GET'])
