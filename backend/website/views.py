@@ -25,7 +25,7 @@ projects_bp = Blueprint('projects', __name__)
 @views.route('/api/projects/<project_id>/members', methods=['GET'])
 @login_required
 def members(project_id):
-    user_projects = User_Project.query.filter_by(project_id=project_id).all()
+    user_projects = User_Project.query.filter_by(project_id=project_id, is_removed=False).all()
     project = Project.query.get(project_id)
 
     project_roles = []
@@ -65,23 +65,55 @@ def invite_member(project_id):
 
     # Check if the current user has permission to invite members
     user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
-    if not user_project or user_project.role not in ['admin', 'owner']:
+    if not user_project or user_project.role not in ['admin', 'owner', 'editor']:  # Include 'editor'
         return jsonify({"error": "You don't have permission to invite members"}), 403
 
     # Check if the invited user already exists
     invited_user = User_profile.query.filter_by(email=invited_email).first()
+    if invited_user:
+        existing_membership = User_Project.query.filter_by(user_id=invited_user.user_id, project_id=project_id).first()
+        if existing_membership:
+            if existing_membership.is_removed:
+                # Reactivate the removed user but require them to accept the invitation
+                existing_membership.is_removed = False
+                existing_membership.role = 'reader'  # Default role
+                db.session.commit()
 
-    # Create an invitation
+                # Update or create a new invitation
+                existing_invitation = Invitation.query.filter_by(
+                    invited_user_id=invited_user.user_id,
+                    project_id=project_id
+                ).first()
+                if existing_invitation:
+                    existing_invitation.status = 'pending'
+                    existing_invitation.invite_date = func.now()
+                else:
+                    new_invitation = Invitation(
+                        invited_email=invited_email,
+                        invited_user_id=invited_user.user_id,
+                        referrer_id=current_user.user_id,
+                        project_id=project_id,
+                        status='pending'
+                    )
+                    db.session.add(new_invitation)
+                db.session.commit()
+
+                return jsonify({"message": "User re-invited successfully. They need to accept the invitation."}), 200
+            else:
+                return jsonify({"error": "User is already a member of this project"}), 400
+
+    # Create a new invitation
     new_invitation = Invitation(
         invited_email=invited_email,
         invited_user_id=invited_user.user_id if invited_user else None,
         referrer_id=current_user.user_id,
-        project_id=project_id
+        project_id=project_id,
+        status='pending'
     )
     db.session.add(new_invitation)
     db.session.commit()
 
-    return jsonify({"message": "Invitation sent successfully"})
+    return jsonify({"message": "Invitation sent successfully"}), 200
 # Invite members to a project end
 
 # Change role of a member
@@ -112,7 +144,7 @@ def change_role(project_id):
     if new_role.lower() == 'owner':
         return jsonify({"error": "You cannot assign the Owner role."}), 403
     
-    if new_role == "Owner" and not current_user.is_owner:
+    if new_role == "owner" and not current_user.is_owner:
         return jsonify({"error": "You cannot assign the Owner role."}), 403
 
     if user_project.role == 'owner' and target_membership.role == 'owner':
@@ -125,6 +157,8 @@ def change_role(project_id):
     if current_user.user_id == target_user_id:
         return jsonify({"error": "You cannot change your own role"}), 403
 
+    if new_role == 'removed' and user_project.role not in ['admin', 'owner']:
+        return jsonify({"error": "You don't have permission to assign the 'removed' role"}), 403
 
     # Update the role
     target_membership.role = new_role
@@ -137,31 +171,38 @@ def change_role(project_id):
 @login_required
 def remove_user_from_project(project_id):
     data = request.get_json()
-    target_user_id = data.get('user_id')
+    user_id_to_remove = data.get('user_id')
 
-    if not target_user_id:
+    if not user_id_to_remove:
         return jsonify({"error": "User ID is required"}), 400
 
-    # Check if the current user has permission to remove members
-    user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
-    if not user_project or user_project.role not in ['admin', 'owner']:
+    remover_membership = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
+    target_membership = User_Project.query.filter_by(user_id=user_id_to_remove, project_id=project_id).first()
+
+    # Debugging logs
+    print(f"            Remover Membership: {remover_membership}")
+    print(f"            Target Membership: {target_membership}")
+
+    if not remover_membership or not target_membership:
+        return jsonify({"error": "Membership not found"}), 404
+
+    # Check permissions
+    if remover_membership.role not in ['admin', 'owner']:
         return jsonify({"error": "You don't have permission to remove members"}), 403
 
-    # Prevent removing the owner
-    target_membership = User_Project.query.filter_by(user_id=target_user_id, project_id=project_id).first()
-    if not target_membership:
-        return jsonify({"error": "Target user is not a member of this project"}), 404
+    if remover_membership.role == 'admin' and target_membership.role in ['admin', 'owner']:
+        return jsonify({"error": "Admins cannot remove other admins or owners"}), 403
 
     if target_membership.role == 'owner':
         return jsonify({"error": "You cannot remove the owner of the project"}), 403
 
-    # Mark the user as removed
+    # Mark the user as removed (simplified, only set 'is_removed' flag)
     target_membership.is_removed = True
-    target_membership.role = None  # Remove their role
     target_membership.user_deleted_or_left_date = func.now()
     db.session.commit()
 
-    return jsonify({"message": "User removed from the project successfully"})
+    return jsonify({"message": "User removed from the project successfully"}), 200
+
 # Remove a member from a project end
 
 # Invitations
@@ -195,16 +236,26 @@ def accept_invite(invitation_id):
         or (invitation.invited_email and invitation.invited_email != current_user.email):
         return jsonify({"error": "Invalid invitation."}), 400
 
-    existing_membership = User_Project.query.filter_by(user_id=current_user.user_id, project_id=invitation.project_id).first()
+    existing_membership = User_Project.query.filter_by(
+        user_id=current_user.user_id, 
+        project_id=invitation.project_id
+    ).first()
+
     if existing_membership:
-        return jsonify({"error": "You are already a member of this project."}), 400
+        if existing_membership.role == 'removed' or existing_membership.is_removed:
+            existing_membership.role = 'reader'
+            existing_membership.is_removed = False
+            existing_membership.user_deleted_or_left_date = None
+            invitation.status = 'accepted'
+            db.session.commit()
+        else:
+            return jsonify({"error": "User is already a project member."}), 400
     else:
         new_member = User_Project(user_id=current_user.user_id, project_id=invitation.project_id, role='reader')
         db.session.add(new_member)
         invitation.status = 'accepted'
         db.session.commit()
-
-    return jsonify({"message": "Invitation accepted."})
+        return jsonify({"message": "Invitation accepted."})
 
 @views.route('/deny_invite/<int:invitation_id>', methods=['POST'])
 @login_required

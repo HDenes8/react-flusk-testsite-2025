@@ -122,14 +122,17 @@ const MembersPage = () => {
                     onChange={(e) => handleChangeRole(member.id, e.target.value)}
                     disabled={
                       member.role === 'owner' || 
+                      member.role === 'removed' || // Disable for removed users
                       (userRole !== 'owner' && userRole !== 'admin') || 
-                      (userRole === 'admin' && member.role === 'admin') // admin can't edit another admin
+                      (userRole === 'admin' && member.role === 'admin') || 
+                      member.role === 'removed' // Disable for inactive users
                     }
                   >
                     <option value="owner">Owner</option>
                     <option value="admin">Admin</option>
                     <option value="editor">Editor</option>
                     <option value="reader">Reader</option>
+                    <option value="removed" disabled>Removed</option>
                   </select>
                 </td>
                 <td>{member.email}</td>
@@ -139,7 +142,8 @@ const MembersPage = () => {
                     disabled={
                       member.role === 'owner' || 
                       (userRole !== 'owner' && userRole !== 'admin') || 
-                      (userRole === 'admin' && member.role === 'admin') // admin can't remove another admin
+                      (userRole === 'admin' && member.role === 'admin') || 
+                      member.role === 'removed' // Disable for removed users
                     }
                   >
                     Remove
