@@ -1,24 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import "./MembersPage.css"
+import "./MembersPage.css";
 
 const MembersPage = () => {
   const navigate = useNavigate();
   const { project_id } = useParams();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
-  const [projectName, setProjectName] = useState(""); 
-  const [userRole, setUserRole] = useState(""); // <-- NEW
+  const [projectName, setProjectName] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
 
   const fetchMembers = async () => {
     try {
-      const response = await axios.get(`/api/projects/${project_id}/members`, { withCredentials: true });
-      setMembers(response.data.members);
-      setUserRole(response.data.current_user_role); // <-- NEW
+      const response = await axios.get(`/api/projects/${project_id}/members`, {
+        withCredentials: true,
+      });
+
+      const roleOrder = { owner: 1, admin: 2, editor: 3, reader: 4 }; // Define the custom order
+      const sortedMembers = response.data.members.sort(
+        (a, b) => roleOrder[a.role] - roleOrder[b.role]
+      );
+
+      setMembers(sortedMembers);
+      setUserRole(response.data.current_user_role);
+      setProjectName(response.data.project_name || "");
+      setCurrentUser(response.data.current_user || null);
     } catch (err) {
-      console.error("Error fetching members:", err);
-      setError("Failed to load members.");
+      if (err.response && err.response.status === 403) {
+        navigate("/dashboard");
+      } else {
+        console.error("Error fetching members:", err);
+        setError("Failed to load members.");
+      }
     }
   };
 
@@ -27,29 +42,52 @@ const MembersPage = () => {
   }, [project_id]);
 
   const handleInviteMember = async () => {
-    const email = prompt("Enter the email of the member to invite:");
-    if (!email) {
+    const emailInput = prompt("Enter the email(s) to invite (comma-separated):");
+    if (!emailInput) {
       alert("Email is required.");
       return;
     }
-    try {
-      const response = await axios.post(
-        `/api/projects/${project_id}/invite`,
-        { email },
-        { withCredentials: true }
-      );
-      alert(response.data.message);
-      fetchMembers();
-    } catch (err) {
-      console.error("Error inviting member:", err);
-      alert(err.response?.data?.error || "Failed to send invitation.");
+
+    const emailList = emailInput.split(",").map(email => email.trim()).filter(email => email);
+
+    if (emailList.length === 0) {
+      alert("No valid emails entered.");
+      return;
     }
+
+    let errors = [];
+
+    for (let email of emailList) {
+      try {
+        const response = await axios.post(
+          `/api/projects/${project_id}/invite`,
+          { email },
+          { withCredentials: true }
+        );
+        alert(`Invited ${email}: ${response.data.message}`);
+      } catch (err) {
+        console.error(`Error inviting ${email}:`, err);
+        errors.push(`${email}: ${err.response?.data?.error || "Failed to invite."}`);
+      }
+    }
+
+    if (errors.length > 0) {
+      alert("Some errors occurred:\n" + errors.join("\n"));
+    }
+
+    fetchMembers();
   };
 
   const handleRemoveMember = async (userId) => {
-    if (!window.confirm("Are you sure you want to remove this member?")) {
-      return;
-    }
+    const isSelf = userId === currentUser?.id;
+    const confirmationMessage = isSelf
+      ? "Are you sure you want to leave this project?"
+      : "Are you sure you want to remove this member?";
+
+    if (!window.confirm(confirmationMessage)) return;
+
+    console.log("Attempting to remove user:", userId); // Debugging log
+
     try {
       const response = await axios.post(
         `/api/projects/${project_id}/remove-user`,
@@ -57,7 +95,12 @@ const MembersPage = () => {
         { withCredentials: true }
       );
       alert(response.data.message);
-      fetchMembers();
+
+      if (isSelf) {
+        navigate("/dashboard"); // Redirect the user after leaving the project
+      } else {
+        fetchMembers(); // Refresh the members list
+      }
     } catch (err) {
       console.error("Error removing member:", err);
       alert(err.response?.data?.error || "Failed to remove member.");
@@ -69,6 +112,7 @@ const MembersPage = () => {
       alert("Role is required.");
       return;
     }
+
     try {
       const response = await axios.post(
         `/api/projects/${project_id}/change-role`,
@@ -87,18 +131,18 @@ const MembersPage = () => {
     navigate("/settings");
   };
 
-  if (error) {
-    return <p className="error-message">{error}</p>;
-  }
+  if (error) return <p className="error-message">{error}</p>;
 
   return (
     <div className="members-page-container">
       <div className="top-buttons">
-        <button onClick={handleInviteMember}>Invite Member</button>
-        <button onClick={() => alert("Settings")}>Settings</button>
-      </div>  
-      <h1>Members</h1>
-      <h1>{projectName}</h1>
+        {(userRole === "owner" || userRole === "admin") && (
+          <button onClick={handleInviteMember}>Invite Member</button>
+        )}
+        <button onClick={handleSettings}>Settings</button>
+      </div>
+
+      <h1>{projectName ? `Members of ${projectName}` : "Members"}</h1>
 
       <table className="members-table">
         <thead>
@@ -107,53 +151,57 @@ const MembersPage = () => {
             <th>Name</th>
             <th>Role</th>
             <th>Email</th>
-            <th></th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {members.length > 0 ? (
-            members.map((member) => (
-              <tr key={member.id}>
-                <td>{member.id}</td>
-                <td>{member.name}</td>
-                <td>
-                  <select
-                    value={member.role}
-                    onChange={(e) => handleChangeRole(member.id, e.target.value)}
-                    disabled={
-                      member.role === 'owner' || 
-                      member.role === 'removed' || // Disable for removed users
-                      (userRole !== 'owner' && userRole !== 'admin') || 
-                      (userRole === 'admin' && member.role === 'admin') || 
-                      member.role === 'removed' // Disable for inactive users
-                    }
-                  >
-                    <option value="owner">Owner</option>
-                    <option value="admin">Admin</option>
-                    <option value="editor">Editor</option>
-                    <option value="reader">Reader</option>
-                    <option value="removed" disabled>Removed</option>
-                  </select>
-                </td>
-                <td>{member.email}</td>
-                <td>
-                  <button
-                    onClick={() => handleRemoveMember(member.id)}
-                    disabled={
-                      member.role === 'owner' || 
-                      (userRole !== 'owner' && userRole !== 'admin') || 
-                      (userRole === 'admin' && member.role === 'admin') || 
-                      member.role === 'removed' // Disable for removed users
-                    }
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))
+            members.map((member) => {
+              const isSelf = member.id === currentUser?.id;
+              const isOwner = member.role === "owner";
+              const isAdmin = member.role === "admin";
+
+              const canChangeRole =
+                !isSelf &&
+                ((userRole === "owner") ||
+                  (userRole === "admin" && !isOwner && !isAdmin));
+
+              const canRemove =
+                !isSelf &&
+                ((userRole === "owner" && !isOwner) ||
+                  (userRole === "admin" && !isAdmin && !isOwner));
+
+              return (
+                <tr key={member.id}>
+                  <td>{member.id}</td>
+                  <td>{member.name}</td>
+                  <td>
+                    <select
+                      value={member.role}
+                      onChange={(e) => handleChangeRole(member.id, e.target.value)}
+                      disabled={!canChangeRole}
+                    >
+                      <option value="owner" disabled={userRole !== "owner"}>Owner</option>
+                      <option value="admin">Admin</option>
+                      <option value="editor">Editor</option>
+                      <option value="reader">Reader</option>
+                    </select>
+                  </td>
+                  <td>{member.email}</td>
+                  <td>
+                    <button
+                      onClick={() => handleRemoveMember(member.id)}
+                      disabled={isOwner || (isSelf && userRole === "owner")} // Prevent owner from leaving
+                    >
+                      {isSelf ? "Leave" : "Remove"}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
           ) : (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center" }}>No members found.</td>
+              <td colSpan="5" style={{ textAlign: "center" }}>No members found.</td>
             </tr>
           )}
         </tbody>
