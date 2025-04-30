@@ -524,6 +524,8 @@ def project_page(project_id):
                 "file_type": file.file_type,
                 "upload_date": file.upload_date.isoformat() if file.upload_date else None,
                 "description": file.file_data.description,
+                "uploader": file.user.full_name if file.user else "Unknown",
+                "uploader_pic": file.user.profile_pic if file.user else "default.png",
                 "comment": file.comment
             })
             download_flags[file.version_id] = downloaded
