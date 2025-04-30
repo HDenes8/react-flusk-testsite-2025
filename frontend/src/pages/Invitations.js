@@ -102,7 +102,7 @@ const Invitations = () => {
             </tbody>
           </table>
         ) : (
-          <p>No invitations found.</p>
+          <p className='noinv'>No invitations found.</p>
         )}
       </section>
     </div>

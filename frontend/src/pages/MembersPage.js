@@ -185,9 +185,9 @@ const MembersPage = () => {
                     <select
                       value={member.role}
                       onChange={(e) => handleChangeRole(member.id, e.target.value)}
-                      disabled={!canChangeRole}
+                      disabled={!canChangeRole || isOwner} // Disable if the member is an owner
                     >
-                      <option value="owner" disabled={userRole !== "owner"}>Owner</option>
+                      <option value="owner" disabled>Owner</option> {/* Always disable the owner option */}
                       <option value="admin">Admin</option>
                       <option value="editor">Editor</option>
                       <option value="reader">Reader</option>
@@ -195,12 +195,16 @@ const MembersPage = () => {
                   </td>
                   <td>{member.email}</td>
                   <td>
-                    <button
-                      onClick={() => handleRemoveMember(member.id)}
-                      disabled={isOwner || (isSelf && userRole === "owner")} // Prevent owner from leaving
-                    >
-                      {isSelf ? "Leave" : "Remove"}
-                    </button>
+                    <div className="remove-buttons">
+                      {!isOwner && ( // Hide the button if the member is an owner
+                        <button
+                          onClick={() => handleRemoveMember(member.id)}
+                          disabled={isSelf && userRole === "owner"} // Prevent owner from leaving
+                        >
+                          {isSelf ? "Leave" : "Remove"}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
