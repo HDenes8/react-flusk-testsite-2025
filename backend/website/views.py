@@ -666,6 +666,16 @@ def upload_file(project_id):
         db.session.add(version)
         db.session.commit()
 
+        # Mark the uploaded file as downloaded for the uploader
+        new_download = Last_download(
+            file_data_id=file_data.file_data_id,
+            version_id=version.version_id,
+            user_id=current_user.user_id,
+            download_date=func.now()
+        )
+        db.session.add(new_download)
+        db.session.commit()
+
         # Return the list of versions (for dropdown or history list)
         file_versions = File_version.query.filter_by(file_data_id=file_data.file_data_id).order_by(File_version.version_number.desc()).all()
         version_history = []
