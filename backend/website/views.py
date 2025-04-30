@@ -677,7 +677,7 @@ def upload_file(project_id):
                 "file_size": v.file_size,
                 "comment": v.comment,
                 "uploader": uploader.full_name if uploader else "Unknown",  # Add uploader name
-                "uploader_pic": uploader.profile_pic if uploader else "default.png"  # Add uploader profile picture
+                "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png"  # Add uploader profile picture
             })
 
         file_data_info = {
