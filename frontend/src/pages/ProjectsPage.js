@@ -292,7 +292,20 @@ const ProjectsPage = () => {
                     <td className="time-cell">
                       <FormattedDate dateInput={file.upload_date} />
                     </td>
-                    <td>{file.uploader || "Unknown"}</td> 
+                    <td>
+                      {file.uploader ? (
+                        <div className="uploader-info">
+                          <img
+                            src={file.uploader_pic || '/default-profile.png'}
+                            alt={`${file.uploader}'s profile`}
+                            className="uploader-profile-picture"
+                          />
+                          <span>{file.uploader}</span>
+                        </div>
+                      ) : (
+                        "Unknown"
+                      )}
+                    </td> 
                     <td>
                       <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>⋯</button>
                       {expandedFile === file.version_id && (
@@ -356,7 +369,20 @@ const ProjectsPage = () => {
                                 <td className="time-cell">
                                   <FormattedDate dateInput={version.upload_date} />
                                 </td>
-                                <td>{version.uploader || "Unknown"}</td> 
+                                <td>
+                                  {version.uploader ? (
+                                    <div className="uploader-info">
+                                      <img
+                                        src={version.uploader_pic || '/default-profile.png'}
+                                        alt={`${version.uploader}'s profile`}
+                                        className="uploader-profile-picture"
+                                      />
+                                      <span>{version.uploader}</span>
+                                    </div>
+                                  ) : (
+                                    "Unknown"
+                                  )}
+                                </td> {/* Display version uploader here */}
                                 <td className="actions-cell">
                                   {/* Add an invisible placeholder to keep layout! */}
                                   <span style={{ visibility: 'hidden' }}>•••</span>

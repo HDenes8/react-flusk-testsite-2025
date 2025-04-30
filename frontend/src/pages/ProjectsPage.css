@@ -226,3 +226,19 @@
 p {
   text-align: left;
 }
+
+/* Style for uploader container */
+.uploader-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between the image and the name */
+}
+
+/* Style for uploader profile picture */
+.uploader-profile-picture {
+  width: 32px; /* Adjust size as needed */
+  height: 32px;
+  border-radius: 50%; /* Makes the image circular */
+  object-fit: cover; /* Ensures the image fits within the circle */
+  border: 1px solid #ccc; /* Optional: Add a border */
+}
