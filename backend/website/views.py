@@ -286,7 +286,7 @@ def download_files():
 
             db.session.commit()
 
-        # Create a ZIP archive of the selected files
+        # Create a ZIP archive of the selected files,
         zip_filename = "selected_files.zip"
         zip_path = os.path.join(current_app.config['UPLOAD_FOLDER'], zip_filename)
         with zipfile.ZipFile(zip_path, "w") as zipf:
