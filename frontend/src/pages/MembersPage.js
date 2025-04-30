@@ -8,7 +8,6 @@ const MembersPage = () => {
   const { project_id } = useParams();
   const [members, setMembers] = useState([]);
   const [error, setError] = useState(null);
-  const [projectName, setProjectName] = useState(""); 
   const [userRole, setUserRole] = useState(""); // <-- NEW
 
   const fetchMembers = async () => {
@@ -87,6 +86,11 @@ const MembersPage = () => {
     navigate("/settings");
   };
 
+  
+  const handleBack = () => {
+    navigate(`/ProjectsPage/${project_id}`);
+  };
+
   if (error) {
     return <p className="error-message">{error}</p>;
   }
@@ -94,11 +98,11 @@ const MembersPage = () => {
   return (
     <div className="members-page-container">
       <div className="top-buttons">
+        <button onClick={handleBack}>Back</button>
         <button onClick={handleInviteMember}>Invite Member</button>
         <button onClick={() => alert("Settings")}>Settings</button>
-      </div>  
+      </div>
       <h1>Members</h1>
-      <h1>{projectName}</h1>
 
       <table className="members-table">
         <thead>
@@ -126,7 +130,8 @@ const MembersPage = () => {
                       (userRole === 'admin' && member.role === 'admin') // admin can't edit another admin
                     }
                   >
-                    <option value="owner">Owner</option>
+                    {/* Show "owner" as a visible but unselectable option */}
+                    <option value="owner" disabled>Owner</option>
                     <option value="admin">Admin</option>
                     <option value="editor">Editor</option>
                     <option value="reader">Reader</option>
@@ -134,16 +139,19 @@ const MembersPage = () => {
                 </td>
                 <td>{member.email}</td>
                 <td>
-                  <button
-                    onClick={() => handleRemoveMember(member.id)}
-                    disabled={
-                      member.role === 'owner' || 
-                      (userRole !== 'owner' && userRole !== 'admin') || 
-                      (userRole === 'admin' && member.role === 'admin') // admin can't remove another admin
-                    }
-                  >
-                    Remove
-                  </button>
+                  <div className="remove-buttons">
+                    {member.role !== 'owner' && ( // Hide the button for users with the "owner" role
+                      <button
+                        onClick={() => handleRemoveMember(member.id)}
+                        disabled={
+                          (userRole !== 'owner' && userRole !== 'admin') || 
+                          (userRole === 'admin' && member.role === 'admin') // admin can't remove another admin
+                        }
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))

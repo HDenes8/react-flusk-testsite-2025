@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import './MainPage.css';
+import FormattedDate from '../components/FormattedDate'; // adjust if needed
 
 const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   const [projects, setProjects] = useState([]);
@@ -13,17 +14,6 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   const [selectedFileIds, setSelectedFileIds] = useState([]); // Added this line
   const menuRef = useRef(null);
   const navigate = useNavigate();
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -160,8 +150,9 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                     </span>
                   </td>
                   <td>{project.role}</td>
-                  <td>{project.last_modified_date ? formatDate(project.last_modified_date) : '-'}</td>
-                  <td>{project.created_date ? formatDate(project.created_date) : '-'}</td>
+                  <td>{project.last_modified_date ? <FormattedDate dateInput={project.last_modified_date} /> : '-'}</td>
+                  <td>{project.created_date ? <FormattedDate dateInput={project.created_date} /> : '-'}</td>
+
                   <td>
                     <img
                       src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}

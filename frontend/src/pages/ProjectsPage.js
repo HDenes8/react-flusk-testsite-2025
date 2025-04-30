@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './ProjectsPage.css';
+import FormattedDate from '../components/FormattedDate';
 
 function formatFileSize(sizeInBytes) {
   const units = ["bytes", "KB", "MB", "GB", "TB"];
@@ -246,42 +247,39 @@ const ProjectsPage = () => {
         <button onClick={() => navigate(`/MembersPage/${project_id}`)}>Members</button>
       </div>
 
-      <h1>{project.name}</h1>
-      <p>{project.description}</p>
-      <p>Created on: {new Date(project.created_date).toLocaleString()}</p>
-
       <h3>Files</h3>
       <section className="file-info">
         <table className="files-table">
           <thead>
             <tr>
-              <th>Select</th>
-              <th>Ver</th>
+              <th className="checkbox-cell">Select</th>
+              <th className="ver-cell">Ver</th>
               <th>Title</th>
               <th>File Name</th>
               <th>Comment</th>
               <th>File Size</th>
               <th>Upload Date</th>
-              <th>Actions</th>
+              <th>Uploader</th> 
+              <th className="actions-cell">Actions</th>
             </tr>
           </thead>
           <tbody>
             {files.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ textAlign: "center" }}>No files uploaded yet.</td>
+                <td colSpan="9" style={{ textAlign: "center" }}>No files uploaded yet.</td>
               </tr>
             ) : (
               files.map((file) => (
                 <React.Fragment key={file.version_id}>
                   <tr>
-                    <td>
+                    <td className="checkbox-cell">
                       <input
                         type="checkbox"
                         value={file.version_id}
                         onChange={handleFileSelect}
                       />
                     </td>
-                    <td>
+                    <td className="ver-cell">
                       {file.version_number}
                       <span className={`status ${download_file_results[file.version_id] ? 'success' : 'error'}`}>
                         {download_file_results[file.version_id] ? '✔' : '❕'}
@@ -291,7 +289,10 @@ const ProjectsPage = () => {
                     <td>{file.file_name}</td>
                     <td>{file.comment}</td>
                     <td>{formatFileSize(file.file_size)}</td>
-                    <td>{new Date(file.upload_date).toLocaleString()}</td>
+                    <td className="time-cell">
+                      <FormattedDate dateInput={file.upload_date} />
+                    </td>
+                    <td>{file.uploader || "Unknown"}</td> 
                     <td>
                       <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>⋯</button>
                       {expandedFile === file.version_id && (
@@ -323,45 +324,48 @@ const ProjectsPage = () => {
                   {/* Injected version history row */}
                   {fileVersions[file.file_data_id] && (
                     <tr className="version-history-row">
-                      <td colSpan="8">
+                      <td className="version-history-data" colSpan="9">
                         <table className="versions-table">
-                          <thead>
-                            <tr>
-                              <th>Select</th>
-                              <th>Ver</th>
-                              <th></th>
-                              <th>File Name</th>
-                              <th>Comment</th>
-                              <th>File Size</th>
-                              <th>Upload Date</th>
-                              <th></th>
-                            </tr>
-                          </thead>
+                          
                           {/* changed freshly */}
                           <tbody>
-                          {fileVersions[file.file_data_id]?.map((version) => (
-                            <tr key={version.version_id}>
-                              <td>
-                                <input
-                                  type="checkbox"
-                                  value={version.version_id}
-                                  onChange={handleFileSelect}
-                                />
-                                
-                              </td>
-                              <td>{version.version_number}
-                                <span className={`status ${version.downloaded  ? 'success' : 'warning'}`}>
-                                  {version.downloaded ? "✔" : "❕"}
-                                </span>
-                              </td>
-                              <td></td>
-                              <td>{version.file_name}</td>
-                              <td>{version.comment}</td>
-                              <td>{formatFileSize(version.file_size)}</td>
-                              <td>{new Date(version.upload_date).toLocaleString()}</td>
-                            </tr>
+                          {fileVersions[file.file_data_id]
+                            .filter((version) => version.version_id !== file.version_id) // Filter out the latest version
+                            .map((version) => (
+                              <tr key={version.version_id} className="version-history-row">
+                                <td className="checkbox-cell">
+                                  <input
+                                    type="checkbox"
+                                    value={version.version_id}
+                                    onChange={handleFileSelect}
+                                  />
+                                </td>
+                                <td className="ver-cell">
+                                  {version.version_number}
+                                  <span className={`status ${version.downloaded ? 'success' : 'warning'}`}>
+                                    {version.downloaded ? "✔" : "❕"}
+                                  </span>
+                                </td>
+                                <td>
+                                  {/* Add an invisible placeholder to keep layout! */}
+                                  <span style={{ visibility: 'hidden' }}>{file.title}</span>
+                                </td>
+                                <td>{version.file_name}</td>
+                                <td>{version.comment}</td>
+                                <td>{formatFileSize(version.file_size)}</td>
+                                <td className="time-cell">
+                                  <FormattedDate dateInput={version.upload_date} />
+                                </td>
+                                <td>{version.uploader || "Unknown"}</td> 
+                                <td className="actions-cell">
+                                  {/* Add an invisible placeholder to keep layout! */}
+                                  <span style={{ visibility: 'hidden' }}>•••</span>
+                                </td>
+                              </tr>
                           ))}
+
                           </tbody>
+
                         </table>
                       </td>
                     </tr>

@@ -154,4 +154,33 @@
     color: rgb(0, 0, 0); /* Style for active buttons */
     font-weight: bolder; /* Makes the active button text bolder */
   }
-  
+
+  .project-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 20px;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 4px;
+}
+
+.project-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 20px;
+  color: #333;
+}
+
+.project-description {
+  font-size: 1rem;
+  margin-right: 20px;
+  color: #666;
+  flex-grow: 1; /* Ensures it takes available space */
+}
+
+.project-meta {
+  font-size: 0.9rem;
+  color: #999;
+  white-space: nowrap; /* Prevents wrapping */
+}

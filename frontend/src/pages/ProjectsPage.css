@@ -162,3 +162,67 @@
   z-index: 999; /* Sits behind the dropdown but in front of the table */
 }
 
+.version-history-row {
+  background-color: #cccccc6c;
+  border-bottom: 1px solid #ffffff;
+  border: none;
+}
+
+.version-history-row td {
+  border-top: none;
+  border-bottom: 1px solid #ffffff;
+  background-color: #f3f3f3;
+  border: none;
+  
+}
+
+.version-history-data {
+  background-color: #ccc;
+  border: none;
+  padding: 0;
+}
+
+.versions-table {
+  background-color: #ffffffbd;
+  border: none;
+}
+
+.files-table, .versions-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.files-table td, .files-table th,
+.versions-table td, .versions-table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkbox-cell {
+  width: 3%;
+  white-space: nowrap; /* Megakadályozza a sortörést */
+  padding: 10px;
+  align-items: center;
+}
+
+.ver-cell {
+  width: 5%;
+  white-space: nowrap; /* Megakadályozza a sortörést */
+  padding: 5px;
+  align-items: center;
+}
+
+.actions-cell {
+  width: 5%;
+  white-space: nowrap; /* Megakadályozza a sortörést */
+  padding: 5px;
+  align-items: center;
+}
+
+.time-cell {
+  text-align: center;
+}
+p {
+  text-align: left;
+}

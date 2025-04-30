@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Invitations.css';
+import FormattedDate from '../components/FormattedDate'; // adjust if needed
 
 const Invitations = () => {
   const [invitations, setInvitations] = useState([]);
@@ -85,7 +86,7 @@ const Invitations = () => {
                 <tr key={invite.id}>
                   <td>{invite.project_name}</td>
                   <td>{invite.status}</td>
-                  <td>{invite.invite_date}</td>
+                  <td>{invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}</td>
                   <td>
                     {filter === 'pending' && (
                       <>
@@ -101,7 +102,7 @@ const Invitations = () => {
             </tbody>
           </table>
         ) : (
-          <p>No invitations found</p>
+          <p>No invitations found.</p>
         )}
       </section>
     </div>

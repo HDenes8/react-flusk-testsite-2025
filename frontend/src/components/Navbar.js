@@ -7,7 +7,28 @@ import { FaHome, FaFolder, FaHeart, FaEnvelope, FaPlus, FaCog, FaSignOutAlt, FaB
 const Navbar = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [projectInfo, setProjectInfo] = useState(null);
   const navigate = useNavigate();
+
+  // Fetch project information if on ProjectsPage or MembersPage
+  useEffect(() => {
+    const fetchProjectInfo = async () => {
+      const path = window.location.pathname;
+      if (path.startsWith('/ProjectsPage') || path.startsWith('/MembersPage')) {
+        const projectId = path.split('/').pop();
+        try {
+          const response = await axios.get(`/project/${projectId}`);
+          if (response.status === 200) {
+            setProjectInfo(response.data.project);
+          }
+        } catch (error) {
+          console.error('Error fetching project info:', error);
+        }
+      }
+    };
+
+    fetchProjectInfo();
+  }, [window.location.pathname]);
 
   // Fetch profile data from the backend
   useEffect(() => {
@@ -89,7 +110,18 @@ const Navbar = () => {
 
       {/* Header */}
       <header className="navbar-header">
-        <h1>{getPageTitle()}</h1>
+        {projectInfo && (window.location.pathname.startsWith('/ProjectsPage') || window.location.pathname.startsWith('/MembersPage')) ? (
+          <div className="project-info">
+            <h1 className="project-title">{projectInfo.name}</h1>
+            <p className="project-description">{projectInfo.description}</p>
+            <p className="project-meta">
+              <strong>Created on:</strong> {new Date(projectInfo.created_date).toLocaleDateString()} | 
+              <strong> ID:</strong> {projectInfo.id}
+            </p>
+          </div>
+        ) : (
+          <h1>{getPageTitle()}</h1>
+        )}
         <div className="user-profile">
           <img src={profile.avatar} alt="User" />
           <span>{profile.name || 'Loading...'}</span>

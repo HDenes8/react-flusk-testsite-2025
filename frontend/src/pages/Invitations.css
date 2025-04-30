@@ -85,3 +85,7 @@
   color: white;
   border-color: #000000;
 }
+
+p {
+  text-align: center;
+}
