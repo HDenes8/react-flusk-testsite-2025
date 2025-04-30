@@ -527,7 +527,7 @@ def project_page(project_id):
                 "description": file.file_data.description,
                 "comment": file.comment,
                 "uploader": uploader.full_name if uploader else "Unknown",  # Add uploader name
-                "uploader_pic": uploader.profile_pic if uploader else "default.png"  # Add uploader profile picture
+                "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png"  # Add uploader profile picture
             })
             download_flags[file.version_id] = downloaded
 
