@@ -29,7 +29,7 @@ const MembersPage = () => {
       setCurrentUser(response.data.current_user || null);
     } catch (err) {
       if (err.response && err.response.status === 403) {
-        navigate("/dashboard");
+        navigate("/mainpage");
       } else {
         console.error("Error fetching members:", err);
         setError("Failed to load members.");
@@ -97,7 +97,7 @@ const MembersPage = () => {
       alert(response.data.message);
 
       if (isSelf) {
-        navigate("/dashboard"); // Redirect the user after leaving the project
+        navigate("/mainpage"); // Redirect the user after leaving the project
       } else {
         fetchMembers(); // Refresh the members list
       }
