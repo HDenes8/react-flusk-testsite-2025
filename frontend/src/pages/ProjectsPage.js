@@ -339,8 +339,6 @@ const ProjectsPage = () => {
                     <tr className="version-history-row">
                       <td className="version-history-data" colSpan="9">
                         <table className="versions-table">
-                          
-                          {/* changed freshly */}
                           <tbody>
                           {fileVersions[file.file_data_id]
                             .filter((version) => version.version_id !== file.version_id) // Filter out the latest version
@@ -389,9 +387,12 @@ const ProjectsPage = () => {
                                 </td>
                               </tr>
                           ))}
-
+                          {fileVersions[file.file_data_id].filter((version) => version.version_id !== file.version_id).length === 0 && (
+                            <tr>
+                              <td colSpan="9" style={{ textAlign: "center" }}>There are no older versions yet.</td>
+                            </tr>
+                          )}
                           </tbody>
-
                         </table>
                       </td>
                     </tr>

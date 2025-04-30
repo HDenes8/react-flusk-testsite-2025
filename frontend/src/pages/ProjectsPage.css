@@ -163,16 +163,14 @@
 }
 
 .version-history-row {
-  background-color: #cccccc6c;
-  border-bottom: 1px solid #ffffff;
+  border-bottom: 12px solid #8d0a0a;
   border: none;
 }
 
 .version-history-row td {
   border-top: none;
-  border-bottom: 1px solid #ffffff;
-  background-color: #f3f3f3;
-  border: none;
+  border-bottom: 2px solid #bebebe8e;
+  background-color: #def2ff;
   
 }
 
