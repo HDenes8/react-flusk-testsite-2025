@@ -17,6 +17,7 @@ import datetime
 import uuid 
 import zipfile
 import re
+import json
 
 #helper functions
 def is_user_active_member(project_id, user_id):
@@ -268,9 +269,10 @@ def invitations():
         "id": inv.invitation_id,
         "project_id": inv.project_id,
         "status": inv.status,
-        "invite_date": inv.invite_date.strftime('%Y-%m-%d')
+        "invite_date": inv.invite_date
     } for inv in latest_invitations]
     
+    print("DEBUG: /api/invitations response:\n" + json.dumps(invitations_data, indent=2, default=str))
     return jsonify({"invitations": invitations_data})
 
 
@@ -293,23 +295,15 @@ def accept_invite(invitation_id):
             existing_membership.is_removed = False
             existing_membership.user_deleted_or_left_date = None
             existing_membership.connection_date = func.now()
-            Invitation.query.filter(
-                ((Invitation.invited_user_id == current_user.user_id) | 
-                (Invitation.invited_email == current_user.email)),
-                Invitation.project_id == invitation.project_id
-            ).update({Invitation.status: 'accepted'}, synchronize_session=False)
-            db.session.commit()
         else:
             return jsonify({"error": "User is already a project member."}), 400
     else:
         new_member = User_Project(user_id=current_user.user_id, project_id=invitation.project_id, role='reader')
         db.session.add(new_member)
-        Invitation.query.filter(
-            ((Invitation.invited_user_id == current_user.user_id) | 
-            (Invitation.invited_email == current_user.email)),
-            Invitation.project_id == invitation.project_id
-        ).update({Invitation.status: 'accepted'}, synchronize_session=False)
-        db.session.commit()
+
+    # Update only the latest invitation
+    invitation.status = 'accepted'
+    db.session.commit()
 
     return jsonify({"message": "Invitation accepted."})
 
@@ -322,11 +316,8 @@ def deny_invite(invitation_id):
         or (invitation.invited_email and invitation.invited_email != current_user.email):
         return jsonify({"error": "Invalid invitation."}), 400
 
-    Invitation.query.filter(
-        ((Invitation.invited_user_id == current_user.user_id) | 
-        (Invitation.invited_email == current_user.email)),
-        Invitation.project_id == invitation.project_id
-    ).update({Invitation.status: 'declined'}, synchronize_session=False)
+    # Update only the latest invitation
+    invitation.status = 'declined'
     db.session.commit()
 
     return jsonify({"message": "Invitation denied."})
@@ -969,6 +960,7 @@ def home():
         "roles": roles_list
     }
 
+    print("DEBUG: /api/mainpage response:\n" + json.dumps(response_data, indent=2, default=str))
     return jsonify(response_data)
 
 # Profile
