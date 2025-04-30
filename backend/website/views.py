@@ -741,8 +741,8 @@ def get_file_versions(file_data_id):
                 "file_type": v.file_type,
                 "upload_date": v.upload_date.isoformat() if v.upload_date else None,
                 "comment": v.comment,
-                "uploader": uploader.email if uploader else "Unknown",
-                # Once downloaded, always mark as downloaded
+                "uploader": uploader.full_name if uploader else "Unknown",  # Changed to uploader's name
+                "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png",  # Added uploader's profile picture
                 "downloaded": v.version_id in downloaded_version_ids
             })
 
