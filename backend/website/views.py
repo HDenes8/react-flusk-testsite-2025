@@ -439,7 +439,7 @@ def get_projects():
         ).order_by(File_version.upload_date.desc()).first()
 
         if last_version and last_version.upload_date:
-            last_modified = last_version.upload_date.strftime('%Y-%m-%d')
+            last_modified = last_version.upload_date
         else:
             last_modified = None
 
@@ -448,7 +448,7 @@ def get_projects():
             "name": project.name,
             "role": user_project.role,
             "lastModified": last_modified,
-            "date": project.created_date.strftime('%Y-%m-%d') if project.created_date else None,
+            "date": project.created_date if project.created_date else None,
             "ownerName": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
             "ownerAvatar": f"/static/profile_pics/{User_profile.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
             "status": "success"
