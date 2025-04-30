@@ -182,7 +182,7 @@ def invitations():
         "id": inv.invitation_id,
         "project_id": inv.project_id,
         "status": inv.status,
-        "invite_date": inv.invite_date.strftime('%Y-%m-%d')
+        "invite_date": inv.invite_date
     } for inv in user_invitations]
     
     return jsonify({"invitations": invitations_data})
