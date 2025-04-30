@@ -590,7 +590,6 @@ def upload_file(project_id):
         main_file_id_raw = request.form.get("main_file_id")
         comment = request.form.get("comment", "")[:100]
         main_file_id = int(main_file_id_raw) if main_file_id_raw and main_file_id_raw.isdigit() else None
-        
 
         if main_file_id:
             # Version upload: Link to existing main file
@@ -614,7 +613,7 @@ def upload_file(project_id):
         # Use the same folder for versioning (existing folder for the file)
         folder_name = str(file_data.file_data_id)
         upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(project.project_id), folder_name)
-        
+
         # Check if the folder already exists, if not, create it
         if os.path.exists(upload_folder):
             print(f"Folder already exists: {upload_folder}")
@@ -637,7 +636,7 @@ def upload_file(project_id):
         # Strip trailing _v<number> from the filename if it exists
         version_pattern = re.compile(r'(.*)_v\d+$')
         match = version_pattern.match(name)
-        if (match):
+        if match:
             name = match.group(1)
 
         # Construct the new filename
@@ -669,12 +668,17 @@ def upload_file(project_id):
 
         # Return the list of versions (for dropdown or history list)
         file_versions = File_version.query.filter_by(file_data_id=file_data.file_data_id).order_by(File_version.version_number.desc()).all()
-        version_history = [{
-            "version_number": v.version_number,
-            "file_name": v.file_name,
-            "file_size": v.file_size,
-            "comment": v.comment
-        } for v in file_versions]
+        version_history = []
+        for v in file_versions:
+            uploader = User_profile.query.get(v.user_id)
+            version_history.append({
+                "version_number": v.version_number,
+                "file_name": v.file_name,
+                "file_size": v.file_size,
+                "comment": v.comment,
+                "uploader": uploader.full_name if uploader else "Unknown",  # Add uploader name
+                "uploader_pic": uploader.profile_pic if uploader else "default.png"  # Add uploader profile picture
+            })
 
         file_data_info = {
             "file_data_id": file_data.file_data_id,
