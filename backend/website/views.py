@@ -513,6 +513,7 @@ def project_page(project_id):
         download_flags = {}
 
         for file in latest_versions:
+            uploader = User_profile.query.get(file.user_id)  # Fetch uploader details
             downloaded = (file.user_id == user_id) or (file.version_id in downloaded_version_ids)
             files_data.append({
                 "version_id": file.version_id,
@@ -524,9 +525,9 @@ def project_page(project_id):
                 "file_type": file.file_type,
                 "upload_date": file.upload_date.isoformat() if file.upload_date else None,
                 "description": file.file_data.description,
-                "uploader": file.user.full_name if file.user else "Unknown",
-                "uploader_pic": file.user.profile_pic if file.user else "default.png",
-                "comment": file.comment
+                "comment": file.comment,
+                "uploader": uploader.full_name if uploader else "Unknown",  # Add uploader name
+                "uploader_pic": uploader.profile_pic if uploader else "default.png"  # Add uploader profile picture
             })
             download_flags[file.version_id] = downloaded
 
