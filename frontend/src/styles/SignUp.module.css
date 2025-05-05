@@ -111,29 +111,27 @@ input::placeholder {
 }
 
 .g-recaptcha {
-    display: flex; /* Use flexbox for centering */
-    justify-content: center; /* Center horizontally */
-    margin: 20px auto; /* Center horizontally and add vertical spacing */
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
     margin-top: 25px;
-    margin-bottom: 50px; /* Increased spacing below the widget */
-
-    /* Scale the reCAPTCHA widget */
-    transform: scale(1.16); /* Adjust the scale factor */
-    transform-origin: center; /* Scale from the center */
-    width: 304px; /* Set the container width to match the reCAPTCHA widget */
-    height: 78px; /* Set the container height to match the reCAPTCHA widget */
-    position: relative; /* Ensure it stays in its container */
-    z-index: 1; /* Ensure it does not overlap other elements */
-    overflow: hidden; /* Prevent the scaled widget from overflowing */
+    margin-bottom: 50px;
+    transform: scale(1.16);
+    transform-origin: center;
+    width: 304px;
+    height: 78px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
 }
 
 .g-recaptcha iframe {
-    position: absolute; /* Ensure the iframe is positioned correctly */
-    left: 0; /* Align the iframe to the left */
-    top: 0; /* Align the iframe to the top */
-    width: 304px !important; /* Match the reCAPTCHA widget's width */
-    height: 78px !important; /* Match the reCAPTCHA widget's height */
-    pointer-events: auto; /* Allow interaction with the iframe */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 304px !important;
+    height: 78px !important;
+    pointer-events: auto;
 }
 
 /* Divider styling */
