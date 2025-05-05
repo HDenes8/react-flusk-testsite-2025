@@ -11,6 +11,7 @@ from flask_wtf.recaptcha import RecaptchaField
 import os
 import requests
 from flask_cors import CORS
+import random
 
 
 auth = Blueprint('auth', __name__)
@@ -75,9 +76,8 @@ def is_valid_phone_number(number):
 @auth.route('/signup', methods=['POST'])
 def sign_up():
     if request.method == 'POST':
-        data = request.get_json()  # Parse JSON data from the request
+        data = request.get_json() 
         captcha_response = data.get('captchaResponse')
-        print("Received captchaResponse:", captcha_response)  # Debugging
 
         # Verify reCAPTCHA
         if not verify_recaptcha(captcha_response):
@@ -88,13 +88,12 @@ def sign_up():
         nickname = data.get('nickname')
         password1 = data.get('password1')
         password2 = data.get('password2')
-        nickname_id = 0 # This will be updated later
 
         # Optional fields
         mobile = data.get('mobile') or None
         job = data.get('job') or None
 
-        # Check for existing user and validate input
+        # Check for existing user and validate inputs
         user = User_profile.query.filter_by(email=email).first()
         if user:
             return {"message": "Email already exists.", "status": "error"}, 400
@@ -119,8 +118,21 @@ def sign_up():
                 "message": "Password must be at least 7 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
                 "status": "error",
             }, 400
+        
+        # Generate nickname_id 
+        possible_ids = list(range(1, 10000))
+        taken_ids = [
+            user.nickname_id for user in User_profile.query.filter_by(nickname=nickname).all()
+        ]            
+        available_ids = list(set(possible_ids) - set(taken_ids))
+
+        if not available_ids:
+            return {"message": "No available nickname IDs for this nickname.", "status": "error"}, 500
         else:
-            # Create new user
+            nickname_id = random.choice(available_ids)
+
+        if nickname_id:
+        # Create new user
             new_user = User_profile(
                 email=email,
                 full_name=full_name,
@@ -133,10 +145,6 @@ def sign_up():
             )
 
             db.session.add(new_user)
-            db.session.commit()
-
-            # will delete later
-            new_user.nickname_id = {new_user.user_id}
             db.session.commit()
 
             login_user(new_user, remember=True)

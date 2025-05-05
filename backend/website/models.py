@@ -9,6 +9,7 @@ class User_profile (db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255))
     nickname = db.Column(db.String(100))
+    nickname_id = db.Column(db.Integer)
     profile_pic = db.Column(db.String(255), default="default.png")
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
