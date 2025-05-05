@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import './sign_up.css';
+import styles from '../styles/LoginPage.module.css'; // Updated to scoped styles
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -29,20 +29,20 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container">
+    <div className={styles['container']}>
       <form method="POST" onSubmit={handleLogin}>
-        <div className="logo" style={{ textAlign: 'center' }}>
+        <div className={styles['logo']} style={{ textAlign: 'center' }}>
           <img src="/sortify_logo.png" alt="Sortify Logo" width="250" />
         </div>
         <h3 align="center">Log In</h3>
 
-        {message && <p className="error-message">{message}</p>}
+        {message && <p className={styles['error-message']}>{message}</p>}
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="email">Email Address</label>
           <input
             type="email"
-            className="form-control"
+            className={styles['form-control']}
             id="email"
             name="email"
             placeholder="Enter email"
@@ -52,11 +52,11 @@ const LoginPage = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="password">Password</label>
           <input
             type="password"
-            className="form-control"
+            className={styles['form-control']}
             id="password"
             name="password"
             placeholder="Enter password"
@@ -68,15 +68,15 @@ const LoginPage = () => {
 
         <br />
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className={styles['btn-primary']}>
           Log In
         </button>
 
-        <div className="divider">
+        <div className={styles['divider']}>
           <h4>or</h4>
         </div>
 
-        <Link to="/signup" className="btn btn-secondary">
+        <Link to="/signup" className={styles['btn-secondary']}>
           Register
         </Link>
       </form>

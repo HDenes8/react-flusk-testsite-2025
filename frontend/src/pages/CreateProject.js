@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './CreateProject.css';
-
-
+import '../styles/CreateProject.module.css'; // Updated to scoped styles
 
 const CreateProject = () => {
   const navigate = useNavigate(); // ✅ This was missing!
@@ -32,12 +30,10 @@ const CreateProject = () => {
       alert('Failed to create project');
     }
   };
-  
-  
 
   return (
     <div className="create-project-container">
-      <h3 align="center">Create New Project</h3>
+      <h3 className="create-project-title" align="center">Create New Project</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="projectName">Project Name: *</label>
@@ -66,7 +62,10 @@ const CreateProject = () => {
           />
         </div>
         <div className="form-group-email">
-          <label htmlFor="inviteEmail">Emails to invite: <p className="attention">make sure you leave a comma (,) mark between the emails!</p></label>
+          <label htmlFor="inviteEmail">
+            Emails to invite: 
+            <p className="attention">Make sure you leave a comma (,) mark between the emails!</p>
+          </label>
           <textarea
             rows="4"
             cols="50"

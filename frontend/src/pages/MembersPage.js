@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import "./MembersPage.css";
+import styles from "../styles/MembersPage.module.css"; // Updated to scoped styles
 
 const MembersPage = () => {
   const navigate = useNavigate();
@@ -131,17 +131,16 @@ const MembersPage = () => {
     navigate("/settings");
   };
 
-  
   const handleBack = () => {
     navigate(`/ProjectsPage/${project_id}`);
   };
 
-  if (error) return <p className="error-message">{error}</p>;
+  if (error) return <p className={styles["error-message"]}>{error}</p>;
 
   return (
-    <div className="members-page-container">
-      <div className="top-buttons">
-      <button onClick={handleBack}>Back</button>
+    <div className={styles["members-page-container"]}>
+      <div className={styles["top-buttons"]}>
+        <button onClick={handleBack}>Back</button>
         {(userRole === "owner" || userRole === "admin") && (
           <button onClick={handleInviteMember}>Invite Member</button>
         )}
@@ -150,7 +149,7 @@ const MembersPage = () => {
 
       <h1>Members</h1>
 
-      <table className="members-table">
+      <table className={styles["members-table"]}>
         <thead>
           <tr>
             <th>ID</th>
@@ -187,7 +186,9 @@ const MembersPage = () => {
                       onChange={(e) => handleChangeRole(member.id, e.target.value)}
                       disabled={!canChangeRole || isOwner} // Disable if the member is an owner
                     >
-                      <option value="owner" disabled>Owner</option> {/* Always disable the owner option */}
+                      <option value="owner" disabled>
+                        Owner
+                      </option>
                       <option value="admin">Admin</option>
                       <option value="editor">Editor</option>
                       <option value="reader">Reader</option>
@@ -195,11 +196,11 @@ const MembersPage = () => {
                   </td>
                   <td>{member.email}</td>
                   <td>
-                    <div className="remove-buttons">
-                      {!isOwner && ( // Hide the button if the member is an owner
+                    <div className={styles["remove-buttons"]}>
+                      {!isOwner && (
                         <button
                           onClick={() => handleRemoveMember(member.id)}
-                          disabled={isSelf && userRole === "owner"} // Prevent owner from leaving
+                          disabled={isSelf && userRole === "owner"}
                         >
                           {isSelf ? "Leave" : "Remove"}
                         </button>
@@ -211,7 +212,9 @@ const MembersPage = () => {
             })
           ) : (
             <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>No members found.</td>
+              <td colSpan="5" style={{ textAlign: "center" }}>
+                No members found.
+              </td>
             </tr>
           )}
         </tbody>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './ProjectsPage.css';
+import styles from '../styles/ProjectsPage.module.css'; // Import styles as an object
 import FormattedDate from '../components/FormattedDate';
 
 function formatFileSize(sizeInBytes) {
@@ -30,9 +30,6 @@ const ProjectsPage = () => {
   const [fileVersions, setFileVersions] = useState({});
   const [download_file_results, setDownloadFileResults] = useState({}); // To track download results 
   const [error, setError] = useState(null);
-
-
-
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
@@ -240,27 +237,27 @@ const ProjectsPage = () => {
   if (!project) return <p>Loading...</p>;
 
   return (
-    <div className="project-page-container">
-      <div className="top-buttons">
+    <div className={styles['project-page-container']}>
+      <div className={styles['top-buttons']}>
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
         <button onClick={() => navigate(`/MembersPage/${project_id}`)}>Members</button>
       </div>
 
       <h3>Files</h3>
-      <section className="file-info">
-        <table className="files-table">
+      <section className={styles['file-info']}>
+        <table className={styles['files-table']}>
           <thead>
             <tr>
-              <th className="checkbox-cell">Select</th>
-              <th className="ver-cell">Ver</th>
+              <th className={styles['checkbox-cell']}>Select</th>
+              <th className={styles['ver-cell']}>Ver</th>
               <th>Title</th>
               <th>File Name</th>
               <th>Comment</th>
               <th>File Size</th>
               <th>Upload Date</th>
               <th>Uploader</th> 
-              <th className="actions-cell">Actions</th>
+              <th className={styles['actions-cell']}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -272,16 +269,16 @@ const ProjectsPage = () => {
               files.map((file) => (
                 <React.Fragment key={file.version_id}>
                   <tr>
-                    <td className="checkbox-cell">
+                    <td className={styles['checkbox-cell']}>
                       <input
                         type="checkbox"
                         value={file.version_id}
                         onChange={handleFileSelect}
                       />
                     </td>
-                    <td className="ver-cell">
+                    <td className={styles['ver-cell']}>
                       {file.version_number}
-                      <span className={`status ${download_file_results[file.version_id] ? 'success' : 'error'}`}>
+                      <span className={`${styles['status']} ${download_file_results[file.version_id] ? styles['success'] : styles['error']}`}>
                         {download_file_results[file.version_id] ? '✔' : '❕'}
                       </span>
                     </td>
@@ -289,16 +286,16 @@ const ProjectsPage = () => {
                     <td>{file.file_name}</td>
                     <td>{file.comment}</td>
                     <td>{formatFileSize(file.file_size)}</td>
-                    <td className="time-cell">
+                    <td className={styles['time-cell']}>
                       <FormattedDate dateInput={file.upload_date} />
                     </td>
                     <td>
                       {file.uploader ? (
-                        <div className="uploader-info">
+                        <div className={styles['uploader-info']}>
                           <img
                             src={file.uploader_pic || '/default-profile.png'}
                             alt={`${file.uploader}'s profile`}
-                            className="uploader-profile-picture"
+                            className={styles['uploader-profile-picture']}
                           />
                           <span>{file.uploader}</span>
                         </div>
@@ -307,27 +304,24 @@ const ProjectsPage = () => {
                       )}
                     </td> 
                     <td>
-                      <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>⋯</button>
+                      <button className={styles['dots-button']} onClick={() => toggleFileDropdown(file.version_id)}>⋯</button>
                       {expandedFile === file.version_id && (
-                        <div className="horizontal-menu" ref={dropdownRef}>
-                          <div className="description-box">
+                        <div className={styles['horizontal-menu']} ref={dropdownRef}>
+                          <div className={styles['description-box']}>
                             <p><strong>Description:</strong> {file.description || "No description available"}</p>
                           </div>
-                          <div className="open-project">
-                          
-                              <button onClick={() => toggleVersionTable(file.file_data_id)}>
-                                {fileVersions[file.file_data_id] ? 'Hide Versions' : 'Show Versions'}
-                              </button>
-                            
-                              <button
-                                onClick={() => {
-                                  setVersionUploadTarget(file);
-                                  closeFileDropdown();
-                                }}
-                              >
-                                Upload New Version
-                              </button>
-                            
+                          <div className={styles['open-project']}>
+                            <button onClick={() => toggleVersionTable(file.file_data_id)}>
+                              {fileVersions[file.file_data_id] ? 'Hide Versions' : 'Show Versions'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setVersionUploadTarget(file);
+                                closeFileDropdown();
+                              }}
+                            >
+                              Upload New Version
+                            </button>
                           </div>
                         </div>
                       )}
@@ -336,24 +330,24 @@ const ProjectsPage = () => {
 
                   {/* Injected version history row */}
                   {fileVersions[file.file_data_id] && (
-                    <tr className="version-history-row">
-                      <td className="version-history-data" colSpan="9">
-                        <table className="versions-table">
+                    <tr className={styles['version-history-row']}>
+                      <td className={styles['version-history-data']} colSpan="9">
+                        <table className={styles['versions-table']}>
                           <tbody>
                           {fileVersions[file.file_data_id]
                             .filter((version) => version.version_id !== file.version_id) // Filter out the latest version
                             .map((version) => (
-                              <tr key={version.version_id} className="version-history-row">
-                                <td className="checkbox-cell">
+                              <tr key={version.version_id} className={styles['version-history-row']}>
+                                <td className={styles['checkbox-cell']}>
                                   <input
                                     type="checkbox"
                                     value={version.version_id}
                                     onChange={handleFileSelect}
                                   />
                                 </td>
-                                <td className="ver-cell">
+                                <td className={styles['ver-cell']}>
                                   {version.version_number}
-                                  <span className={`status ${version.downloaded ? 'success' : 'warning'}`}>
+                                  <span className={`${styles['status']} ${version.downloaded ? styles['success'] : styles['warning']}`}>
                                     {version.downloaded ? "✔" : "❕"}
                                   </span>
                                 </td>
@@ -364,16 +358,16 @@ const ProjectsPage = () => {
                                 <td>{version.file_name}</td>
                                 <td>{version.comment}</td>
                                 <td>{formatFileSize(version.file_size)}</td>
-                                <td className="time-cell">
+                                <td className={styles['time-cell']}>
                                   <FormattedDate dateInput={version.upload_date} />
                                 </td>
                                 <td>
                                   {version.uploader ? (
-                                    <div className="uploader-info">
+                                    <div className={styles['uploader-info']}>
                                       <img
                                         src={version.uploader_pic || '/default-profile.png'}
                                         alt={`${version.uploader}'s profile`}
-                                        className="uploader-profile-picture"
+                                        className={styles['uploader-profile-picture']}
                                       />
                                       <span>{version.uploader}</span>
                                     </div>
@@ -381,7 +375,7 @@ const ProjectsPage = () => {
                                     "Unknown"
                                   )}
                                 </td> {/* Display version uploader here */}
-                                <td className="actions-cell">
+                                <td className={styles['actions-cell']}>
                                   {/* Add an invisible placeholder to keep layout! */}
                                   <span style={{ visibility: 'hidden' }}>•••</span>
                                 </td>
@@ -407,8 +401,8 @@ const ProjectsPage = () => {
 
       {/* Upload Modal */}
       {showUploadModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className={styles['modal-overlay']}>
+          <div className={styles['modal']}>
             <h2>Upload File</h2>
             <form onSubmit={handleUploadSubmit} encType="multipart/form-data">
               <input type="file" name="file" required onChange={handleFileChange} />
@@ -424,7 +418,7 @@ const ProjectsPage = () => {
                 placeholder="Description (optional)"
                 onChange={handleInputChange}
               />
-              <div className="modal-buttons">
+              <div className={styles['modal-buttons']}>
                 <button type="submit">Upload</button>
                 <button type="button" onClick={() => setShowUploadModal(false)}>Cancel</button>
               </div>
@@ -435,8 +429,8 @@ const ProjectsPage = () => {
 
       {/* Upload Version Modal */}
       {versionUploadTarget && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className={styles['modal-overlay']}>
+          <div className={styles['modal']}>
             <h2>Upload New Version for "{versionUploadTarget.file_name}"</h2>
             <form onSubmit={handleVersionUploadSubmit} encType="multipart/form-data">
               <input type="file" required onChange={(e) =>
@@ -447,7 +441,7 @@ const ProjectsPage = () => {
                 onChange={(e) =>
                   setVersionUploadData({ ...versionUploadData, comment: e.target.value })}
               />
-              <div className="modal-buttons">
+              <div className={styles['modal-buttons']}>
                 <button type="submit">Upload Version</button>
                 <button type="button" onClick={() => setVersionUploadTarget(null)}>Cancel</button>
               </div>
@@ -458,12 +452,12 @@ const ProjectsPage = () => {
 
       {/* Download Modal */}
       {showDownloadModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className={styles['modal-overlay']}>
+          <div className={styles['modal']}>
             <h2>Download Files</h2>
             <p>You have selected {selectedFiles.length} file(s) to download.</p>
             <form onSubmit={handleDownloadSubmit}>
-              <div className="modal-buttons">
+              <div className={styles['modal-buttons']}>
                 <button type="submit">Download</button>
                 <button type="button" onClick={() => setShowDownloadModal(false)}>Cancel</button>
               </div>
