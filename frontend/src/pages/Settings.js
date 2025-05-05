@@ -124,7 +124,6 @@ const Settings = () => {
 
   return (
     <div className="settings-container">
-      <h3 align="center">Settings</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="fullName">Full Name:</label>

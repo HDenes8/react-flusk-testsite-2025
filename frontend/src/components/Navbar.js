@@ -19,7 +19,10 @@ const Navbar = () => {
         try {
           const response = await axios.get(`/project/${projectId}`);
           if (response.status === 200) {
-            setProjectInfo(response.data.project);
+            setProjectInfo({
+              name: response.data.project.name,
+              role: response.data.project.role, // Assuming the API returns the user's role
+            });
           }
         } catch (error) {
           console.error('Error fetching project info:', error);
@@ -113,11 +116,7 @@ const Navbar = () => {
         {projectInfo && (window.location.pathname.startsWith('/ProjectsPage') || window.location.pathname.startsWith('/MembersPage')) ? (
           <div className="project-info">
             <h1 className="project-title">{projectInfo.name}</h1>
-            <p className="project-description">{projectInfo.description}</p>
-            <p className="project-meta">
-              <strong>Created on:</strong> {new Date(projectInfo.created_date).toLocaleDateString()} | 
-              <strong> ID:</strong> {projectInfo.id}
-            </p>
+            <p className="project-role"><strong>Role:</strong> {projectInfo.role}</p>
           </div>
         ) : (
           <h1>{getPageTitle()}</h1>

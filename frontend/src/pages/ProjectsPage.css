@@ -240,3 +240,8 @@ p {
   object-fit: cover; /* Ensures the image fits within the circle */
   border: 1px solid #ccc; /* Optional: Add a border */
 }
+
+.time-cell, .modified-date-cell {
+  text-align: center; /* Centers text horizontally */
+  vertical-align: middle; /* Centers text vertically */
+}
