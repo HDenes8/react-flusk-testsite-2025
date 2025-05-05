@@ -88,6 +88,7 @@ def sign_up():
         nickname = data.get('nickname')
         password1 = data.get('password1')
         password2 = data.get('password2')
+        nickname_id = 0 # This will be updated later
 
         # Optional fields
         mobile = data.get('mobile') or None
@@ -126,14 +127,16 @@ def sign_up():
                 password=generate_password_hash(password1, method='pbkdf2:sha256'),
                 nickname=nickname,
                 mobile=mobile,
+                nickname_id=nickname_id, 
                 job=job,
+
             )
 
             db.session.add(new_user)
             db.session.commit()
 
-            # Update the nickname by appending the user ID
-            new_user.nickname = f"{new_user.nickname}#{new_user.user_id}"
+            # will delete later
+            new_user.nickname_id = {new_user.user_id}
             db.session.commit()
 
             login_user(new_user, remember=True)
