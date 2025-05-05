@@ -184,3 +184,7 @@
   color: #999;
   white-space: nowrap; /* Prevents wrapping */
 }
+
+p {
+  text-align: center;
+}

@@ -173,4 +173,30 @@
     color: white; /* Text color on hover */
     transition: background-color 0.3s, color 0.3s; /* Smooth transition effect */
   }
+
+  .top-buttons {
+    display: flex;
+    justify-content: flex-end; /* Pushes buttons to the right */
+    align-items: center; /* Vertically aligns the buttons if needed */
+    gap: 10px; /* Adds spacing between buttons */
+    margin-bottom: 20px; /* Spacing below the buttons */
+    margin-left: auto; /* Pushes the buttons to the far-right side */
+    margin-right: 5%; /* Ensures no extra space to the right */
+    width: 35%; /* Allows the buttons to occupy only the required width */
+  }
   
+  .top-buttons button {
+    padding: 8px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 8px; /* Rounded corners */
+    background-color: #ffffff; /* Default background color */
+    color: #000000; /* Default text color */
+    border: 1px solid #00000054; /* Border color */ 
+  }
+  
+  .top-buttons button:hover {
+    background-color: #000000; /* Background color on hover */
+    color: white; /* Text color on hover */
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition effect */
+  }
