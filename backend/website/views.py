@@ -45,6 +45,7 @@ def members(project_id):
     for user_project in user_projects:
         user = User_profile.query.get(user_project.user_id)
         project_roles.append({
+            "id": user.user_id,
             "name": user.full_name,
             "role": user_project.role,
             "email": user.email,
@@ -247,24 +248,25 @@ def remove_user_from_project(project_id):
 @views.route('/invitations', methods=['GET'])
 @login_required
 def invitations():
-    filter_status = request.args.getlist('status')
+    filter_status = request.args.getlist('status')  # Get the status filter from the query params
     if not filter_status:
-        filter_status = ['pending']
+        filter_status = ['pending']  # Default to "pending" if no status is provided
 
+    # Fetch the latest invitations for the current user based on the filter
     latest_invites_subquery = db.session.query(
         Invitation.project_id,
         func.max(Invitation.invitation_id).label('max_id')
     ).filter(
         ((Invitation.invited_user_id == current_user.user_id) | 
-        (Invitation.invited_email == current_user.email)),
-        Invitation.status.in_(filter_status)
+         (Invitation.invited_email == current_user.email)),
+        Invitation.status.in_(filter_status)  # Dynamically filter by status
     ).group_by(Invitation.project_id).subquery()
 
     latest_invitations = db.session.query(Invitation).join(
         latest_invites_subquery,
         (Invitation.project_id == latest_invites_subquery.c.project_id) & 
         (Invitation.invitation_id == latest_invites_subquery.c.max_id)
-    ).filter(Invitation.status == 'pending').all()  # Ensure only pending invitations are included
+    ).all()  # Remove hardcoded "pending" filter
 
     invitations_data = [{
         "project_name": inv.project.name,
@@ -273,8 +275,8 @@ def invitations():
         "status": inv.status,
         "invite_date": inv.invite_date
     } for inv in latest_invitations]
-    
-    print("DEBUG: /api/invitations response:\n" + json.dumps(invitations_data, indent=2, default=str))
+
+    print("DEBUG: /invitations response:\n" + json.dumps(invitations_data, indent=2, default=str))
     return jsonify({"invitations": invitations_data})
 
 

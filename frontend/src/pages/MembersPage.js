@@ -19,9 +19,15 @@ const MembersPage = () => {
       });
 
       const roleOrder = { owner: 1, admin: 2, editor: 3, reader: 4 }; // Define the custom order
-      const sortedMembers = response.data.members.sort(
-        (a, b) => roleOrder[a.role] - roleOrder[b.role]
-      );
+      const sortedMembers = response.data.members.sort((a, b) => {
+        // First, sort by role order
+        const roleComparison = roleOrder[a.role] - roleOrder[b.role];
+        if (roleComparison !== 0) {
+          return roleComparison;
+        }
+        // If roles are the same, sort alphabetically by name
+        return a.name.localeCompare(b.name);
+      });
 
       setMembers(sortedMembers);
       setUserRole(response.data.current_user_role);
