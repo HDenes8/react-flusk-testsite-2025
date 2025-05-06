@@ -417,6 +417,7 @@ def projects():
         filter(User_Project.user_id == current_user.user_id).\
         all()
     
+    #maybe
     projects_data = [{
         "project_id": proj.Project.project_id,
         "name": proj.Project.name,
@@ -477,8 +478,8 @@ def create_project():
         "message": "Project created",
         "project": {
             "id": project.project_id,
-            "name": project.name,
             "description": project.description,
+            "role": project.role,
             "created_at": project.created_date.isoformat()
         }
     }), 201
@@ -536,6 +537,7 @@ def project_page(project_id):
         project_data = {
             "id": project.project_id,
             "name": project.name,
+            "role": membership.role,
             "description": project.description,
             "created_date": project.created_date.isoformat() if project.created_date else None,
             "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
