@@ -45,10 +45,12 @@ def members(project_id):
     for user_project in user_projects:
         user = User_profile.query.get(user_project.user_id)
         project_roles.append({
-            "id": user.user_id,
             "name": user.full_name,
             "role": user_project.role,
-            "email": user.email
+            "email": user.email,
+            "phoneNumber": user.mobile,
+            "nickname": user.nickname,
+            "nickname_id": user.nickname_id
         })
         if user.user_id == current_user.user_id:
             current_user_role = user_project.role
