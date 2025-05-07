@@ -51,6 +51,7 @@ def members(project_id):
             "email": user.email,
             "phoneNumber": user.mobile,
             "nickname": user.nickname,
+            "job": user.job,
             "nickname_id": user.nickname_id
         })
         if user.user_id == current_user.user_id:
@@ -531,7 +532,8 @@ def project_page(project_id):
                 "upload_date": file.upload_date.isoformat() if file.upload_date else None,
                 "description": file.file_data.description,
                 "comment": file.comment,
-                "uploader": uploader.full_name if uploader else "Unknown",  # Add uploader name
+                "uploader_nickname": uploader.nickname if uploader else "Unknown",
+                "uploader_nickname_id": uploader.nickname_id if uploader else "No ID",
                 "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png"  # Add uploader profile picture
             })
             download_flags[file.version_id] = downloaded
@@ -978,12 +980,15 @@ def home():
             "id": user.user_id,
             "name": user.full_name,
             "email": user.email,
+            "nickname": user.nickname,
+            "nickname_id": user.nickname_id,
             "profile_pic": f"/static/profile_pics/{user.profile_pic}" if user.profile_pic else "/static/profile_pics/default.png"
         },
         "roles": roles_list
     }
 
     print("DEBUG: /api/mainpage response:\n" + json.dumps(response_data, indent=2, default=str))
+
     return jsonify(response_data)
 
 # Profile
@@ -997,7 +1002,9 @@ def get_profile():
 
     profile_data = {
         "name": user.full_name,
-        "avatar": f"/static/profile_pics/{user.profile_pic}" if user.profile_pic else "/static/profile_pics/default.png"
+        "avatar": f"/static/profile_pics/{user.profile_pic}" if user.profile_pic else "/static/profile_pics/default.png",
+        "nickname_id": user.nickname_id,
+        "nickname": user.nickname,
     }
 
     return jsonify(profile_data)

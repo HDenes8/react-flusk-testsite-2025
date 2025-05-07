@@ -161,8 +161,10 @@ const MembersPage = () => {
           <tr>
             <th>ID</th>
             <th>Name</th>
+            <th>Nickname</th>
+            <th>Job</th>
+            <th>Email</th>            
             <th>Role</th>
-            <th>Email</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -185,8 +187,11 @@ const MembersPage = () => {
 
               return (
                 <tr key={member.id}>
-                  <td>{member.id}</td>
+                  <td>#{member.nickname_id}</td>
                   <td>{member.name}</td>
+                  <td>{member.nickname}</td>
+                  <td>{member.job}</td>                  
+                  <td>{member.email}</td>
                   <td>
                     <select
                       value={member.role}
@@ -199,7 +204,6 @@ const MembersPage = () => {
                       <option value="reader">Reader</option>
                     </select>
                   </td>
-                  <td>{member.email}</td>
                   <td>
                     <div className="remove-buttons">
                       {!isOwner && ( // Hide the button if the member is an owner
@@ -217,7 +221,7 @@ const MembersPage = () => {
             })
           ) : (
             <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>No members found.</td>
+              <td colSpan="6" style={{ textAlign: "center" }}>No members found.</td>
             </tr>
           )}
         </tbody>

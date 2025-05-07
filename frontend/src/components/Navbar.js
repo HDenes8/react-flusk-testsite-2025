@@ -46,7 +46,7 @@ const Navbar = () => {
         }
 
         // Set the fetched data to state
-        setProfile(profileResponse.data || { name: '', avatar: '/static/profile_pics/default.png' });
+        setProfile(profileResponse.data || { name: '', avatar: '/static/profile_pics/default.png', nickname: '', nickname_id: '' });
       } catch (error) {
         console.error('Error fetching profile data:', error);
         navigate('/login'); // Redirect to login page on unexpected errors
@@ -123,7 +123,7 @@ const Navbar = () => {
         )}
         <div className="user-profile">
           <img src={profile.avatar} alt="User" />
-          <span>{profile.name || 'Loading...'}</span>
+          <span>{`${profile.nickname || "Loading"} # ${profile.nickname_id || 'No ID'}`}</span>
           <button onClick={handleLogout}>
             <FaSignOutAlt />
           </button>

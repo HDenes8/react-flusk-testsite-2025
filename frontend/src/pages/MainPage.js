@@ -156,10 +156,10 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                   <td>
                     <img
                       src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
-                      alt={project.creator_name || 'Unknown'}
+                      alt={`${project.nickname || 'Unknown'}#${project.nickname_id || 'No ID'}`} 
                       className="owner-avatar"
                     />
-                    <span className="ownername">{project.creator_name || 'Unknown'}</span>
+                    <span className="ownername">{`${project.nickname || 'Unknown'} # ${project.nickname_id || 'No ID'}`}</span>
                   </td>
                   <td className="actions">
                     <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>

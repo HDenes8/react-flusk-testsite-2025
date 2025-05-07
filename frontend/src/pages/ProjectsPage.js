@@ -293,14 +293,14 @@ const ProjectsPage = () => {
                       <FormattedDate dateInput={file.upload_date} />
                     </td>
                     <td>
-                      {file.uploader ? (
+                      {file.uploader_nickname ? (
                         <div className="uploader-info">
                           <img
                             src={file.uploader_pic || '/default-profile.png'}
-                            alt={`${file.uploader}'s profile`}
+                            alt={`${file.uploader_nickname}'s profile`}
                             className="uploader-profile-picture"
                           />
-                          <span>{file.uploader}</span>
+                          <span>{`${file.uploader_nickname || 'Unknown'}#${file.uploader_nickname_id || 'No ID'}`}</span>
                         </div>
                       ) : (
                         "Unknown"
