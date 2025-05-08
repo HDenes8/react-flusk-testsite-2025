@@ -19,7 +19,7 @@ import zipfile
 import re
 import json
 
-from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX
+from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX, JOB_REGEX
 
 #helper functions
 def is_user_active_member(project_id, user_id):
@@ -276,6 +276,8 @@ def invitations():
         "id": inv.invitation_id,
         "project_id": inv.project_id,
         "status": inv.status,
+        "nickname": inv.invited_user.nickname if inv.invited_user else None,
+        "nickname_id": inv.invited_user.nickname_id if inv.invited_user else None,
         "invite_date": inv.invite_date
     } for inv in latest_invitations]
 
@@ -891,6 +893,14 @@ def update_user():
             return jsonify({"error": "Nickname must not exceed 20 characters."}), 400
         elif not NICKNAME_REGEX.match(nickname):
             return jsonify({"error": "Nickname can only contain letters, numbers, and underscores."}), 400
+    
+    if job and job != user.job:
+        if len(job) < 2:
+            return jsonify({"error": "Job title must be greater than 1 character."}), 400
+        elif len(job) > 50:
+            return jsonify({"error": "Job title must not exceed 50 characters."}), 400
+        elif not JOB_REGEX.match(job):
+            return jsonify({"error": "Job title can only contain letters, numbers, spaces, and hyphens."}), 400
 
     if password1 or password2:
         if password1 or password2:

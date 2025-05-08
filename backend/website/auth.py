@@ -63,15 +63,21 @@ def verify_recaptcha(response):
 # Regex patterns
 FULL_NAME_REGEX = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ-]+)*$")
 NICKNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
+JOB_REGEX = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ_]+$")
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{7,}$")
 
 
 def is_valid_phone_number(number):  
-        try:
-            parsed_number = phonenumbers.parse(number)
-            return phonenumbers.is_valid_number(parsed_number)
-        except phonenumbers.NumberParseException:
-            return False
+    try:
+        # Allow numbers starting with '0' (e.g., 06704322345)
+        if number.startswith('0') and number.isdigit() and len(number) >= 10:
+            return True
+        
+        # Parse and validate international phone numbers
+        parsed_number = phonenumbers.parse(number, "ZZ")  # "ZZ" for unknown region
+        return phonenumbers.is_valid_number(parsed_number)
+    except phonenumbers.NumberParseException:
+        return False
 
 @auth.route('/signup', methods=['POST'])
 def sign_up():
@@ -109,7 +115,7 @@ def sign_up():
             return {"message": "Nickname must not exceed 20 characters.", "status": "error"}, 400
         elif not NICKNAME_REGEX.match(nickname):
             return {"message": "Nickname can only contain letters, numbers, and underscores.", "status": "error"}, 400
-        elif job and not NICKNAME_REGEX.match(job):
+        elif job and not JOB_REGEX.match(job):
             return {"message": "Job can only contain letters, numbers, and underscores.", "status": "error"}, 400
         elif mobile and not is_valid_phone_number(mobile):
             return {"message": "Invalid phone number.", "status": "error"}, 400
