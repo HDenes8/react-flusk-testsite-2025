@@ -83,8 +83,9 @@ const Invitations = () => {
             <thead>
               <tr>
                 <th>Project Name</th>
-                <th>Status</th>
+                <th>Invited By</th> 
                 <th>Invite Date</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -101,6 +102,7 @@ const Invitations = () => {
                   <td>
                     {invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}
                   </td>
+                  <td>{invite.status}</td>
                   <td>
                     {filter === 'pending' && (
                       <div className={styles['invitation-actions']}>
