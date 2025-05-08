@@ -105,6 +105,8 @@ def sign_up():
             return {"message": "Full name must only contain letters, spaces, and hyphens.", "status": "error"}, 400
         elif len(nickname) < 2:
             return {"message": "Nickname must be greater than 1 character.", "status": "error"}, 400
+        elif len(nickname) > 10:  # Add upper limit check
+            return {"message": "Nickname must not exceed 20 characters.", "status": "error"}, 400
         elif not NICKNAME_REGEX.match(nickname):
             return {"message": "Nickname can only contain letters, numbers, and underscores.", "status": "error"}, 400
         elif job and not NICKNAME_REGEX.match(job):

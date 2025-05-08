@@ -19,6 +19,8 @@ import zipfile
 import re
 import json
 
+from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX
+
 #helper functions
 def is_user_active_member(project_id, user_id):
     return User_Project.query.filter_by(project_id=project_id, user_id=user_id, is_removed=False).first() is not None
@@ -876,6 +878,16 @@ def update_user():
     if full_name and full_name != user.full_name:
         if len(full_name) < 2:
             return jsonify({"error": "Full name must be greater than 1 character."}), 400
+        elif not FULL_NAME_REGEX.match(full_name):
+            return jsonify({"error": "Full name must only contain letters, spaces, and hyphens."}), 400
+
+    if nickname and nickname != user.nickname:
+        if len(nickname) < 2:
+            return jsonify({"error": "Nickname must be greater than 1 character."}), 400
+        elif len(nickname) > 20:  # Add upper limit check
+            return jsonify({"error": "Nickname must not exceed 20 characters."}), 400
+        elif not NICKNAME_REGEX.match(nickname):
+            return jsonify({"error": "Nickname can only contain letters, numbers, and underscores."}), 400
 
     if password1 or password2:
         if password1 or password2:
@@ -885,10 +897,12 @@ def update_user():
                 return jsonify({"error": "Current password is incorrect."}), 400
         if password1 != password2:
             return jsonify({"error": "Passwords don't match."}), 400
-        elif len(password1) < 7:
-            return jsonify({"error": "Password must be at least 7 characters."}), 400
         elif password1 and check_password_hash(user.password, password1):
             return jsonify({"error": "Password can't be the old one."}), 400
+        elif not PASSWORD_REGEX.match(password1):
+            return jsonify({
+                "error": "Password must be at least 7 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+            }), 400
 
     if email and email != user.email:
         user.email = email
