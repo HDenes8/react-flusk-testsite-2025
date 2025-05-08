@@ -54,3 +54,17 @@
     padding: 8px;
     box-sizing: border-box;
 }
+
+.flex-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.nickname-container {
+    flex: 3; /* Make the nickname field larger */
+}
+
+.nickname-id-container {
+    flex: 1; /* Make the ID field smaller */
+}

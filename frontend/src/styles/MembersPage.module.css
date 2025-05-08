@@ -254,11 +254,3 @@
     background-color: #000000; /* Background color on hover */
     color: white; /* Text color on hover */
   }
-
-  .inactive-button {
-    background-color: #f0f0f0; /* Lighter grey background */
-    color: #b0b0b0; /* Lighter grey text */
-    border: 1px dashed #c0c0c0; /* Dashed border for distinction */
-    cursor: not-allowed; /* Show not-allowed cursor */
-    opacity: 0.7; /* Reduce opacity for a faded look */
-  }

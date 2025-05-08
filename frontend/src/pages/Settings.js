@@ -14,7 +14,8 @@ const Settings = () => {
     currentPassword: '',
     password1: '',
     password2: '',
-    profilePic: ''
+    profilePic: '',
+    nicknameId: '' // Added nicknameId
   });
 
   const [errors, setErrors] = useState({
@@ -42,7 +43,8 @@ const Settings = () => {
         currentPassword: '',
         password1: '',
         password2: '',
-        profilePic: response.data.profile_pic || ''
+        profilePic: response.data.profile_pic || '',
+        nicknameId: response.data.nickname_id || '' // Added nickname_id
       });
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -137,8 +139,8 @@ const Settings = () => {
             onChange={handleChange}
           />
         </div>
-        <div className={styles['form-group']} style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ flex: '1', marginRight: '10px' }}>
+        <div className={`${styles['form-group']} ${styles['flex-row']}`}>
+          <div className={styles['nickname-container']}>
             <label htmlFor="nickname">Nickname:</label>
             <input
               type="text"
@@ -150,14 +152,14 @@ const Settings = () => {
               onChange={handleChange}
             />
           </div>
-          <div style={{ flex: '1' }}>
-            <label htmlFor="nicknameCode">Code:</label>
+          <div className={styles['nickname-id-container']}>
+            <label htmlFor="nicknameId">Nickname ID:</label>
             <input
               type="text"
               className={styles['form-control']}
-              id="nicknameCode"
-              name="nicknameCode"
-              value="#0000"
+              id="nicknameId"
+              name="nicknameId"
+              value={`#${formData.nicknameId}`}
               readOnly
             />
           </div>

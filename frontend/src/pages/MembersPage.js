@@ -135,10 +135,6 @@ const MembersPage = () => {
     }
   };
 
-  const handleSettings = () => {
-    navigate("/settings");
-  };
-
   const handleBack = () => {
     navigate(`/ProjectsPage/${project_id}`);
   };
@@ -193,7 +189,6 @@ const MembersPage = () => {
         {(userRole === "owner" || userRole === "admin") && (
           <button onClick={handleOpenInviteModal}>Invite Member</button>
         )}
-        <button disabled className={styles["inactive-button"]}>Settings</button>
       </div>
 
       {showInviteModal && (
