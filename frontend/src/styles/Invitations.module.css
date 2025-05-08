@@ -90,8 +90,20 @@
   text-align: center;
 }
 
+.inviter-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between avatar and nickname */
+}
+
 .inviter-avatar {
-  width: 24px; /* Reduced size */
-  height: 24px; /* Reduced size */
+  width: 32px; /* Adjusted size for better visibility */
+  height: 32px;
   border-radius: 50%;
+  object-fit: cover; /* Ensures the image fits within the circle */
+}
+
+.inviter-nickname {
+  font-size: 14px; /* Adjust font size as needed */
+  color: #333; /* Text color */
 }

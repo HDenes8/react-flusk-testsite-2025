@@ -15,7 +15,7 @@ const Settings = () => {
     password1: '',
     password2: '',
     profilePic: '',
-    nicknameId: '' // Added nicknameId
+    nicknameId: ''
   });
 
   const [errors, setErrors] = useState({
