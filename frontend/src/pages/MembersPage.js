@@ -248,10 +248,9 @@ const MembersPage = () => {
               return (
                 <tr key={member.id}>
                   <td>{member.name}</td>
-                  <td>#{member.nickname_id}</td>
-                  <td>{member.nickname}</td>
+                  <td>{member.nickname}  #{member.nickname_id}</td>
                   <td>{member.email}</td>
-                  <td>{member.mobile}</td>
+                  <td>{member.phoneNumber}</td>
                   <td>{member.job}</td>
                   <td>
                     <select
