@@ -546,6 +546,8 @@ def project_page(project_id):
             "role": membership.role,
             "description": project.description,
             "created_date": project.created_date.isoformat() if project.created_date else None,
+            "uploader_nickname": uploader.nickname if uploader else "Unknown",
+            "uploader_nickname_id": uploader.nickname_id if uploader else "No ID",
             "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
         }
 
@@ -761,7 +763,8 @@ def get_file_versions(file_data_id):
                 "file_type": v.file_type,
                 "upload_date": v.upload_date.isoformat() if v.upload_date else None,
                 "comment": v.comment,
-                "uploader": uploader.full_name if uploader else "Unknown",  # Changed to uploader's name
+                "uploader_nickname": uploader.nickname if uploader else "Unknown",
+                "uploader_nickname_id": uploader.nickname_id if uploader else "No ID",
                 "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png",  # Added uploader's profile picture
                 "downloaded": v.version_id in downloaded_version_ids
             })
