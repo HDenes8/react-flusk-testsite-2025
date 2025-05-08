@@ -83,8 +83,9 @@ const Invitations = () => {
             <thead>
               <tr>
                 <th>Project Name</th>
-                <th>Status</th>
+                <th>Invited By</th> 
                 <th>Invite Date</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -92,10 +93,20 @@ const Invitations = () => {
               {filteredInvitations.map((invite) => (
                 <tr key={invite.id}>
                   <td>{invite.project_name}</td>
-                  <td>{invite.status}</td>
+                  <td>
+                    <div className={styles['inviter-info']}>
+                      <img
+                        src={invite.inviter_avatar || '/static/profile_pics/default.png'}
+                        alt="Inviter"
+                        className={styles['inviter-avatar']}
+                      />
+                      <span>{`${invite.inviter_nickname || 'Unknown'} #${invite.inviter_nickname_id || 'N/A'}`}</span>
+                    </div>
+                  </td>
                   <td>
                     {invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}
                   </td>
+                  <td>{invite.status}</td>
                   <td>
                     {filter === 'pending' && (
                       <div className={styles['invitation-actions']}>
