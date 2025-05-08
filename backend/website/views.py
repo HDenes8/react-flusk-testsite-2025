@@ -847,6 +847,7 @@ def get_user():
         'email': user.email,
         'full_name': user.full_name,
         'nickname': user.nickname,
+        'nickname_id': user.nickname_id,
         'mobile': user.mobile,
         'job': user.job,
         'profile_pic': user.profile_pic
