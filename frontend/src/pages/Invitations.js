@@ -105,7 +105,6 @@ const Invitations = () => {
                       </span>
                     </div>
                   </td>
-                  <td>{invite.status}</td>
                   <td>
                     {invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}
                   </td>
