@@ -30,6 +30,9 @@ const ProjectsPage = () => {
   const [fileVersions, setFileVersions] = useState({});
   const [download_file_results, setDownloadFileResults] = useState({}); // To track download results 
   const [error, setError] = useState(null);
+  const [showDescription, setShowDescription] = useState(false);
+  const [hoveredComment, setHoveredComment] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
@@ -47,6 +50,17 @@ const ProjectsPage = () => {
 
   const closeFileDropdown = () => {
     setExpandedFile(null);
+  };
+
+  const handleCommentHover = (comment, event) => {
+    if (comment.length > 20) { // Show bubble only for truncated comments
+      setHoveredComment(comment);
+      setHoverPosition({ x: event.clientX, y: event.clientY });
+    }
+  };
+
+  const handleCommentLeave = () => {
+    setHoveredComment(null);
   };
 
   // Close dropdown if clicking outside
@@ -239,10 +253,24 @@ const ProjectsPage = () => {
   return (
     <div className={styles['project-page-container']}>
       <div className={styles['top-buttons']}>
+        <button
+          className={styles['project-description-button']}
+          onClick={() => setShowDescription(!showDescription)}
+        >
+          {showDescription ? "Hide Description" : "Show Description"}
+        </button>
         <button onClick={() => setShowUploadModal(true)}>Upload File</button>
         <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
         <button onClick={() => navigate(`/MembersPage/${project_id}`)}>Members</button>
       </div>
+
+      {showDescription && (
+        <div className={styles['description-box']}>
+          <p className={styles['description-paragraph']}>
+            {project.description || "No description available for this project."}
+          </p>
+        </div>
+      )}
 
       <h3>Files</h3>
       <section className={styles['file-info']}>
@@ -284,7 +312,12 @@ const ProjectsPage = () => {
                     </td>
                     <td>{file.title}</td>
                     <td>{file.file_name}</td>
-                    <td>{file.comment}</td>
+                    <td
+                      onMouseEnter={(e) => handleCommentHover(file.comment, e)}
+                      onMouseLeave={handleCommentLeave}
+                    >
+                      {file.comment}
+                    </td>
                     <td>{formatFileSize(file.file_size)}</td>
                     <td className={styles['time-cell']}>
                       <FormattedDate dateInput={file.upload_date} />
@@ -308,7 +341,9 @@ const ProjectsPage = () => {
                       {expandedFile === file.version_id && (
                         <div className={styles['horizontal-menu']} ref={dropdownRef}>
                           <div className={styles['description-box']}>
-                            <p><strong>Description:</strong> {file.description || "No description available"}</p>
+                            <p className={styles['description-paragraph']}>
+                              <strong>Description:</strong> {file.description || "No description available"}
+                            </p>
                           </div>
                           <div className={styles['open-project']}>
                             <button onClick={() => toggleVersionTable(file.file_data_id)}>
@@ -463,6 +498,15 @@ const ProjectsPage = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {hoveredComment && (
+        <div
+          className={styles['comment-hover-bubble']}
+          style={{ top: hoverPosition.y + 10, left: hoverPosition.x + 10 }}
+        >
+          {hoveredComment}
         </div>
       )}
     </div>

@@ -34,7 +34,6 @@
 
 .files-table td {
     background-color: #fff;
-    color: #555;
 }
 
 .checkbox-cell {
@@ -78,7 +77,6 @@
     margin-bottom: 20px; /* Add spacing below the buttons */
     margin-left: auto;
     margin-right: 5%;
-    width: 35%;
 }
 
 .top-buttons button {
@@ -172,6 +170,8 @@
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    align-items: left;
+    text-align: left; /* Ensure text is aligned to the left */
 }
 
 .description-text {
@@ -217,7 +217,9 @@
 .version-history-data {
     padding: 10px;
     background-color: #ffffff;
-    border: none;
+    border-left-style: solid;
+    border-left-width: 5px;
+    border-left-color: #007bff;
 }
 
 .versions-table {
@@ -265,6 +267,85 @@
     vertical-align: middle; /* Centers text vertically */
 }
 
-p {
-    text-align: left;
+.description-box {
+    text-align: left; /* Changed from center to left */
+}
+
+.status {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    margin-left: 10px;
+  }
+  
+  .status.success {
+    background-color: #006900;
+    color: rgb(255, 255, 255);
+  }
+  
+  .status.warning {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .status.error {
+    background-color: #c01704;
+    color: white;
+  }
+  
+
+  .dots-button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    color: #000 !important;
+    background-color: white !important
+  
+  }
+
+.project-description-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #00000054;
+    margin-right: 10px;
+}
+
+.project-description-button:hover {
+    background-color: #000000;
+    color: white;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.comment-hover-bubble {
+    position: absolute;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    white-space: normal;
+    word-wrap: break-word;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+}
+
+.comment-hover-bubble.visible {
+    display: block; /* Show when hovered */
+}
+
+.description-paragraph {
+    text-align: left; /* Align text to the left */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
 }

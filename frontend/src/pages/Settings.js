@@ -137,17 +137,30 @@ const Settings = () => {
             onChange={handleChange}
           />
         </div>
-        <div className={styles['form-group']}>
-          <label htmlFor="nickname">Nickname:</label>
-          <input
-            type="text"
-            className={styles['form-control']}
-            id="nickname"
-            name="nickname"
-            placeholder="Change/ Add nickname"
-            value={formData.nickname}
-            onChange={handleChange}
-          />
+        <div className={styles['form-group']} style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: '1', marginRight: '10px' }}>
+            <label htmlFor="nickname">Nickname:</label>
+            <input
+              type="text"
+              className={styles['form-control']}
+              id="nickname"
+              name="nickname"
+              placeholder="Change/ Add nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+            />
+          </div>
+          <div style={{ flex: '1' }}>
+            <label htmlFor="nicknameCode">Code:</label>
+            <input
+              type="text"
+              className={styles['form-control']}
+              id="nicknameCode"
+              name="nicknameCode"
+              value="#0000"
+              readOnly
+            />
+          </div>
         </div>
         <div className={styles['form-group']}>
           <label htmlFor="email">Email Address:</label>

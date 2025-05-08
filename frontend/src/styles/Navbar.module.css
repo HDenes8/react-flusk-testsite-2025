@@ -173,3 +173,16 @@
 p {
     text-align: center;
 }
+
+.navbar-collapse-button {
+    background-color: transparent; /* No background color */
+    color: black; /* Black text/icon color */
+    border: none; /* Remove border */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 1.2rem; /* Adjust size if needed */
+    transition: color 0.3s ease; /* Smooth transition for color changes */
+}
+
+.navbar-collapse-button:hover {
+    color: #555; /* Slightly lighter black on hover */
+}
