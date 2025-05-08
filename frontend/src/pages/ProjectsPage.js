@@ -397,19 +397,19 @@ const ProjectsPage = () => {
                                   <FormattedDate dateInput={version.upload_date} />
                                 </td>
                                 <td>
-                                  {version.uploader ? (
+                                  {version.uploader_nickname ? (
                                     <div className={styles['uploader-info']}>
                                       <img
                                         src={version.uploader_pic || '/default-profile.png'}
-                                        alt={`${version.uploader}'s profile`}
+                                        alt={`${version.uploader_nickname}'s profile`}
                                         className={styles['uploader-profile-picture']}
                                       />
-                                      <span>{version.uploader}</span>
+                                      <span>{`${version.uploader_nickname || 'Unknown'}#${version.uploader_nickname_id || 'No ID'}`}</span>
                                     </div>
                                   ) : (
                                     "Unknown"
                                   )}
-                                </td> {/* Display version uploader here */}
+                                </td>  {/* Display version uploader here */}
                                 <td className={styles['actions-cell']}>
                                   {/* Add an invisible placeholder to keep layout! */}
                                   <span style={{ visibility: 'hidden' }}>•••</span>
