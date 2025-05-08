@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import './MainPage.css';
+import styles from '../styles/MainPage.module.css'; // Import styles as an object
 import FormattedDate from '../components/FormattedDate'; // adjust if needed
 
 const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
@@ -105,18 +105,22 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   };
 
   return (
-    <div className="main-page-container">
-      <div className="search-filter-container">
+    <div className={styles['main-page-container']}>
+      <div className={styles['search-filter-container']}>
         <input
           type="text"
-          className="search-bar"
+          className={styles['search-bar']}
           placeholder="Search projects..."
           value={searchQuery}
           onChange={handleSearch}
         />
 
         {showFilterDropdown && (
-          <select className="filter-dropdown" value={selectedRole} onChange={handleRoleFilter}>
+          <select
+            className={styles['filter-dropdown']}
+            value={selectedRole}
+            onChange={handleRoleFilter}
+          >
             <option value="">all roles</option>
             {[...new Set(projects.map((project) => project.role))].map((role) => (
               <option key={role} value={role}>
@@ -127,8 +131,8 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
         )}
       </div>
 
-      <section className="project-list">
-        <table className="projects-table">
+      <section className={styles['project-list']}>
+        <table className={styles['projects-table']}>
           <thead>
             <tr>
               <th>Project Name</th>
@@ -145,33 +149,65 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                 <tr key={project.project_id}>
                   <td>
                     {project.project_name}{' '}
-                    <span className={`status ${project.has_latest === true ? 'success' : 'error'}`}>
+                    <span
+                      className={`${styles['status']} ${
+                        project.has_latest === true ? styles['success'] : styles['error']
+                      }`}
+                    >
                       {project.has_latest === true ? '✔' : '❕'}
                     </span>
                   </td>
                   <td>{project.role}</td>
-                  <td>{project.last_modified_date ? <FormattedDate dateInput={project.last_modified_date} /> : '-'}</td>
-                  <td>{project.created_date ? <FormattedDate dateInput={project.created_date} /> : '-'}</td>
+                  <td>
+                    {project.last_modified_date ? (
+                      <FormattedDate dateInput={project.last_modified_date} />
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td>
+                    {project.created_date ? (
+                      <FormattedDate dateInput={project.created_date} />
+                    ) : (
+                      '-'
+                    )}
+                  </td>
 
                   <td>
                     <img
-                      src={`/static/profile_pics/${project.creator_profile_picture || 'default.png'}`}
+                      src={`/static/profile_pics/${
+                        project.creator_profile_picture || 'default.png'
+                      }`}
                       alt={`${project.nickname || 'Unknown'}#${project.nickname_id || 'No ID'}`} 
-                      className="owner-avatar"
+                      className={styles['owner-avatar']}
                     />
-                    <span className="ownername">{`${project.nickname || 'Unknown'} # ${project.nickname_id || 'No ID'}`}</span>
+                    <span className={styles['ownername']}>
+                      {`${project.nickname || 'Unknown'} # ${project.nickname_id || 'No ID'}`}
+                    </span>
                   </td>
-                  <td className="actions">
-                    <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button>
+                  <td className={styles['actions']}>
+                    <button
+                      className={styles['dots-button']}
+                      onClick={() => toggleMenu(project.project_id)}
+                    >
+                      ⋯
+                    </button>
                     {menuOpen === project.project_id && (
-                      <div ref={menuRef} className="horizontal-menu" id={`menu-${project.project_id}`}>
-                        <div className="description-box">
-                          <span className="description-text">
-                            {project.description && <strong>Description:</strong>} {project.description || 'No description available'}
+                      <div
+                        ref={menuRef}
+                        className={styles['horizontal-menu']}
+                        id={`menu-${project.project_id}`}
+                      >
+                        <div className={styles['description-box']}>
+                          <span className={styles['description-text']}>
+                            {project.description && <strong>Description:</strong>}{' '}
+                            {project.description || 'No description available'}
                           </span>
                         </div>
-                        <div className="open-project">
-                          <button onClick={() => openProject(project.project_id)}>Open Project</button>
+                        <div className={styles['open-project']}>
+                          <button onClick={() => openProject(project.project_id)}>
+                            Open Project
+                          </button>
                         </div>
                       </div>
                     )}

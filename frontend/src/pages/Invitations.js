@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './Invitations.css';
+import styles from '../styles/Invitations.module.css'; // Updated to scoped styles
 import FormattedDate from '../components/FormattedDate'; // adjust if needed
 
 const Invitations = () => {
@@ -21,7 +21,6 @@ const Invitations = () => {
       console.error('Error fetching invitations:', error);
     }
   };
-  
 
   const acceptInvitation = async (invitationId) => {
     try {
@@ -47,30 +46,38 @@ const Invitations = () => {
   );
 
   return (
-    <div className="invitations-container">
-      <div className="filter-buttons">
-  <button
-    className={`pending ${filter === 'pending' ? 'active' : ''}`}
-    onClick={() => { setFilter('pending'); fetchInvitations('pending'); }}
-  >
-    Pending
-  </button>
-  <button
-    className={`accepted ${filter === 'accepted' ? 'active' : ''}`}
-    onClick={() => { setFilter('accepted'); fetchInvitations('accepted'); }}
-  >
-    Accepted
-  </button>
-  <button
-    className={`declined ${filter === 'declined' ? 'active' : ''}`}
-    onClick={() => { setFilter('declined'); fetchInvitations('declined'); }}
-  >
-    Declined
-  </button>
-</div>
+    <div className={styles['invitations-container']}>
+      <div className={styles['filter-buttons']}>
+        <button
+          className={`${styles['pending']} ${filter === 'pending' ? styles['active'] : ''}`}
+          onClick={() => {
+            setFilter('pending');
+            fetchInvitations('pending');
+          }}
+        >
+          Pending
+        </button>
+        <button
+          className={`${styles['accepted']} ${filter === 'accepted' ? styles['active'] : ''}`}
+          onClick={() => {
+            setFilter('accepted');
+            fetchInvitations('accepted');
+          }}
+        >
+          Accepted
+        </button>
+        <button
+          className={`${styles['declined']} ${filter === 'declined' ? styles['active'] : ''}`}
+          onClick={() => {
+            setFilter('declined');
+            fetchInvitations('declined');
+          }}
+        >
+          Declined
+        </button>
+      </div>
 
-
-      <section className="project-list invitation-list">
+      <section className={`${styles['project-list']} ${styles['invitation-list']}`}>
         {filteredInvitations.length > 0 ? (
           <table>
             <thead>
@@ -86,15 +93,25 @@ const Invitations = () => {
                 <tr key={invite.id}>
                   <td>{invite.project_name}</td>
                   <td>{invite.status}</td>
-                  <td>{invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}</td>
+                  <td>
+                    {invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}
+                  </td>
                   <td>
                     {filter === 'pending' && (
-                      <>
-                      <div className="invitation-actions">
-                        <button className="btn-accept" onClick={() => acceptInvitation(invite.id)}>Accept</button>
-                        <button className="btn-deny" onClick={() => denyInvitation(invite.id)}>Deny</button>
+                      <div className={styles['invitation-actions']}>
+                        <button
+                          className={styles['btn-accept']}
+                          onClick={() => acceptInvitation(invite.id)}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className={styles['btn-deny']}
+                          onClick={() => denyInvitation(invite.id)}
+                        >
+                          Deny
+                        </button>
                       </div>
-                      </>
                     )}
                   </td>
                 </tr>
@@ -102,7 +119,7 @@ const Invitations = () => {
             </tbody>
           </table>
         ) : (
-          <p className='noinv'>No invitations found.</p>
+          <p className={styles['noinv']}>No invitations found.</p>
         )}
       </section>
     </div>

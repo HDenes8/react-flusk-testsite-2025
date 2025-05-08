@@ -40,8 +40,100 @@
   font-weight: bold; /* Optional: Make the active link bold */
 }
 
-/* Global formatted table styles */
+/* Global body styles */
+body {
+  background-color: #e5e5e5;
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
+/* Global form styles */
+form {
+  background-color: #fff;
+  width: 350px;
+  margin: 50px auto;
+  padding: 50px;
+  padding-top: 40px; /* Reduce the space above the form */
+  padding-bottom: 20px; /* Reduce the space below the form */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Global input styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #fafafa;
+}
+
+/* Global button styles */
+button,
+.btn-primary,
+.btn-secondary {
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  display: block;
+}
+
+.btn-primary {
+  background-color: #222;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #333;
+}
+
+.btn-secondary {
+  background-color: #e8e8e8;
+  color: #000000;
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background-color: #dcdcdc;
+}
+
+/* Global label styles */
+label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+/* Global divider styles */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #ddd;
+  margin: 0 10px;
+}
+
+/* Global table styles */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -60,6 +152,21 @@ th {
   border-bottom: 3px solid #ddd;
 }
 
-td {
-  background-color: #fff;
+/* Global logo styles */
+.logo {
+  text-align: center;
+  margin-bottom: 10px;
 }
+
+/* Global heading styles */
+h3 {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+/* Highlighted inconsistencies */
+/* Ensure consistent styles for .btn-primary, .btn-secondary, and input elements across all pages. */

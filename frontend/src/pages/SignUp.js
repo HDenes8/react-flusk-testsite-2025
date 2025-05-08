@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import './sign_up.css';
+import styles from '../styles/SignUp.module.css'; // Updated to scoped styles
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -91,16 +91,16 @@ const SignUp = () => {
   }, [renderRecaptcha]);
 
   return (
-    <div className="container">
+    <div className={styles['container']}>
       <form onSubmit={handleSubmit} method="POST">
-        <div className="logo" style={{ textAlign: 'center' }}>
+        <div className={styles['logo']} style={{ textAlign: 'center' }}>
           <img src="/sortify_logo.png" alt="Sortify Logo" width="250" />
         </div>
         <h3 align="center">Register</h3>
 
-        {message && <p className="error-message">{message}</p>}
+        {message && <p className={styles['error-message']}>{message}</p>}
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="fullName">Full Name *</label>
           <input
             type="text"
@@ -108,13 +108,13 @@ const SignUp = () => {
             name="fullName"
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Enter full name"
             required
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="nickname">Nickname *</label>
           <input
             type="text"
@@ -122,13 +122,13 @@ const SignUp = () => {
             name="nickname"
             value={formData.nickname}
             onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Enter nickname"
             required
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="email">Email Address *</label>
           <input
             type="email"
@@ -136,13 +136,13 @@ const SignUp = () => {
             name="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Enter email"
             required
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="mobile">Phone Number</label>
           <input
             type="text"
@@ -150,12 +150,12 @@ const SignUp = () => {
             name="mobile"
             value={formData.mobile}
             onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Enter mobile number (Optional)"
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="job">Job Title</label>
           <input
             type="text"
@@ -163,12 +163,12 @@ const SignUp = () => {
             name="job"
             value={formData.job}
             onChange={(e) => setFormData({ ...formData, job: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Enter job (Optional)"
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="password1">Password *</label>
           <input
             type="password"
@@ -176,13 +176,13 @@ const SignUp = () => {
             name="password1"
             value={formData.password1}
             onChange={(e) => setFormData({ ...formData, password1: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Enter password"
             required
           />
         </div>
 
-        <div className="form-group">
+        <div className={styles['form-group']}>
           <label htmlFor="password2">Password (Confirm) *</label>
           <input
             type="password"
@@ -190,7 +190,7 @@ const SignUp = () => {
             name="password2"
             value={formData.password2}
             onChange={(e) => setFormData({ ...formData, password2: e.target.value })}
-            className="form-control"
+            className={styles['form-control']}
             placeholder="Confirm password"
             required
           />
@@ -198,12 +198,14 @@ const SignUp = () => {
 
         <div id="recaptcha-container" className="g-recaptcha"></div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className={styles['btn-primary']}>
           Submit
         </button>
         <br />
-        <span className="privacypolicy">By clicking Submit, you agree to our Terms of Service and Privacy Policy</span>
-        <div className="already-account">
+        <span className={styles['privacypolicy']}>
+          By clicking Submit, you agree to our Terms of Service and Privacy Policy
+        </span>
+        <div className={styles['already-account']}>
           <Link to="/login">Already have an account?</Link>
         </div>
       </form>
