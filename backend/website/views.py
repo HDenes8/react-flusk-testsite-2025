@@ -269,19 +269,24 @@ def invitations():
         latest_invites_subquery,
         (Invitation.project_id == latest_invites_subquery.c.project_id) & 
         (Invitation.invitation_id == latest_invites_subquery.c.max_id)
-    ).all()  # Remove hardcoded "pending" filter
+    ).all()
 
-    invitations_data = [{
-        "project_name": inv.project.name,
-        "id": inv.invitation_id,
-        "project_id": inv.project_id,
-        "status": inv.status,
-        "nickname": inv.invited_user.nickname if inv.invited_user else None,
-        "nickname_id": inv.invited_user.nickname_id if inv.invited_user else None,
-        "invite_date": inv.invite_date
-    } for inv in latest_invitations]
+    invitations_data = []
+    for inv in latest_invitations:
+        referrer = User_profile.query.get(inv.referrer_id)  # Fetch the user who sent the invitation
+        project_creator = User_profile.query.get(inv.project.creator_id)  # Fetch the project creator
 
-    print("DEBUG: /invitations response:\n" + json.dumps(invitations_data, indent=2, default=str))
+        invitations_data.append({
+            "project_name": inv.project.name,
+            "id": inv.invitation_id,
+            "project_id": inv.project_id,
+            "status": inv.status,
+            "invite_date": inv.invite_date,
+            "profile_pic": f"/static/profile_pics/{referrer.profile_pic}" if referrer and referrer.profile_pic else "/static/profile_pics/default.png",  # Fixed this line
+            "referrer_nickname": referrer.nickname if referrer else "Unknown",
+            "referrer_nickname_id": referrer.nickname_id if referrer else "No ID"
+        })
+
     return jsonify({"invitations": invitations_data})
 
 

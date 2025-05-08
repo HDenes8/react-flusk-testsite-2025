@@ -92,6 +92,11 @@ const Invitations = () => {
               {filteredInvitations.map((invite) => (
                 <tr key={invite.id}>
                   <td>{invite.project_name}</td>
+                  <td>
+                    <img
+                      src={invite.profile_pic}
+                    />
+                    {invite.referrer_nickname}#{invite.referrer_nickname_id}</td>
                   <td>{invite.status}</td>
                   <td>
                     {invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}
