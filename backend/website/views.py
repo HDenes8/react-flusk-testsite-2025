@@ -341,7 +341,14 @@ def deny_invite(invitation_id):
 
 
 # Download
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'tar', 'gz', '7z', 'docx', 'xlsx', 'pptx'}
+def load_allowed_extensions(filepath=os.path.join(current_app.static_folder, 'allowed_extensions.txt')):
+    if not os.path.exists(filepath):
+        print(f"[ERROR] {filepath} not found. Using default set.")
+        return {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'tar', 'gz', '7z', 'docx', 'xlsx', 'pptx'}
+    with open(filepath, "r", encoding="utf-8") as f:
+        return {line.strip().lower() for line in f if line.strip()}
+
+ALLOWED_EXTENSIONS = load_allowed_extensions()
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -919,7 +926,7 @@ def update_user():
         elif len(job) > 50:
             return jsonify({"error": "Job title must not exceed 50 characters."}), 400
         elif not JOB_REGEX.match(job):
-            return jsonify({"error": "Job title can only contain letters, numbers, spaces, and hyphens."}), 400
+            return jsonify({"error": "Job title can only contain letters, spaces, and hyphens."}), 400
         
     if mobile and mobile != user.mobile:
         if len(mobile) < 2:

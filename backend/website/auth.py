@@ -64,7 +64,7 @@ def verify_recaptcha(response):
 # Regex patterns
 FULL_NAME_REGEX = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ-]+)*$")
 NICKNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
-JOB_REGEX = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ_]+$")
+JOB_REGEX = re.compile(r"^[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű\s-]+$")
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[{}\[\]\-_$@!%*?&#^()+=~`|\\:;\"'<>,./])[A-Za-z\d{}\[\]\-_$@!%*?&#^()+=~`|\\:;\"'<>,./]{7,}$")
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
