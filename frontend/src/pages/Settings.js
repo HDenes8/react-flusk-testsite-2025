@@ -237,7 +237,7 @@ const Settings = () => {
           />
         </div>
         <button
-          className={styles['btn-primary']}
+          className='btn-primary'
           type="button"
           id="selectProfilePicButton"
           onClick={() => document.getElementById('profilePicMenu').style.display = 'block'}
@@ -265,7 +265,7 @@ const Settings = () => {
           </div>
         </div>
         <br />
-        <button type="submit" className={styles['btn-primary']} name="submit">
+        <button type="submit" className='btn-primary' name="submit">
           Save Changes
         </button>
       </form>

@@ -107,6 +107,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    white-space: nowrap; /* Prevents text from breaking into multiple lines */
+    overflow: hidden; /* Ensures content doesn't overflow the container */
+    text-overflow: ellipsis; /* Adds ellipsis if the text overflows */
 }
 
 .user-profile img {
@@ -141,20 +144,24 @@
 }
 
 .project-info {
+    width: 70%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-between; /* Ensures items are spaced apart */
     margin: 0 20px;
-    padding: 10px;
-    background-color: #ffffff;
+    padding: 20px; /* Increased padding for more spacing */
+    background: transparent;
     border-radius: 4px;
 }
 
 .project-title {
     font-size: 1.5rem;
     font-weight: bold;
-    margin-right: 20px;
     color: #333;
+    margin: 0; /* Removes extra margin */
+    margin-right: 20px; /* Adds spacing between title and role */
+    flex-grow: 0; /* Prevents it from stretching */
+    text-align: left; /* Aligns text to the left */
 }
 
 .project-description {
@@ -170,7 +177,15 @@
     white-space: nowrap; /* Prevents wrapping */
 }
 
-p {
+.project-role {
+    font-size: 1rem;
+    color: #666;
+    margin: 0; /* Removes extra margin */
+    flex-grow: 1; /* Allows it to take up remaining space */
+    text-align: right; /* Aligns text to the right */
+}
+
+.licencing {
     text-align: center;
 }
 
@@ -185,4 +200,12 @@ p {
 
 .navbar-collapse-button:hover {
     color: #555; /* Slightly lighter black on hover */
+}
+
+p {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    color: #000000;
+    text-align: justify;
 }

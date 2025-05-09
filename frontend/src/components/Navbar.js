@@ -135,7 +135,7 @@ const Navbar = () => {
           </ul>
         </nav>
         <div className={styles['navbar-sidebar-footer']}>
-          <p>© 2025 Sortify</p>
+          <p className={styles['licencing']}>© 2025 Sortify</p>
         </div>
       </aside>
 
