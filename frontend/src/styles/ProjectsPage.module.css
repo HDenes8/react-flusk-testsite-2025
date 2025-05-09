@@ -190,7 +190,7 @@
 .versions-table td,
 .versions-table th {
     padding: 10px;
-    text-align: left;
+    text-align: center; /* last modifyed at: 2025.05.09. 4:10*/
     border-bottom: 1px solid #ddd;
 }
 
