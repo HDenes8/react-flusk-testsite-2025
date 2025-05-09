@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import styles from "../styles/MembersPage.module.css"; // Updated to scoped styles
+import FormattedDate from "../components/FormattedDate"; // Add this line
 
 const MembersPage = () => {
   const navigate = useNavigate();
@@ -220,6 +221,7 @@ const MembersPage = () => {
             <th>Mobile</th>
             <th>Job</th>
             <th>Role</th>
+            <th className="date-header">Join Date</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -261,6 +263,9 @@ const MembersPage = () => {
                       <option value="reader">Reader</option>
                     </select>
                   </td>
+                  <td className="date-cell">
+                    {member.join_date ? <FormattedDate dateInput={member.join_date} /> : '-'}
+                  </td>
                   <td>
                     <div className={styles["remove-buttons"]}>
                       {!isOwner && (
@@ -278,7 +283,7 @@ const MembersPage = () => {
             })
           ) : (
             <tr>
-              <td colSpan="7" style={{ textAlign: "center" }}>
+              <td colSpan="8" style={{ textAlign: "center" }}>
                 No members found.
               </td>
             </tr>

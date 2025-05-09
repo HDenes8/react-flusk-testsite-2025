@@ -118,15 +118,23 @@
     font-size: 20px;
     cursor: pointer;
     padding: 5px;
-    color: #000 !important;
-    background-color: white !important
+    color: #000;
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    margin: 0 auto; /* Ensure centering within the cell */
+  }
   
+  .actions-column {
+    width: auto; /* Automatically adjust to content size */
+    white-space: nowrap; /* Prevent text from wrapping */
+    text-align: center; /* Center-align content */
   }
   
   .actions {
-    position: relative;
-    display: auto;
-    align-items: center;
+    display: flex; /* Ensure proper alignment */
+    justify-content: center; /* Center actions within the cell */
+    align-items: center; /* Center vertically */
   }
   
   .horizontal-menu {
@@ -140,7 +148,8 @@
     padding: 15px; /* Increased padding for more space inside the box */
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     position: absolute;
-    right: 10px;
+    right: 0; /* Align to the right side of the table */
+    left: auto; /* Ensure it doesn't conflict with left alignment */
     top: 50%;
     transform: translateY(-50%);
     white-space: normal; /* Allows text to wrap properly */

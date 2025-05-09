@@ -277,15 +277,15 @@ const ProjectsPage = () => {
         <table className={styles['files-table']}>
           <thead>
             <tr>
-              <th className={styles['checkbox-cell']}>Select</th>
+              <th className={styles['select-cell']}>Select</th>
               <th className={styles['ver-cell']}>Ver</th>
               <th>Title</th>
               <th>File Name</th>
               <th>Comment</th>
               <th>File Size</th>
-              <th>Upload Date</th>
-              <th>Uploader</th> 
-              <th className={styles['actions-cell']}>Actions</th>
+              <th className="date-header">Upload Date</th> {/* Apply date-header */}
+              <th>Uploader</th>
+              <th className="actions-header">Actions</th> {/* Use global class */}
             </tr>
           </thead>
           <tbody>
@@ -319,7 +319,7 @@ const ProjectsPage = () => {
                       {file.comment}
                     </td>
                     <td>{formatFileSize(file.file_size)}</td>
-                    <td className={styles['time-cell']}>
+                    <td className="date-cell">
                       <FormattedDate dateInput={file.upload_date} />
                     </td>
                     <td>
@@ -336,16 +336,16 @@ const ProjectsPage = () => {
                         "Unknown"
                       )}
                     </td> 
-                    <td>
-                      <button className={styles['dots-button']} onClick={() => toggleFileDropdown(file.version_id)}>⋯</button>
+                    <td className="actions-cell" style={{ textAlign: 'right' }}> {/* Use global class */}
+                      <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>⋯</button> {/* Use global class */}
                       {expandedFile === file.version_id && (
-                        <div className={styles['horizontal-menu']} ref={dropdownRef}>
-                          <div className={styles['description-box']}>
-                            <p className={styles['description-paragraph']}>
+                        <div className="horizontal-menu" ref={dropdownRef}> {/* Use global class */}
+                          <div className="description-box"> {/* Use global class */}
+                            <p className="description-paragraph"> {/* Use global class */}
                               <strong>Description:</strong> {file.description || "No description available"}
                             </p>
                           </div>
-                          <div className={styles['open-project']}>
+                          <div className="button-container"> {/* Use global class */}
                             <button onClick={() => toggleVersionTable(file.file_data_id)}>
                               {fileVersions[file.file_data_id] ? 'Hide Versions' : 'Show Versions'}
                             </button>
@@ -383,7 +383,8 @@ const ProjectsPage = () => {
                                 <td className={styles['ver-cell']}>
                                   {version.version_number}
                                   <span className={`${styles['status']} ${version.downloaded ? styles['success'] : styles['warning']}`}>
-                                    {version.downloaded ? "✔" : "❕"}
+                                    {version.downloaded ? "✔" : "❕"
+                                    }
                                   </span>
                                 </td>
                                 <td>
@@ -393,7 +394,7 @@ const ProjectsPage = () => {
                                 <td>{version.file_name}</td>
                                 <td>{version.comment}</td>
                                 <td>{formatFileSize(version.file_size)}</td>
-                                <td className={styles['time-cell']}>
+                                <td className="date-cell">
                                   <FormattedDate dateInput={version.upload_date} />
                                 </td>
                                 <td>

@@ -84,9 +84,9 @@ const Invitations = () => {
               <tr>
                 <th>Project Name</th>
                 <th>Invited By</th> 
-                <th>Invite Date</th>
+                <th className="date-header">Invite Date</th> {/* Apply date-header */}
                 <th>Status</th>
-                <th>Actions</th>
+                <th className="actions-header">Actions</th> {/* Add class for alignment */}
               </tr>
             </thead>
             <tbody>
@@ -105,11 +105,11 @@ const Invitations = () => {
                       </span>
                     </div>
                   </td>
-                  <td>
+                  <td className="date-cell">
                     {invite.invite_date ? <FormattedDate dateInput={invite.invite_date} /> : '-'}
                   </td>
                   <td>{invite.status}</td>
-                  <td>
+                  <td className="actions-cell"> {/* Add class for alignment */}
                     {filter === 'pending' && (
                       <div className={styles['invitation-actions']}>
                         <button

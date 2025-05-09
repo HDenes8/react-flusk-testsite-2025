@@ -17,12 +17,12 @@
   display: flex;
   width: 100%;
   gap: 10px;
-  justify-content: left;
+  justify-content: center; /* Align actions to the right */
 }
 
 .btn-accept,
 .btn-deny {
-  width: 20%;
+  min-width: 30%;
   padding: 8px 12px;
   border: none;
   cursor: pointer;
@@ -106,4 +106,9 @@
 .inviter-nickname {
   font-size: 14px; /* Adjust font size as needed */
   color: #333; /* Text color */
+}
+
+.actions-header {
+  text-align: center;
+  align-items: center;
 }

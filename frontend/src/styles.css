@@ -74,9 +74,7 @@ textarea {
 }
 
 /* Global button styles */
-button,
-.btn-primary,
-.btn-secondary {
+button {
   padding: 10px;
   border-radius: 5px;
   font-size: 14px;
@@ -85,9 +83,15 @@ button,
 }
 
 .btn-primary {
+  width: 100%;
+  padding: 10px;
   background-color: #222;
   color: white;
   border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  display: block;
 }
 
 .btn-primary:hover {
@@ -139,17 +143,74 @@ table {
   border-collapse: collapse;
 }
 
+/* Global table cell padding and alignment */
 th,
 td {
-  padding: 15px;
-  text-align: left;
+  padding: 8px; /* Consistent padding for all table cells */
+  text-align: left; /* Default alignment for all cells */
+}
+
+th.actions-header,
+td.actions-cell {
+  text-align: center !important; /* Center-align actions */
+  width: auto !important; /* Automatically adjust to content size */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Ensure actions-header and actions-cell styles are not overridden */
+th.actions-header,
+td.actions-cell {
+  text-align: center !important; /* Force center alignment */
+  width: auto !important; /* Force width to adjust to content */
+  white-space: nowrap; /* Prevent text wrapping */
+  padding: 8px; /* Ensure consistent padding */
+}
+
+/* Remove any conflicting styles for th and td */
+th,
+td {
+  text-align: left; /* Default alignment for other cells */
+  padding: 15px; /* Default padding */
   border-bottom: 3px solid #eee;
+}
+
+th.date-header {
+  text-align: center; /* Center-align headers containing dates */
 }
 
 th {
   background-color: #f8f9fa;
   font-weight: 600;
   border-bottom: 3px solid #ddd;
+  text-align: left; /* This might override specific th alignments */
+  padding: 15px; /* This might add unnecessary padding */
+}
+
+th.select-cell {
+  max-width: 50px; /* Ensure the column is only as wide as needed */
+  text-align: center !important; /* Override global alignment */
+  padding: 5px !important; /* Override global padding */
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+th.actions-header,
+td.actions-cell {
+  text-align: center; /* Center-align actions */
+  width: auto; /* Automatically adjust to content size */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Remove global styles for th.select-cell and td.checkbox-cell */
+th.select-cell,
+td.checkbox-cell {
+    all: unset; /* Reset all styles to avoid interference */
+}
+
+/* Global styles for date-related items */
+.date-cell {
+  text-align: center; /* Center-align date content */
+  font-style: italic; /* Optional: Add a distinct style for dates */
+  color: #555; /* Optional: Subtle color for date text */
 }
 
 /* Global logo styles */
@@ -170,3 +231,101 @@ h3 {
 
 /* Highlighted inconsistencies */
 /* Ensure consistent styles for .btn-primary, .btn-secondary, and input elements across all pages. */
+
+/* Global reusable styles for actions and buttons */
+.dots-button {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  color: #000;
+  display: flex; /* Use flexbox for centering */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  margin: 0 auto; /* Ensure centering within the cell */
+}
+
+.actions-cell {
+  text-align: center; /* Center-align actions */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Global reusable styles for horizontal menu */
+.horizontal-menu {
+  min-width: 120px; /* Ensures a minimum width */
+  width: auto; /* Allows resizing dynamically */
+  max-width: 500px; /* Prevents it from becoming too large */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack content vertically */
+  align-items: center; /* Center content horizontally */
+  justify-content: center; /* Center content vertically */
+  background: white;
+  border: 1px solid #ccc;
+  padding: 15px; /* Increased padding for more space inside the box */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 0; /* Align to the right side of the table */
+  left: auto; /* Ensure it doesn't conflict with left alignment */
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: normal; /* Allows text to wrap properly */
+  margin: 10px;
+  border-radius: 5px; /* Rounded corners */
+  z-index: 1000; /* Ensures it appears above other elements */
+}
+
+.horizontal-menu span {
+  display: block; /* Ensures the description spans its own line */
+  margin-bottom: 15px; /* Adds space between the description and the button */
+  font-size: 14px; /* Adjust the font size for readability */
+  text-align: center; /* Center-align the description */
+}
+
+.horizontal-menu .button-container {
+  display: flex; /* Align buttons horizontally */
+  gap: 10px; /* Add spacing between buttons */
+  justify-content: center; /* Center buttons horizontally */
+  width: 100%; /* Ensure buttons are centered within the menu */
+}
+
+.horizontal-menu button {
+  width: auto; /* Makes button size dynamic */
+  padding: 8px 12px;
+  color: #000000;
+  background-color: #d6d6d6; /* Light grey background */
+  border: none;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners */
+  border: 1px solid #00000000; /* Transparent border */
+  word-wrap: break-word; /* Ensures long words wrap nicely */
+}
+
+.horizontal-menu button:hover {
+  background-color: #333;
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.description-box {
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #333;
+  max-width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-align: left; /* Ensure text is aligned to the left */
+}
+
+.description-paragraph {
+  text-align: left; /* Align text to the left */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+}

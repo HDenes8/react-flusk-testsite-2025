@@ -237,9 +237,9 @@ const Settings = () => {
           />
         </div>
         <button
+          className={styles['btn-primary']}
           type="button"
           id="selectProfilePicButton"
-          className={styles['btn-primary']}
           onClick={() => document.getElementById('profilePicMenu').style.display = 'block'}
         >
           Select Profile Picture

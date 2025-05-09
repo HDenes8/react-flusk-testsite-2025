@@ -137,10 +137,10 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
             <tr>
               <th>Project Name</th>
               <th>My Roles</th>
-              <th>Last Modified</th>
-              <th>Date</th>
+              <th className="date-header">Last Modified</th> {/* Apply date-header */}
+              <th className="date-header">Date</th> {/* Apply date-header */}
               <th>Owner</th>
-              <th>Actions</th>
+              <th className="actions-header">Actions</th> {/* Use global class */}
             </tr>
           </thead>
           <tbody>
@@ -158,14 +158,14 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                     </span>
                   </td>
                   <td>{project.role}</td>
-                  <td>
+                  <td className="date-cell">
                     {project.last_modified_date ? (
                       <FormattedDate dateInput={project.last_modified_date} />
                     ) : (
                       '-'
                     )}
                   </td>
-                  <td>
+                  <td className="date-cell">
                     {project.created_date ? (
                       <FormattedDate dateInput={project.created_date} />
                     ) : (
@@ -182,32 +182,20 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       className={styles['owner-avatar']}
                     />
                     <span className={styles['ownername']}>
-                      {`${project.nickname || 'Unknown'} # ${project.nickname_id || 'No ID'}`}
+                      {`${project.nickname || 'Unknown'} #${project.nickname_id || 'No ID'}`}
                     </span>
                   </td>
-                  <td className={styles['actions']}>
-                    <button
-                      className={styles['dots-button']}
-                      onClick={() => toggleMenu(project.project_id)}
-                    >
-                      ⋯
-                    </button>
+                  <td className="actions-cell"> {/* Use global class */}
+                    <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button> {/* Use global class */}
                     {menuOpen === project.project_id && (
-                      <div
-                        ref={menuRef}
-                        className={styles['horizontal-menu']}
-                        id={`menu-${project.project_id}`}
-                      >
-                        <div className={styles['description-box']}>
-                          <span className={styles['description-text']}>
-                            {project.description && <strong>Description:</strong>}{' '}
-                            {project.description || 'No description available'}
+                      <div className="horizontal-menu" ref={menuRef}> {/* Use global class */}
+                        <div className="description-box"> {/* Use global class */}
+                          <span className="description-paragraph"> {/* Use global class */}
+                            {project.description && <strong>Description:</strong>} {project.description || 'No description available'}
                           </span>
                         </div>
-                        <div className={styles['open-project']}>
-                          <button onClick={() => openProject(project.project_id)}>
-                            Open Project
-                          </button>
+                        <div className="button-container"> {/* Use global class */}
+                          <button onClick={() => openProject(project.project_id)}>Open Project</button>
                         </div>
                       </div>
                     )}

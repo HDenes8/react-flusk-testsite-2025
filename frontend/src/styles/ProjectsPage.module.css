@@ -13,41 +13,71 @@
     margin-top: 20px; /* Add spacing above the table */
 }
 
-.files-table {
+.files-table,
+.versions-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* Prevents columns from resizing unevenly */
+    table-layout: fixed; /* Ensure consistent column widths */
+    background-color: #ffffff; /* Consistent background color */
+}
+
+.files-table thead tr,
+.versions-table thead tr {
+    height: 50px; /* Match the height of table rows */
+    background-color: #f8f9fa; /* Consistent header background */
+    border-bottom: 3px solid #ddd; /* Match global border styling */
 }
 
 .files-table th,
-.files-table td {
-    padding: 15px;
-    text-align: left;
+.versions-table th {
+    padding: 15px; /* Match global padding for consistent height */
+    background-color: #f8f9fa; /* Consistent header background */
+    font-weight: 600; /* Bold header text */
+    color: #333; /* Consistent header text color */
+    text-align: left; /* Default alignment */
+    border-bottom: 1px solid #ddd; /* Subtle border for readability */
+}
+
+.files-table td,
+.versions-table td {
     border-bottom: 1px solid #ddd; /* Add subtle borders for better readability */
+    padding: 8px; /* Ensure consistent padding */
+    overflow: hidden; /* Prevent content overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+    white-space: nowrap; /* Prevent wrapping */
 }
 
-.files-table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #333;
-}
-
-.files-table td {
-    background-color: #fff;
+.select-cell {
+    text-align: center; /* Center align the header text */
+    padding: 5px; /* Add consistent padding */
+    white-space: nowrap; /* Prevent wrapping */
+    vertical-align: middle; /* Center align vertically */
+    width: 40px; /* Explicitly set the width */
+    max-width: 40px; /* Prevent the column from expanding */
+    font-weight: bold; /* Optional: Make the header text bold */
 }
 
 .checkbox-cell {
-    width: 5%; /* Adjust width for checkboxes */
-    text-align: center;
+    text-align: center; /* Center align the checkbox */
+    vertical-align: middle; /* Center align vertically */
+    padding: 0; /* Remove extra padding */
+    width: 40px; /* Explicitly set the width */
+    max-width: 40px; /* Prevent the column from expanding */
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.checkbox-cell input[type="checkbox"] {
+    margin: 0; /* Remove default margins */
+    padding: 0; /* Remove default padding */
+    width: 16px; /* Set a fixed width for the checkbox */
+    height: 16px; /* Set a fixed height for the checkbox */
+    display: inline-block; /* Ensure the checkbox is treated as an inline-block element */
+    box-sizing: border-box; /* Include padding and border in width/height */
+    vertical-align: middle; /* Align the checkbox vertically */
 }
 
 .ver-cell {
     width: 5%; /* Adjust width for version column */
-    text-align: center;
-}
-
-.actions-cell {
-    width: 10%; /* Adjust width for actions column */
     text-align: center;
 }
 
@@ -130,79 +160,6 @@
     margin-top: 20px;
 }
 
-.horizontal-menu {
-    min-width: 120px;
-    width: auto;
-    max-width: 500px;
-    display: block;
-    align-items: center;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 15px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    white-space: normal;
-    margin: 10px;
-    border-radius: 5px;
-    z-index: 1000;
-}
-
-.horizontal-menu span {
-    display: block;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
-
-.description-box {
-    padding: 15px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: #333;
-    max-width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    align-items: left;
-    text-align: left; /* Ensure text is aligned to the left */
-}
-
-.description-text {
-    display: inline-block;
-}
-
-.open-project {
-    display: flex;
-    width: 100%;
-    gap: 10px;
-    justify-content: center;
-}
-
-.open-project button {
-    width: auto;
-    padding: 8px 12px;
-    color: #000000;
-    background-color: #d6d6d6;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    border: 1px solid #00000000;
-    word-wrap: break-word;
-}
-
-.open-project button:hover {
-    background-color: #333;
-    color: white;
-    transition: background 0.2s ease;
-}
-
 .version-history-row {
     background-color: #f8f9fa;
     border: none;
@@ -245,9 +202,9 @@
 }
 
 .checkbox-cell {
-    white-space: nowrap; /* Megakadályozza a sortörést */
-    padding: 10px;
-    align-items: center;
+    text-align: center; /* Center align the checkboxes */
+    vertical-align: middle; /* Center align vertically */
+    padding: 0; /* Remove extra padding */
 }
 
 .ver-cell {
@@ -256,19 +213,9 @@
     align-items: center;
 }
 
-.actions-cell {
-    white-space: nowrap; /* Megakadályozza a sortörést */
-    padding: 5px;
-    align-items: center;
-}
-
 .time-cell, .modified-date-cell {
     text-align: center; /* Centers text horizontally */
     vertical-align: middle; /* Centers text vertically */
-}
-
-.description-box {
-    text-align: left; /* Changed from center to left */
 }
 
 .status {
@@ -297,17 +244,6 @@
     color: white;
   }
   
-
-  .dots-button {
-    background: transparent;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 5px;
-    color: #000 !important;
-    background-color: white !important
-  
-  }
 
 .project-description-button {
     padding: 8px 16px;
@@ -342,10 +278,4 @@
 
 .comment-hover-bubble.visible {
     display: block; /* Show when hovered */
-}
-
-.description-paragraph {
-    text-align: left; /* Align text to the left */
-    margin: 0; /* Remove default margin */
-    padding: 0; /* Remove default padding */
 }
