@@ -18,8 +18,11 @@ import uuid
 import zipfile
 import re
 import json
+import bleach
 
-from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX, JOB_REGEX
+import phonenumbers
+
+from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX, JOB_REGEX, EMAIL_REGEX
 
 #helper functions
 def is_user_active_member(project_id, user_id):
@@ -71,7 +74,6 @@ def members(project_id):
 # Members base end
 
 # Invite members to a project
-# Invite members to a project
 @views.route('/api/projects/<int:project_id>/invite', methods=['POST'])
 @login_required
 def invite_member(project_id):
@@ -80,7 +82,7 @@ def invite_member(project_id):
         return jsonify({"error": "You are not an active member of this project"}), 403
 
     data = request.get_json()
-    invited_email = data.get('email')
+    invited_email = bleach.clean(data.get('email', ""), strip=True)
 
     if not invited_email:
         return jsonify({"error": "At least one email is required"}), 400
@@ -91,7 +93,7 @@ def invite_member(project_id):
         return jsonify({"error": "You don't have permission to invite members"}), 403
 
     # Split and clean up the emails
-    email_list = [email.strip() for email in invited_email.replace("\n", ",").split(",") if email.strip()]
+    email_list = [bleach.clean(email.strip(), strip=True) for email in invited_email.replace("\n", ",").split(",") if email.strip()]
 
     for email in email_list:
         # Check if the invited user already exists
@@ -110,7 +112,7 @@ def invite_member(project_id):
 
                     # Create a new invitation
                     new_invitation = Invitation(
-                        invited_email=email,  # Fixed here
+                        invited_email=email,
                         invited_user_id=invited_user.user_id,
                         referrer_id=current_user.user_id,
                         project_id=project_id,
@@ -124,7 +126,7 @@ def invite_member(project_id):
             else:
                 # Create a new invitation
                 new_invitation = Invitation(
-                    invited_email=email,  # Fixed here
+                    invited_email=email,
                     invited_user_id=invited_user.user_id if invited_user else None,
                     referrer_id=current_user.user_id,
                     project_id=project_id,
@@ -476,8 +478,8 @@ def get_projects():
 @projects_bp.route("/api/projects", methods=["POST"])
 def create_project():
     data = request.get_json()
-    name = data.get("name")
-    description = data.get("description")
+    name = bleach.clean(data.get("name", ""), strip=True)
+    description = bleach.clean(data.get("description", ""), strip=True)
 
     if not name:
         return jsonify({"error": "Project name is required"}), 400
@@ -553,8 +555,6 @@ def project_page(project_id):
             "role": membership.role,
             "description": project.description,
             "created_date": project.created_date.isoformat() if project.created_date else None,
-            "uploader_nickname": uploader.nickname if uploader else "Unknown",
-            "uploader_nickname_id": uploader.nickname_id if uploader else "No ID",
             "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
         }
 
@@ -578,6 +578,9 @@ def upload_file(project_id):
     file = request.files["file"]
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
+
+    if not allowed_file(file.filename):  
+        return jsonify({"error": "Invalid file type!"}), 400
 
     # Get the user's role in the specific project
     user_project = User_Project.query.filter_by(
@@ -839,6 +842,14 @@ def get_project_versions(project_id):
 
 
 # Settings
+
+def is_valid_phone_number(number):  
+    try:
+        parsed_number = phonenumbers.parse(number)
+        return phonenumbers.is_valid_number(parsed_number)
+    except phonenumbers.NumberParseException:
+        return False
+    
 @views.route('/api/user', methods=['GET'])
 @login_required
 def get_user():
@@ -870,19 +881,21 @@ def update_user():
     data = request.get_json()
     user = current_user
 
-    email = data.get('email')
-    full_name = data.get('fullName')
+    email = bleach.clean(data.get('email', ""), strip=True)
+    full_name = bleach.clean(data.get('fullName', ""), strip=True)
     current_password = data.get('currentPassword')
     password1 = data.get('password1')
     password2 = data.get('password2')
-    nickname = data.get('nickname')
-    mobile = data.get('mobile')
-    job = data.get('job')
-    selected_pic = data.get('profilePic')
+    nickname = bleach.clean(data.get('nickname', ""), strip=True)
+    mobile = bleach.clean(data.get('mobile', ""), strip=True)
+    job = bleach.clean(data.get('job', ""), strip=True)
+    selected_pic = bleach.clean(data.get('profilePic', ""), strip=True)
 
     if email and email != user.email:
         if len(email) < 4:
             return jsonify({"error": "Email must be greater than 3 characters."}), 400
+        elif not EMAIL_REGEX.match(email):
+            return {"message": "Invalid email format.", "status": "error"}, 400
         elif User_profile.query.filter_by(email=email).first():
             return jsonify({"error": "Email already exists."}), 400
 
@@ -907,6 +920,12 @@ def update_user():
             return jsonify({"error": "Job title must not exceed 50 characters."}), 400
         elif not JOB_REGEX.match(job):
             return jsonify({"error": "Job title can only contain letters, numbers, spaces, and hyphens."}), 400
+        
+    if mobile and mobile != user.mobile:
+        if len(mobile) < 2:
+            return jsonify({"error": "Mobile number must be greater than 1 characters."}), 400
+        elif not is_valid_phone_number(mobile):
+            return jsonify({"error": "Invalid phone number format."}), 400
 
     if password1 or password2:
         if password1 or password2:

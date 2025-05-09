@@ -12,6 +12,7 @@ import os
 import requests
 from flask_cors import CORS
 import random
+import bleach
 
 
 auth = Blueprint('auth', __name__)
@@ -64,17 +65,13 @@ def verify_recaptcha(response):
 FULL_NAME_REGEX = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ-]+(?: [A-Za-zÀ-ÖØ-öø-ÿ-]+)*$")
 NICKNAME_REGEX = re.compile(r"^[A-Za-z0-9_]+$")
 JOB_REGEX = re.compile(r"^[A-Za-zÀ-ÖØ-öø-ÿ_]+$")
-PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{7,}$")
+PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[{}\[\]\-_$@!%*?&#^()+=~`|\\:;\"'<>,./])[A-Za-z\d{}\[\]\-_$@!%*?&#^()+=~`|\\:;\"'<>,./]{7,}$")
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
 
 def is_valid_phone_number(number):  
     try:
-        # Allow numbers starting with '0' (e.g., 06704322345)
-        if number.startswith('0') and number.isdigit() and len(number) >= 10:
-            return True
-        
-        # Parse and validate international phone numbers
-        parsed_number = phonenumbers.parse(number, "ZZ")  # "ZZ" for unknown region
+        parsed_number = phonenumbers.parse(number)
         return phonenumbers.is_valid_number(parsed_number)
     except phonenumbers.NumberParseException:
         return False
@@ -90,14 +87,14 @@ def sign_up():
             return {"message": "Please complete the CAPTCHA.", "status": "error"}, 400
 
         email = data.get('email')
-        full_name = data.get('fullName')
-        nickname = data.get('nickname')
+        full_name = bleach.clean(data.get('fullName', ""), strip=True)
+        nickname = bleach.clean(data.get('nickname', ""), strip=True)
         password1 = data.get('password1')
         password2 = data.get('password2')
 
         # Optional fields
         mobile = data.get('mobile') or None
-        job = data.get('job') or None
+        job = bleach.clean(data.get('job', ""), strip=True) if data.get('job') else None
 
         # Check for existing user and validate inputs
         user = User_profile.query.filter_by(email=email).first()
@@ -105,6 +102,8 @@ def sign_up():
             return {"message": "Email already exists.", "status": "error"}, 400
         elif len(email) < 4:
             return {"message": "Email must be greater than 3 characters.", "status": "error"}, 400
+        elif not EMAIL_REGEX.match(email):
+            return {"message": "Invalid email format.", "status": "error"}, 400
         elif len(full_name) < 2:
             return {"message": "Full name must be greater than 1 character.", "status": "error"}, 400
         elif not FULL_NAME_REGEX.match(full_name):
