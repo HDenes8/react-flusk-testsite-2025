@@ -341,17 +341,18 @@ def deny_invite(invitation_id):
 
 
 # Download
-def load_allowed_extensions(filepath=os.path.join(current_app.static_folder, 'allowed_extensions.txt')):
+def load_allowed_extensions(filepath=None):
+    if filepath is None:
+        filepath = os.path.join(current_app.static_folder, 'allowed_extensions.txt')
     if not os.path.exists(filepath):
         print(f"[ERROR] {filepath} not found. Using default set.")
         return {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'tar', 'gz', '7z', 'docx', 'xlsx', 'pptx'}
     with open(filepath, "r", encoding="utf-8") as f:
         return {line.strip().lower() for line in f if line.strip()}
 
-ALLOWED_EXTENSIONS = load_allowed_extensions()
-
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    allowed_extensions = load_allowed_extensions()
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 @views.route('/download/<filename>')
 @login_required
