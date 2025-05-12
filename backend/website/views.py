@@ -1,38 +1,33 @@
-from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
 from .models import File_data, User_profile, User_Project, Project, Invitation, File_version, Last_download
 from . import db
-from werkzeug.security import generate_password_hash, check_password_hash
+from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX, JOB_REGEX, EMAIL_REGEX
 
+from flask import Blueprint, request, jsonify
 from flask import current_app
 from flask import send_from_directory
-import os
+
+from flask_login import login_required, current_user
+
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 from sqlalchemy import text, func
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import exists 
 
-import datetime
-import uuid 
+import os
 import zipfile
 import re
-import json
 import bleach
-
 import phonenumbers
-
-from .auth import FULL_NAME_REGEX, NICKNAME_REGEX, PASSWORD_REGEX, JOB_REGEX, EMAIL_REGEX
-
-#helper functions
-def is_user_active_member(project_id, user_id):
-    return User_Project.query.filter_by(project_id=project_id, user_id=user_id, is_removed=False).first() is not None
-
 
 views = Blueprint('views', __name__)
 projects_bp = Blueprint('projects', __name__)
 
-# Members base
+# helper function for multiple places
+def is_user_active_member(project_id, user_id):
+    return User_Project.query.filter_by(project_id=project_id, user_id=user_id, is_removed=False).first() is not None
+
+# Members base logic start
 @views.route('/api/projects/<project_id>/members', methods=['GET'])
 @login_required
 def members(project_id):
@@ -40,7 +35,7 @@ def members(project_id):
     if not is_user_active_member(project_id, current_user.user_id):
         return jsonify({"error": "You are not an active member of this project"}), 403
 
-
+    # Fetch all members of the project
     user_projects = User_Project.query.filter_by(project_id=project_id, is_removed=False).all()
     project = Project.query.get(project_id)
 
@@ -67,11 +62,12 @@ def members(project_id):
 
     return jsonify({
         "user_id": current_user.user_id,
-        "current_user_role": current_user_role,  # Added current user's role for permission checking on the client
+        "current_user_role": current_user_role, 
         "project_name": project.name if project else "Unknown",
         "members": project_roles
     })
-# Members base end
+# Members base logic end
+
 
 # Invite members to a project
 @views.route('/api/projects/<int:project_id>/invite', methods=['POST'])
@@ -89,7 +85,7 @@ def invite_member(project_id):
 
     # Check if the current user has permission to invite members
     user_project = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
-    if not user_project or user_project.role not in ['admin', 'owner', 'editor']:  # Include 'editor'
+    if not user_project or user_project.role not in ['admin', 'owner', 'editor']: 
         return jsonify({"error": "You don't have permission to invite members"}), 403
 
     # Split and clean up the emails
@@ -99,11 +95,12 @@ def invite_member(project_id):
         # Check if the invited user already exists
         invited_user = User_profile.query.filter_by(email=email).first()
         
+        # check if the user is already a member of the project
         if invited_user:
             existing_membership = User_Project.query.filter_by(user_id=invited_user.user_id, project_id=project_id).first()
             if existing_membership:
                 if existing_membership.is_removed:
-                    # Reactivate the removed user but require them to accept the invitation
+                    # Re-invite the user if they were removed
                     Invitation.query.filter_by(
                         invited_user_id=invited_user.user_id,
                         project_id=project_id,
@@ -124,7 +121,7 @@ def invite_member(project_id):
                 else:
                     return jsonify({"error": f"User {email} is already a member of this project"}), 400
             else:
-                # Create a new invitation
+                # If they weren't a member before; create an invitation
                 new_invitation = Invitation(
                     invited_email=email,
                     invited_user_id=invited_user.user_id if invited_user else None,
@@ -137,9 +134,9 @@ def invite_member(project_id):
 
                 return jsonify({"message": "Invitation sent successfully"}), 200
 
-    return jsonify({"error": "Invalid email addresses"}), 400  # For invalid email formats
-
+    return jsonify({"error": "Invalid email addresses"}), 400  
 # Invite members to a project end
+
 
 # Change role of a member
 @views.route('/api/projects/<int:project_id>/change-role', methods=['POST'])
@@ -166,7 +163,7 @@ def change_role(project_id):
     if not target_membership:
         return jsonify({"error": "Target user is not a member of this project"}), 404
 
-    # Role change restrictions
+    # Role change restrictions start
     if user_project.role == 'admin' and target_membership.role in ['admin', 'owner']:
         return jsonify({"error": "Admins cannot change roles of other admins or the owner"}), 403
     
@@ -182,18 +179,19 @@ def change_role(project_id):
     if user_project.role == 'admin' and new_role.lower() == 'admin':
         return jsonify({"error": "Admins cannot assign the admin role to others"}), 403
     
-    # Prevent any user from changing their own role, should not be needed but just in case
     if current_user.user_id == target_user_id:
-        return jsonify({"error": "You cannot change your own role"}), 403
+        return jsonify({"error": "You cannot change your own role"}), 403 # should not be needed, but just in case
 
     if new_role == 'removed' and user_project.role not in ['admin', 'owner']:
-        return jsonify({"error": "You don't have permission to assign the 'removed' role"}), 403
+        return jsonify({"error": "You don't have permission to assign the 'removed' role"}), 403 
+    # Role change restrictions end
 
-    # Update the role
+    # Update the role(s)
     target_membership.role = new_role
     db.session.commit()
     return jsonify({"message": "Role updated successfully"})
 # Change role of a member end
+
 
 # Remove a member from a project
 @views.route('/api/projects/<int:project_id>/remove-user', methods=['POST'])
@@ -215,7 +213,7 @@ def remove_user_from_project(project_id):
     if not remover_membership or not target_membership:
         return jsonify({"error": "Membership not found"}), 404
 
-    # --- SELF-REMOVAL LOGIC ---
+    # self-removal logic
     if current_user.user_id == user_id_to_remove:
         print(f"Self-removal attempt by user {current_user.user_id} from project {project_id}")
         if remover_membership.role == 'owner':
@@ -225,12 +223,17 @@ def remove_user_from_project(project_id):
             # Mark the user as removed
             remover_membership.is_removed = True
             remover_membership.user_deleted_or_left_date = func.now()
+
             db.session.commit()
+
             print(f"User {current_user.user_id} successfully left project {project_id}")
             return jsonify({"message": "You have left the project successfully"}), 200
+    # self-removal logic end
 
-    # --- REMOVING OTHERS LOGIC ---
-    # Check permissions
+
+    # remove other user(s) logic start
+
+    # Check for permissions
     if remover_membership.role not in ['admin', 'owner']:
         return jsonify({"error": "You don't have permission to remove members"}), 403
 
@@ -243,13 +246,14 @@ def remove_user_from_project(project_id):
     # Mark the user as removed
     target_membership.is_removed = True
     target_membership.user_deleted_or_left_date = func.now()
+
     db.session.commit()
 
     return jsonify({"message": "User removed from the project successfully"}), 200
-
 # Remove a member from a project end
 
-# Invitations
+
+# base logic for invitations start
 @views.route('/invitations', methods=['GET'])
 @login_required
 def invitations():
@@ -290,8 +294,10 @@ def invitations():
         })
 
     return jsonify({"invitations": invitations_data})
+# base logic for invitations end
 
 
+# acceptin invitations start
 @views.route('/accept_invite/<int:invitation_id>', methods=['POST'])
 @login_required
 def accept_invite(invitation_id):
@@ -305,6 +311,7 @@ def accept_invite(invitation_id):
         project_id=invitation.project_id
     ).first()
 
+    # check if the user was removed prior or still part of the project
     if existing_membership:
         if existing_membership.role == 'removed' or existing_membership.is_removed:
             existing_membership.role = 'reader'
@@ -313,20 +320,24 @@ def accept_invite(invitation_id):
             existing_membership.connection_date = func.now()
         else:
             return jsonify({"error": "User is already a project member."}), 400
+    # If the user is not a member, add them
     else:
         new_member = User_Project(user_id=current_user.user_id, project_id=invitation.project_id, role='reader')
         db.session.add(new_member)
 
-    # Update only the latest invitation
+    # Update the invitation
     invitation.status = 'accepted'
     db.session.commit()
 
     return jsonify({"message": "Invitation accepted."})
+# acceptin invitations end
 
 
+# deny invitations start
 @views.route('/deny_invite/<int:invitation_id>', methods=['POST'])
 @login_required
 def deny_invite(invitation_id):
+    # check for the invitation
     invitation = Invitation.query.get(invitation_id)
     if not invitation or (invitation.invited_user_id and invitation.invited_user_id != current_user.user_id) \
         or (invitation.invited_email and invitation.invited_email != current_user.email):
@@ -340,7 +351,7 @@ def deny_invite(invitation_id):
 # Invitations end
 
 
-# Download
+# allowed file types for upload logic start
 def load_allowed_extensions(filepath=None):
     if filepath is None:
         filepath = os.path.join(current_app.static_folder, 'allowed_extensions.txt')
@@ -353,230 +364,33 @@ def load_allowed_extensions(filepath=None):
 def allowed_file(filename):
     allowed_extensions = load_allowed_extensions()
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+# allowed file types for upload logic end
 
-@views.route('/download/<filename>')
+# upload base start
+@views.route('/upload', methods=['POST'])
 @login_required
-def download_file(filename):
-    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    if os.path.exists(file_path):
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+    print("Received file:", file.filename)
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        print("Saved to:", file_path)
+        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
     else:
-        return jsonify({"error": "File not found."}), 404
-    
-@projects_bp.route("/api/projects/download", methods=["POST"])
-@login_required
-def download_files():
-    data = request.get_json()
-    selected_files = data.get("selected_files", [])
+        print("Rejected file extension:", file.filename)
+        return jsonify({"error": "Invalid file type!"}), 400
+#upload base end
 
-    if not selected_files:
-        return jsonify({"error": "No files selected for download"}), 400
-
-    try:
-        # Collect file paths for the selected files
-        file_paths = []
-        for file_id in selected_files:
-            if not str(file_id).isdigit():
-                return jsonify({"error": f"Invalid file ID: {file_id}"}), 400
-
-            file_version = File_version.query.get(int(file_id))
-            if not file_version:
-                return jsonify({"error": f"File version with ID {file_id} not found"}), 404
-
-            file_data = File_data.query.get(file_version.file_data_id)
-            if not file_data:
-                return jsonify({"error": f"File data for version ID {file_id} not found"}), 404
-
-            project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
-            file_folder = os.path.join(project_folder, str(file_data.file_data_id))
-            file_path = os.path.join(file_folder, file_version.file_name)
-
-            if not os.path.exists(file_path):
-                return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
-
-            file_paths.append(file_path)
-
-            existing = Last_download.query.filter_by(
-                file_data_id=file_data.file_data_id,
-                version_id=file_version.version_id,
-                user_id=current_user.user_id
-            ).first()
-
-            if not existing:
-                new_download = Last_download(
-                    file_data_id=file_data.file_data_id,
-                    version_id=file_version.version_id,
-                    user_id=current_user.user_id,
-                    download_date=func.now()
-                )
-                db.session.add(new_download)
-
-            db.session.commit()
-
-        # Create a ZIP archive of the selected files
-        zip_filename = "selected_files.zip"
-        zip_path = os.path.join(current_app.config['UPLOAD_FOLDER'], zip_filename)
-        with zipfile.ZipFile(zip_path, "w") as zipf:
-            for file_path in file_paths:
-                zipf.write(file_path, os.path.basename(file_path))
-
-        # Send the ZIP file to the user
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], zip_filename, as_attachment=True)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-# Download end
-
-# Projects start 
-@views.route('/projects', methods=['POST', 'GET'])
-@login_required
-def projects():
-    creator_alias = aliased(User_profile)
-    projects = db.session.query(Project, User_profile, creator_alias).\
-        select_from(User_profile).\
-        join(User_Project, User_Project.user_id == User_profile.user_id).\
-        join(Project, Project.project_id == User_Project.project_id).\
-        join(creator_alias, creator_alias.user_id == Project.creator_id).\
-        filter(User_Project.user_id == current_user.user_id).\
-        all()
-    
-    #maybe
-    projects_data = [{
-        "project_id": proj.Project.project_id,
-        "name": proj.Project.name,
-        "creator": proj.creator_alias.full_name,
-    } for proj in projects]
-
-    files = os.listdir(current_app.config['UPLOAD_FOLDER'])
-
-    return jsonify({"projects": projects_data}, files=files)
-
-@views.route('/api/projects', methods=['GET'])
-@login_required
-def get_projects():
-    user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
-
-    projects_data = []
-    for user_project in user_projects:
-        project = Project.query.get(user_project.project_id)
-
-        last_version = db.session.query(File_version).join(File_data).filter(
-            File_data.project_id == project.project_id
-        ).order_by(File_version.upload_date.desc()).first()
-
-        if last_version and last_version.upload_date:
-            last_modified = last_version.upload_date
-        else:
-            last_modified = None
-
-        projects_data.append({
-            "id": project.project_id,
-            "name": project.name,
-            "role": user_project.role,
-            "lastModified": last_modified,
-            "date": project.created_date if project.created_date else None,
-            "ownerName": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
-            "ownerAvatar": f"/static/profile_pics/{User_profile.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
-            "status": "success"
-        })
-
-    return jsonify(projects_data)
-# Projects end
-
-# Create project
-@projects_bp.route("/api/projects", methods=["POST"])
-def create_project():
-    data = request.get_json()
-    name = bleach.clean(data.get("name", ""), strip=True)
-    description = bleach.clean(data.get("description", ""), strip=True)
-
-    if not name:
-        return jsonify({"error": "Project name is required"}), 400
-
-    project = Project(name=name, description=description)
-    db.session.add(project)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Project created",
-        "project": {
-            "id": project.project_id,
-            "description": project.description,
-            "role": project.role,
-            "created_at": project.created_date.isoformat()
-        }
-    }), 201
-# Create project end
-
-#project_page
-@views.route('/project/<int:project_id>', methods=['GET'])
-@login_required
-def project_page(project_id):
-    try:
-        membership = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
-        if not membership:
-            return jsonify({"error": "Access denied: You are not a member of this project"}), 403
-
-        project = Project.query.get(project_id)
-        if not project:
-            return jsonify({"error": "Project not found"}), 404
-
-        user_id = current_user.user_id
-
-        # Fetch all latest versions
-        latest_versions = File_version.query.\
-            join(File_data, File_version.file_data_id == File_data.file_data_id).\
-            filter(File_data.project_id == project_id, File_version.last_version == True).\
-            all()
-
-        # Get version IDs user has downloaded
-        downloaded_versions = db.session.query(Last_download.version_id).\
-            filter_by(user_id=user_id).distinct().all()
-        downloaded_version_ids = {vid for (vid,) in downloaded_versions}
-
-        # Prepare file list
-        files_data = []
-        download_flags = {}
-
-        for file in latest_versions:
-            uploader = User_profile.query.get(file.user_id)  # Fetch uploader details
-            downloaded = (file.user_id == user_id) or (file.version_id in downloaded_version_ids)
-            files_data.append({
-                "version_id": file.version_id,
-                "file_data_id": file.file_data_id,
-                "title": file.file_data.title,
-                "file_name": file.file_name,
-                "version_number": file.version_number,
-                "file_size": file.file_size,
-                "file_type": file.file_type,
-                "upload_date": file.upload_date.isoformat() if file.upload_date else None,
-                "description": file.file_data.description,
-                "comment": file.comment,
-                "uploader_nickname": uploader.nickname if uploader else "Unknown",
-                "uploader_nickname_id": uploader.nickname_id if uploader else "No ID",
-                "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png"  # Add uploader profile picture
-            })
-            download_flags[file.version_id] = downloaded
-
-        project_data = {
-            "id": project.project_id,
-            "name": project.name,
-            "role": membership.role,
-            "description": project.description,
-            "created_date": project.created_date.isoformat() if project.created_date else None,
-            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
-        }
-
-        return jsonify({
-            "project": project_data,
-            "files": files_data,
-            "download_file_results": download_flags
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-#project_page end yey
-
-# Upload file + create version
+# upload main file(s) + upload new version(s) for main file(s) start
 @projects_bp.route("/api/projects/<int:project_id>/upload", methods=["POST"])
 @login_required
 def upload_file(project_id):
@@ -614,7 +428,7 @@ def upload_file(project_id):
     project = Project.query.get_or_404(project_id)
 
     try:
-        # Form fields
+        # get the form data and bleach it
         description = request.form.get("description", "")
         title = request.form.get("title", "")[:100]
         main_file_id_raw = request.form.get("main_file_id")
@@ -663,7 +477,7 @@ def upload_file(project_id):
         ).scalar()
         version_number = (latest_version or 0) + 1
 
-        # Strip trailing _v<number> from the filename if it exists
+        # Stripping version number from the filename if it exists
         version_pattern = re.compile(r'(.*)_v\d+$')
         match = version_pattern.match(name)
         if match:
@@ -706,7 +520,7 @@ def upload_file(project_id):
         db.session.add(new_download)
         db.session.commit()
 
-        # Return the list of versions (for dropdown or history list)
+        # Return the list of versions for history list
         file_versions = File_version.query.filter_by(file_data_id=file_data.file_data_id).order_by(File_version.version_number.desc()).all()
         version_history = []
         for v in file_versions:
@@ -716,7 +530,7 @@ def upload_file(project_id):
                 "file_name": v.file_name,
                 "file_size": v.file_size,
                 "comment": v.comment,
-                "uploader": uploader.full_name if uploader else "Unknown",  # Add uploader name
+                "uploader": uploader.full_name if uploader else "Unknown",  
                 "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png"  # Add uploader profile picture
             })
 
@@ -730,7 +544,7 @@ def upload_file(project_id):
         return jsonify({
             "message": "File uploaded successfully",
             "file_data": file_data_info,
-            "version_history": version_history  # Provide version history to the frontend
+            "version_history": version_history  
         }), 200
 
     except Exception as e:
@@ -738,7 +552,245 @@ def upload_file(project_id):
         return jsonify({"error": str(e)}), 500
 # Upload file + create version end
 
-# Dropdown/history
+
+# downlaod base start
+@views.route('/download/<filename>')
+@login_required
+def download_file(filename):
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(file_path):
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+    else:
+        return jsonify({"error": "File not found."}), 404
+# downlaod base end
+
+
+# downlaod files start
+@projects_bp.route("/api/projects/download", methods=["POST"])
+@login_required
+def download_files():
+    data = request.get_json()
+    selected_files = data.get("selected_files", [])
+
+    if not selected_files:
+        return jsonify({"error": "No files selected for download"}), 400
+
+    try:
+        # Collect file paths for the selected files
+        file_paths = []
+        for file_id in selected_files:
+            if not str(file_id).isdigit():
+                return jsonify({"error": f"Invalid file ID: {file_id}"}), 400
+
+            # Fetch the file version and its associated file data
+            file_version = File_version.query.get(int(file_id))
+            if not file_version:
+                return jsonify({"error": f"File version with ID {file_id} not found"}), 404
+
+            file_data = File_data.query.get(file_version.file_data_id)
+            if not file_data:
+                return jsonify({"error": f"File data for version ID {file_id} not found"}), 404
+
+            project_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], str(file_data.project_id))
+            file_folder = os.path.join(project_folder, str(file_data.file_data_id))
+            file_path = os.path.join(file_folder, file_version.file_name)
+
+            if not os.path.exists(file_path):
+                return jsonify({"error": f"File {file_version.file_name} not found on server"}), 404
+
+            file_paths.append(file_path)
+
+            existing = Last_download.query.filter_by(
+                file_data_id=file_data.file_data_id,
+                version_id=file_version.version_id,
+                user_id=current_user.user_id
+            ).first()
+
+            if not existing:
+                new_download = Last_download(
+                    file_data_id=file_data.file_data_id,
+                    version_id=file_version.version_id,
+                    user_id=current_user.user_id,
+                    download_date=func.now()
+                )
+                db.session.add(new_download)
+
+            db.session.commit()
+
+        # Create a ZIP archive of the selected files
+        zip_filename = "selected_files.zip"
+        zip_path = os.path.join(current_app.config['UPLOAD_FOLDER'], zip_filename)
+        with zipfile.ZipFile(zip_path, "w") as zipf:
+            for file_path in file_paths:
+                zipf.write(file_path, os.path.basename(file_path))
+
+        # Send the ZIP file to the user
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], zip_filename, as_attachment=True)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# downlaod files end
+
+
+# Projects base start 
+@views.route('/projects', methods=['POST', 'GET'])
+@login_required
+def projects():
+
+    # Query projects the current user is part of, along with user and creator profile info
+    creator_alias = aliased(User_profile)
+    projects = db.session.query(Project, User_profile, creator_alias).\
+        select_from(User_profile).\
+        join(User_Project, User_Project.user_id == User_profile.user_id).\
+        join(Project, Project.project_id == User_Project.project_id).\
+        join(creator_alias, creator_alias.user_id == Project.creator_id).\
+        filter(User_Project.user_id == current_user.user_id).\
+        all()
+    
+    projects_data = [{
+        "project_id": proj.Project.project_id,
+        "name": proj.Project.name,
+        "creator": proj.creator_alias.full_name,
+    } for proj in projects]
+
+    files = os.listdir(current_app.config['UPLOAD_FOLDER'])
+
+    return jsonify({"projects": projects_data}, files=files)
+# Projects base end
+
+
+# Projects start
+@views.route('/api/projects', methods=['GET'])
+@login_required
+def get_projects():
+    user_projects = User_Project.query.filter_by(user_id=current_user.user_id).all()
+
+    projects_data = []
+    for user_project in user_projects:
+        project = Project.query.get(user_project.project_id)
+
+        last_version = db.session.query(File_version).join(File_data).filter(
+            File_data.project_id == project.project_id
+        ).order_by(File_version.upload_date.desc()).first()
+
+        if last_version and last_version.upload_date:
+            last_modified = last_version.upload_date
+        else:
+            last_modified = None
+
+        projects_data.append({
+            "id": project.project_id,
+            "name": project.name,
+            "role": user_project.role,
+            "lastModified": last_modified,
+            "date": project.created_date if project.created_date else None,
+            "ownerName": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown",
+            "ownerAvatar": f"/static/profile_pics/{User_profile.query.get(project.creator_id).profile_pic}" if project.creator_id else "/static/profile_pics/default.png",
+            "status": "success"
+        })
+
+    return jsonify(projects_data)
+# Projects end
+
+
+#project page start
+@views.route('/project/<int:project_id>', methods=['GET'])
+@login_required
+def project_page(project_id):
+    try:
+        membership = User_Project.query.filter_by(user_id=current_user.user_id, project_id=project_id).first()
+        if not membership:
+            return jsonify({"error": "Access denied: You are not a member of this project"}), 403
+
+        project = Project.query.get(project_id)
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
+
+        user_id = current_user.user_id
+
+        # Fetch all latest versions
+        latest_versions = File_version.query.\
+            join(File_data, File_version.file_data_id == File_data.file_data_id).\
+            filter(File_data.project_id == project_id, File_version.last_version == True).\
+            all()
+
+        # Get version IDs user has downloaded
+        downloaded_versions = db.session.query(Last_download.version_id).\
+            filter_by(user_id=user_id).distinct().all()
+        downloaded_version_ids = {vid for (vid,) in downloaded_versions}
+
+        # Prepare file list
+        files_data = []
+        download_flags = {}
+
+        # Iterate through the latest versions and prepare the response
+        for file in latest_versions:
+            uploader = User_profile.query.get(file.user_id)  
+            downloaded = (file.user_id == user_id) or (file.version_id in downloaded_version_ids)
+            files_data.append({
+                "version_id": file.version_id,
+                "file_data_id": file.file_data_id,
+                "title": file.file_data.title,
+                "file_name": file.file_name,
+                "version_number": file.version_number,
+                "file_size": file.file_size,
+                "file_type": file.file_type,
+                "upload_date": file.upload_date.isoformat() if file.upload_date else None,
+                "description": file.file_data.description,
+                "comment": file.comment,
+                "uploader_nickname": uploader.nickname if uploader else "Unknown",
+                "uploader_nickname_id": uploader.nickname_id if uploader else "No ID",
+                "uploader_pic": f"/static/profile_pics/{uploader.profile_pic}" if uploader and uploader.profile_pic else "/static/profile_pics/default.png"  # Add uploader profile picture
+            })
+            download_flags[file.version_id] = downloaded
+
+        # Prepare project data
+        project_data = {
+            "id": project.project_id,
+            "name": project.name,
+            "role": membership.role,
+            "description": project.description,
+            "created_date": project.created_date.isoformat() if project.created_date else None,
+            "creator": User_profile.query.get(project.creator_id).full_name if project.creator_id else "Unknown"
+        }
+
+        return jsonify({
+            "project": project_data,
+            "files": files_data,
+            "download_file_results": download_flags
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+#project page end
+
+
+# Create project start
+@projects_bp.route("/api/projects", methods=["POST"])
+def create_project():
+    data = request.get_json()
+    name = bleach.clean(data.get("name", ""), strip=True)
+    description = bleach.clean(data.get("description", ""), strip=True)
+
+    if not name:
+        return jsonify({"error": "Project name is required"}), 400
+
+    project = Project(name=name, description=description)
+    db.session.add(project)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Project created",
+        "project": {
+            "id": project.project_id,
+            "description": project.description,
+            "role": project.role,
+            "created_at": project.created_date.isoformat()
+        }
+    }), 201
+# Create project end
+
+
+# Dropdown/history start    
 @projects_bp.route("/api/files/<int:file_data_id>/versions", methods=["GET"])
 @login_required
 def get_file_versions(file_data_id):
@@ -798,30 +850,6 @@ def get_file_versions(file_data_id):
         return jsonify({"error": str(e)}), 500
 #dropdown/history end
 
-# upload start might not need anyomre
-@views.route('/upload', methods=['POST'])
-@login_required
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-
-    file = request.files['file']
-    print("Received file:", file.filename)
-
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-        print("Saved to:", file_path)
-        return jsonify({"message": "File uploaded successfully!", "file_name": filename})
-    else:
-        print("Rejected file extension:", file.filename)
-        return jsonify({"error": "Invalid file type!"}), 400
-#upload end
-
 
 # Get all versions for a project
 @projects_bp.route("/api/projects/<int:project_id>/versions", methods=["GET"])
@@ -845,12 +873,11 @@ def get_project_versions(project_id):
             })
 
     return jsonify(versions)
+# Get all versions for a project end
 
-#project end
 
-
-# Settings
-
+# Settings start
+# did not let me import this from auth.py
 def is_valid_phone_number(number):  
     try:
         parsed_number = phonenumbers.parse(number)
@@ -858,6 +885,7 @@ def is_valid_phone_number(number):
     except phonenumbers.NumberParseException:
         return False
     
+# Get user data
 @views.route('/api/user', methods=['GET'])
 @login_required
 def get_user():
@@ -873,6 +901,7 @@ def get_user():
     }
     return jsonify(user_data)
 
+# Get profile pictures for dropdown
 @views.route('/api/profile_pics', methods=['GET'])
 @login_required
 def get_profile_pics():
@@ -883,12 +912,14 @@ def get_profile_pics():
         profile_pics.append("default.png")
     return jsonify(profile_pics)
 
+# settings update logic
 @views.route('/api/user/update', methods=['POST'])
 @login_required
 def update_user():
     data = request.get_json()
     user = current_user
 
+    # Clean and validate input data
     email = bleach.clean(data.get('email', ""), strip=True)
     full_name = bleach.clean(data.get('fullName', ""), strip=True)
     current_password = data.get('currentPassword')
@@ -899,6 +930,7 @@ def update_user():
     job = bleach.clean(data.get('job', ""), strip=True)
     selected_pic = bleach.clean(data.get('profilePic', ""), strip=True)
 
+    # check email
     if email and email != user.email:
         if len(email) < 4:
             return jsonify({"error": "Email must be greater than 3 characters."}), 400
@@ -907,12 +939,14 @@ def update_user():
         elif User_profile.query.filter_by(email=email).first():
             return jsonify({"error": "Email already exists."}), 400
 
+    # check full name
     if full_name and full_name != user.full_name:
         if len(full_name) < 2:
             return jsonify({"error": "Full name must be greater than 1 character."}), 400
         elif not FULL_NAME_REGEX.match(full_name):
             return jsonify({"error": "Full name must only contain letters, spaces, and hyphens."}), 400
 
+    # check nickname
     if nickname and nickname != user.nickname:
         if len(nickname) < 2:
             return jsonify({"error": "Nickname must be greater than 1 character."}), 400
@@ -921,6 +955,7 @@ def update_user():
         elif not NICKNAME_REGEX.match(nickname):
             return jsonify({"error": "Nickname can only contain letters, numbers, and underscores."}), 400
     
+    # check job
     if job and job != user.job:
         if len(job) < 2:
             return jsonify({"error": "Job title must be greater than 1 character."}), 400
@@ -929,12 +964,14 @@ def update_user():
         elif not JOB_REGEX.match(job):
             return jsonify({"error": "Job title can only contain letters, spaces, and hyphens."}), 400
         
+    # check mobile
     if mobile and mobile != user.mobile:
         if len(mobile) < 2:
             return jsonify({"error": "Mobile number must be greater than 1 characters."}), 400
         elif not is_valid_phone_number(mobile):
             return jsonify({"error": "Invalid phone number format."}), 400
 
+    # check password
     if password1 or password2:
         if password1 or password2:
             if not current_password:
@@ -950,6 +987,7 @@ def update_user():
                 "error": "Password must be at least 7 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
             }), 400
 
+    # update user data
     if email and email != user.email:
         user.email = email
     if full_name and full_name != user.full_name:
@@ -965,19 +1003,19 @@ def update_user():
         profile_pics = [f for f in os.listdir(profile_pics_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
         if selected_pic in profile_pics:
             user.profile_pic = selected_pic
-
     if password1:
         user.password = generate_password_hash(password1, method='pbkdf2:sha256')
 
     db.session.commit()
     return jsonify({"message": "Your changes have been saved!"})
+# settings update logic end
 
 
-
-# Create new project
+# Create new project start
 @views.route('/create-project', methods=['POST'])
 @login_required
 def create_project():
+    
     data = request.get_json()
     project_name = data.get('projectName')
     description = data.get('description')
@@ -1005,6 +1043,7 @@ def create_project():
 
     db.session.add(creator_relation)
 
+    # Handle invited user emails
     if invited_emails:
         email_list = [email.strip() for email in invited_emails.replace("\n", ",").split(",") if email.strip()]
         for email in email_list:
@@ -1021,7 +1060,7 @@ def create_project():
 
     return jsonify({"message": "Project created successfully!"})
 
-# Home
+# Home start
 @views.route('/api/mainpage', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -1030,6 +1069,7 @@ def home():
     if not user:
         return jsonify({"error": "User not found"}), 404
     
+    # Fetch user and project data using the stored procedure
     query = text("SELECT * FROM get_user_projects(:user_id_param)")
     result = db.session.execute(query, {"user_id_param": user.user_id}).mappings()
 
@@ -1046,12 +1086,11 @@ def home():
         },
         "roles": roles_list
     }
-
-    print("DEBUG: /api/mainpage response:\n" + json.dumps(response_data, indent=2, default=str))
-
+    
     return jsonify(response_data)
+# Home end
 
-# Profile
+# Profile data for navbar start
 @views.route('/api/profile', methods=['GET'])
 @login_required
 def get_profile():
@@ -1068,4 +1107,4 @@ def get_profile():
     }
 
     return jsonify(profile_data)
-
+# Profile data for navbar end

@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.sql.expression import text
 
 
-# User + Project => N-M Conn. 
+# user table
 class User_profile (db.Model, UserMixin):
     user_id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(255))
@@ -25,7 +25,8 @@ class User_profile (db.Model, UserMixin):
 
     def get_id(self):
         return str(self.user_id)
-  
+
+# project table
 class Project(db.Model):
     project_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -35,6 +36,7 @@ class Project(db.Model):
     
     creator_id = db.Column(db.Integer, db.ForeignKey('user_profile.user_id'))
 
+# define therelationship between user and project
 class User_Project(db.Model):
     __tablename__ = 'user_project'
 
@@ -46,6 +48,7 @@ class User_Project(db.Model):
 
     is_removed = db.Column(db.Boolean, default=False)  # New field to track if the user was removed
 
+# invitation table
 class Invitation(db.Model):
     invitation_id = db.Column(db.Integer, primary_key=True)
     invited_email = db.Column(db.String(255), nullable=True)
@@ -59,6 +62,7 @@ class Invitation(db.Model):
     project = db.relationship('Project', backref='invitations')
     referrer = db.relationship('User_profile', foreign_keys=[referrer_id], backref='sent_invitations')
 
+# file_data table
 class File_data(db.Model):
     file_data_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
@@ -66,6 +70,7 @@ class File_data(db.Model):
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.project_id'))
 
+# file_data table
 class File_version(db.Model):
     version_id = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer)
@@ -81,9 +86,10 @@ class File_version(db.Model):
 
     file_data = db.relationship('File_data', backref='versions')
 
+# file_download table
 class Last_download(db.Model):
     last_download_id = db.Column(db.Integer, primary_key=True)
-    version_id = db.Column(db.Integer, db.ForeignKey('file_version.version_id'))  #actual file version
+    version_id = db.Column(db.Integer, db.ForeignKey('file_version.version_id')) 
     download_date = db.Column(db.DateTime(timezone=True), default=text("CURRENT_TIMESTAMP(0)"))
 
     file_data_id = db.Column(db.Integer, db.ForeignKey('file_data.file_data_id'))

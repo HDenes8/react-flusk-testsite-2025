@@ -10,12 +10,10 @@ db = SQLAlchemy()
 migrate = Migrate()
 DB_NAME = "database.db"
 
-
+# Function to initialize the application
 def create_app():
     app = Flask(__name__, static_folder='static')
     app.config['SECRET_KEY'] = 'szekret'
-    #app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-    #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@db:5432/sortify'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/sortify'
     app.config['REMEMBER_COOKIE_DURATION'] = timedelta(hours=1)
 
@@ -38,6 +36,7 @@ def create_app():
 
     create_database(app)
 
+    # Handlers for login/logout
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
@@ -62,11 +61,3 @@ def create_database(app):
     with app.app_context():
         db.create_all()
     print('Checked/created tables (if missing).')
-
-#SQLite
-# def create_database(app):
-#     db_path = path.join('instance', DB_NAME)
-#     if not path.exists(db_path):
-#         with app.app_context():
-#             db.create_all()
-#         print('Created Database!')

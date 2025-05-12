@@ -18,11 +18,10 @@ import bleach
 auth = Blueprint('auth', __name__)
 CORS(auth)
 
-#login
-
+#login start
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    data = request.get_json()  # Parse JSON data from the request
+    data = request.get_json()  
     email = data.get('email')
     password = data.get('password')
 
@@ -35,24 +34,24 @@ def login():
             return {"message": "Incorrect password, try again.", "status": "error"}, 401
     else:
         return {"message": "Email does not exist.", "status": "error"}, 404
-
 # login end
 
-# logout
 
+# logout start
 @auth.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
-
 # logout end
 
-# sign up stuff
 
+# sign-up start
+# set up reCAPTCHA keys
 os.environ['RECAPTCHA_PUBLIC_KEY'] = "6LeKEvEqAAAAAI1MIfoiTYc_MBpk6GZ0hXO-fCot" #site_key
 os.environ['RECAPTCHA_PRIVATE_KEY'] = "6LeKEvEqAAAAACB2kZN3_QckJOu_nYtxpHuRWz2O" #your_secret_key
 
+# Verify reCAPTCHA function
 def verify_recaptcha(response):
     secret_key = "6LeKEvEqAAAAACB2kZN3_QckJOu_nYtxpHuRWz2O"  # Replace with your actual secret key
     verify_url = "https://www.google.com/recaptcha/api/siteverify"
@@ -68,7 +67,7 @@ JOB_REGEX = re.compile(r"^[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű\s-]+$")
 PASSWORD_REGEX = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[{}\[\]\-_$@!%*?&#^()+=~`|\\:;\"'<>,./])[A-Za-z\d{}\[\]\-_$@!%*?&#^()+=~`|\\:;\"'<>,./]{7,}$")
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
-
+# phone number validation
 def is_valid_phone_number(number):  
     try:
         parsed_number = phonenumbers.parse(number)
@@ -86,6 +85,7 @@ def sign_up():
         if not verify_recaptcha(captcha_response):
             return {"message": "Please complete the CAPTCHA.", "status": "error"}, 400
 
+        # Get data from the request, bleach and validate
         email = data.get('email')
         full_name = bleach.clean(data.get('fullName', ""), strip=True)
         nickname = bleach.clean(data.get('nickname', ""), strip=True)
@@ -110,7 +110,7 @@ def sign_up():
             return {"message": "Full name must only contain letters, spaces, and hyphens.", "status": "error"}, 400
         elif len(nickname) < 2:
             return {"message": "Nickname must be greater than 1 character.", "status": "error"}, 400
-        elif len(nickname) > 10:  # Add upper limit check
+        elif len(nickname) > 10: 
             return {"message": "Nickname must not exceed 20 characters.", "status": "error"}, 400
         elif not NICKNAME_REGEX.match(nickname):
             return {"message": "Nickname can only contain letters, numbers, and underscores.", "status": "error"}, 400
@@ -138,8 +138,8 @@ def sign_up():
         else:
             nickname_id = random.choice(available_ids)
 
+        # Check if nickname is already taken, and if not, generate a new user
         if nickname_id:
-        # Create new user
             new_user = User_profile(
                 email=email,
                 full_name=full_name,
@@ -148,7 +148,6 @@ def sign_up():
                 mobile=mobile,
                 nickname_id=nickname_id, 
                 job=job,
-
             )
 
             db.session.add(new_user)
@@ -161,4 +160,4 @@ def sign_up():
     # If the request method is not POST, return an error
     return {"message": "Invalid request method.", "status": "error"}, 405
 
-# sign up stuff end
+# sign-up end
