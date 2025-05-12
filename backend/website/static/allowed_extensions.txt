@@ -1,0 +1,14 @@
+txt
+pdf
+png
+jpg
+jpeg
+gif
+zip
+rar
+tar
+gz
+7z
+docx
+xlsx
+pptx
