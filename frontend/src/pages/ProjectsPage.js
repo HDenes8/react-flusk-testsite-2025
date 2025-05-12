@@ -36,8 +36,10 @@ const ProjectsPage = () => {
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
-  const toggleFileDropdown = (fileId) => {
+  const toggleFileDropdown = (fileId, event) => {
+    const buttonRect = event.target.getBoundingClientRect(); // Get button position
     setExpandedFile(expandedFile === fileId ? null : fileId);
+    setHoverPosition({ x: buttonRect.left - 120, y: buttonRect.top }); // Position menu on the left
   };
 
   const toggleFileVersions = (fileId) => {
@@ -254,14 +256,29 @@ const ProjectsPage = () => {
     <div className={styles['project-page-container']}>
       <div className={styles['top-buttons']}>
         <button
-          className={styles['project-description-button']}
+          className={styles['button-secondary']}
           onClick={() => setShowDescription(!showDescription)}
         >
           {showDescription ? "Hide Description" : "Show Description"}
         </button>
-        <button onClick={() => setShowUploadModal(true)}>Upload File</button>
-        <button onClick={() => setShowDownloadModal(true)}>Download Files</button>
-        <button onClick={() => navigate(`/MembersPage/${project_id}`)}>Members</button>
+        <button
+          className={styles['button-primary']}
+          onClick={() => setShowUploadModal(true)}
+        >
+          Upload File
+        </button>
+        <button
+          className={styles['button-primary']}
+          onClick={() => setShowDownloadModal(true)}
+        >
+          Download Files
+        </button>
+        <button
+          className={styles['button-secondary']}
+          onClick={() => navigate(`/MembersPage/${project_id}`)}
+        >
+          Members
+        </button>
       </div>
 
       {showDescription && (
@@ -337,9 +354,18 @@ const ProjectsPage = () => {
                       )}
                     </td> 
                     <td className="actions-cell" style={{ textAlign: 'right' }}> {/* Use global class */}
-                      <button className="dots-button" onClick={() => toggleFileDropdown(file.version_id)}>⋯</button> {/* Use global class */}
+                      <button
+                        className="dots-button"
+                        onClick={(e) => toggleFileDropdown(file.version_id, e)} // Pass event to get position
+                      >
+                        ⋯
+                      </button>
                       {expandedFile === file.version_id && (
-                        <div className="horizontal-menu" ref={dropdownRef}> {/* Use global class */}
+                        <div
+                          className="horizontal-menu"
+                          ref={dropdownRef}
+                          style={{ top: `${hoverPosition.y}px`, left: `${hoverPosition.x}px` }} // Apply dynamic position
+                        >
                           <div className="description-box"> {/* Use global class */}
                             <p className="description-paragraph"> {/* Use global class */}
                               <strong>Description:</strong> {file.description || "No description available"}
@@ -440,7 +466,7 @@ const ProjectsPage = () => {
         <div className={styles['modal-overlay']}>
           <div className={styles['modal']}>
             <h2>Upload File</h2>
-            <form onSubmit={handleUploadSubmit} encType="multipart/form-data">
+            <form onSubmit={handleUploadSubmit} encType="multipart/form-data" className={styles['form-container']}>
               <input type="file" name="file" required onChange={handleFileChange} />
               <input
                 type="text"
@@ -455,8 +481,16 @@ const ProjectsPage = () => {
                 onChange={handleInputChange}
               />
               <div className={styles['modal-buttons']}>
-                <button type="submit">Upload</button>
-                <button type="button" onClick={() => setShowUploadModal(false)}>Cancel</button>
+                <button type="submit" className={styles['button-primary']}>
+                  Upload
+                </button>
+                <button
+                  type="button"
+                  className={styles['button-secondary']}
+                  onClick={() => setShowUploadModal(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -468,7 +502,7 @@ const ProjectsPage = () => {
         <div className={styles['modal-overlay']}>
           <div className={styles['modal']}>
             <h2>Upload New Version for "{versionUploadTarget.file_name}"</h2>
-            <form onSubmit={handleVersionUploadSubmit} encType="multipart/form-data">
+            <form onSubmit={handleVersionUploadSubmit} encType="multipart/form-data" className={styles['form-container']}>
               <input type="file" required onChange={(e) =>
                 setVersionUploadData({ ...versionUploadData, file: e.target.files[0] })} />
               <input
@@ -478,8 +512,16 @@ const ProjectsPage = () => {
                   setVersionUploadData({ ...versionUploadData, comment: e.target.value })}
               />
               <div className={styles['modal-buttons']}>
-                <button type="submit">Upload Version</button>
-                <button type="button" onClick={() => setVersionUploadTarget(null)}>Cancel</button>
+                <button type="submit" className={styles['button-primary']}>
+                  Upload Version
+                </button>
+                <button
+                  type="button"
+                  className={styles['button-secondary']}
+                  onClick={() => setVersionUploadTarget(null)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -494,8 +536,16 @@ const ProjectsPage = () => {
             <p>You have selected {selectedFiles.length} file(s) to download.</p>
             <form onSubmit={handleDownloadSubmit}>
               <div className={styles['modal-buttons']}>
-                <button type="submit">Download</button>
-                <button type="button" onClick={() => setShowDownloadModal(false)}>Cancel</button>
+                <button type="submit" className={styles['button-primary']}>
+                  Download
+                </button>
+                <button
+                  type="button"
+                  className={styles['button-secondary']}
+                  onClick={() => setShowDownloadModal(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>

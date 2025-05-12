@@ -253,33 +253,26 @@ h3 {
 
 /* Global reusable styles for horizontal menu */
 .horizontal-menu {
-  min-width: 120px; /* Ensures a minimum width */
-  width: auto; /* Allows resizing dynamically */
-  max-width: 500px; /* Prevents it from becoming too large */
-  display: flex; /* Use flexbox for alignment */
-  flex-direction: column; /* Stack content vertically */
-  align-items: center; /* Center content horizontally */
-  justify-content: center; /* Center content vertically */
+  position: absolute; /* Position relative to the page */
   background: white;
   border: 1px solid #ccc;
-  padding: 15px; /* Increased padding for more space inside the box */
+  padding: 10px; /* Reduce padding slightly */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  position: absolute;
-  right: 0; /* Align to the right side of the table */
-  left: auto; /* Ensure it doesn't conflict with left alignment */
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: normal; /* Allows text to wrap properly */
-  margin: 10px;
-  border-radius: 5px; /* Rounded corners */
-  z-index: 1000; /* Ensures it appears above other elements */
+  border-radius: 5px;
+  z-index: 1000;
+  transform: translateY(-50%) translateX(-105%); /* Adjust position closer to the button */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 300px; /* Increase minimum width */
+  max-width: 600px; /* Allow it to grow wider */
+  margin: 5px; /* Reduce margin for closer positioning */
 }
 
 .horizontal-menu span {
   display: block; /* Ensures the description spans its own line */
   margin-bottom: 15px; /* Adds space between the description and the button */
   font-size: 14px; /* Adjust the font size for readability */
-  text-align: center; /* Center-align the description */
 }
 
 .horizontal-menu .button-container {
@@ -298,7 +291,6 @@ h3 {
   cursor: pointer;
   border-radius: 5px; /* Rounded corners */
   border: 1px solid #00000000; /* Transparent border */
-  word-wrap: break-word; /* Ensures long words wrap nicely */
 }
 
 .horizontal-menu button:hover {

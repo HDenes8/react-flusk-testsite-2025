@@ -140,11 +140,17 @@
 
 .modal {
     background: white;
-    padding: 30px;
+    padding: 15px; /* Reduce padding */
     border-radius: 8px;
-    width: 400px;
-    max-width: 90%;
+    width: 500px; /* Reduce modal width */
+    max-width: 90%; /* Adjust max width */
+    max-height: 80%; /* Reduce max height */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow-y: auto; /* Allow vertical scrolling if necessary */
+    display: flex;
+    flex-direction: column; /* Ensure content stacks vertically */
+    justify-content: flex-start; /* Align content to the top */
+    align-items: center; /* Center content horizontally */
 }
 
 .modal h2 {
@@ -158,6 +164,49 @@
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Reduce spacing between form elements */
+    width: 70%; /* Ensure the form takes full width */
+}
+
+.form-container input[type="file"],
+.form-container input[type="text"] {
+    width: 100%; /* Make inputs take full width */
+    padding: 8px; /* Reduce padding for compactness */
+    border: 1px solid #ccc; /* Add a border */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px; /* Adjust font size */
+}
+
+.form-container button {
+    padding: 8px 16px; /* Reduce button padding */
+    font-size: 14px; /* Adjust font size */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+.form-container button[type="submit"] {
+    background-color: #000000; /* Primary button color */
+    color: white; /* White text */
+    border: none; /* Remove border */
+}
+
+.form-container button[type="submit"]:hover {
+    background-color: #363636; /* Darker shade on hover */
+}
+
+.form-container button[type="button"] {
+    background-color: #f8f9fa; /* Neutral button color */
+    color: #333; /* Dark text */
+    border: 1px solid #ccc; /* Add border */
+}
+
+.form-container button[type="button"]:hover {
+    background-color: #e2e6ea; /* Slightly darker shade on hover */
 }
 
 .version-history-row {
@@ -190,7 +239,6 @@
 .versions-table td,
 .versions-table th {
     padding: 10px;
-    text-align: center; /* last modifyed at: 2025.05.09. 4:10*/
     border-bottom: 1px solid #ddd;
 }
 

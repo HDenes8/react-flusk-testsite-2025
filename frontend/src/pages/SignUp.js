@@ -26,13 +26,32 @@ const SignUp = () => {
         script.src = 'https://www.google.com/recaptcha/api.js';
         script.async = true;
         script.defer = true;
-        script.onload = resolve;
-        script.onerror = reject;
+
+        const timeout = setTimeout(() => {
+          reject(new Error('Captcha script load timeout'));
+        }, 10000); // 10-second timeout
+
+        script.onload = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+        script.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error('Failed to load captcha script'));
+        };
+
         document.body.appendChild(script);
       } else {
         resolve();
       }
     });
+  };
+
+  const unloadRecaptchaScript = () => {
+    const script = document.getElementById('recaptcha-script');
+    if (script) {
+      script.remove();
+    }
   };
 
   const renderRecaptcha = useCallback(() => {
@@ -64,7 +83,9 @@ const SignUp = () => {
       setMessage(response.data.message);
 
       if (response.data.status === 'success') {
-        navigate('/login');
+        setTimeout(() => {
+          navigate('/login'); // Navigate to the login page after 1 second
+        }, 1000);
       }
     } catch (error) {
       if (error.response) {

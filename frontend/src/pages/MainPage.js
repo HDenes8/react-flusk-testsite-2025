@@ -11,6 +11,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [selectedRole, setSelectedRole] = useState(defaultRoleFilter);
   const [menuOpen, setMenuOpen] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 }); // Added hover position state
   const [selectedFileIds, setSelectedFileIds] = useState([]); // Added this line
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -75,13 +76,10 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
     setFilteredProjects(filtered);
   };
 
-  const toggleMenu = (projectId) => {
-    console.log(`Toggling menu for project ID: ${projectId}`);
-    if (menuOpen === projectId) {
-      setMenuOpen(null); // Close menu
-    } else {
-      setMenuOpen(projectId); // Open menu
-    }
+  const toggleMenu = (projectId, event) => {
+    const buttonRect = event.target.getBoundingClientRect(); // Get button position
+    setMenuOpen(menuOpen === projectId ? null : projectId);
+    setHoverPosition({ x: buttonRect.left - 120, y: buttonRect.top }); // Position menu on the left
   };
 
   const openProject = (projectId) => {
@@ -186,9 +184,18 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                     </span>
                   </td>
                   <td className="actions-cell"> {/* Use global class */}
-                    <button className="dots-button" onClick={() => toggleMenu(project.project_id)}>⋯</button> {/* Use global class */}
+                    <button
+                      className="dots-button"
+                      onClick={(e) => toggleMenu(project.project_id, e)} // Pass event to get position
+                    >
+                      ⋯
+                    </button>
                     {menuOpen === project.project_id && (
-                      <div className="horizontal-menu" ref={menuRef}> {/* Use global class */}
+                      <div
+                        className="horizontal-menu"
+                        ref={menuRef}
+                        style={{ top: `${hoverPosition.y}px`, left: `${hoverPosition.x}px` }} // Apply dynamic position
+                      >
                         <div className="description-box"> {/* Use global class */}
                           <span className="description-paragraph"> {/* Use global class */}
                             {project.description && <strong>Description:</strong>} {project.description || 'No description available'}
