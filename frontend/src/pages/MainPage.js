@@ -180,7 +180,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       className={styles['owner-avatar']}
                     />
                     <span className={styles['ownername']}>
-                      {`${project.nickname || 'Unknown'} #${project.nickname_id || 'No ID'}`}
+                      {`${project.nickname || 'Unknown'}#${project.nickname_id || 'No ID'}`}
                     </span>
                   </td>
                   <td className="actions-cell"> {/* Use global class */}

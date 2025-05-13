@@ -154,7 +154,7 @@ const Navbar = () => {
         )}
         <div className={styles['user-profile']}>
           <img src={profile.avatar} alt="User" />
-          <span>{`${profile.nickname || "Loading"} #${profile.nickname_id || 'No ID'}`}</span>
+          <span>{`${profile.nickname || "Loading"}#${profile.nickname_id || 'No ID'}`}</span>
           <button onClick={handleLogout}>
             <FaSignOutAlt />
           </button>

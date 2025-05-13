@@ -327,9 +327,10 @@ const ProjectsPage = () => {
                         {download_file_results[file.version_id] ? '✔' : '❕'}
                       </span>
                     </td>
-                    <td>{file.title}</td>
-                    <td>{file.file_name}</td>
+                    <td title={file.title}>{file.title}</td>
+                    <td title={file.file_name}>{file.file_name}</td>
                     <td
+                      title={file.comment.length > 30 ? file.comment : undefined} // Show title only if truncated
                       onMouseEnter={(e) => handleCommentHover(file.comment, e)}
                       onMouseLeave={handleCommentLeave}
                     >
@@ -417,8 +418,8 @@ const ProjectsPage = () => {
                                   {/* Add an invisible placeholder to keep layout! */}
                                   <span style={{ visibility: 'hidden' }}>{file.title}</span>
                                 </td>
-                                <td>{version.file_name}</td>
-                                <td>{version.comment}</td>
+                                <td title={version.file_name}>{version.file_name}</td>
+                                <td title={version.comment}>{version.comment}</td>
                                 <td>{formatFileSize(version.file_size)}</td>
                                 <td className="date-cell">
                                   <FormattedDate dateInput={version.upload_date} />
@@ -536,12 +537,12 @@ const ProjectsPage = () => {
             <p>You have selected {selectedFiles.length} file(s) to download.</p>
             <form onSubmit={handleDownloadSubmit}>
               <div className={styles['modal-buttons']}>
-                <button type="submit" className={styles['button-primary']}>
+                <button type="submit" className='btn-primary'>
                   Download
                 </button>
                 <button
                   type="button"
-                  className={styles['button-secondary']}
+                  className='btn-secondary'
                   onClick={() => setShowDownloadModal(false)}
                 >
                   Cancel

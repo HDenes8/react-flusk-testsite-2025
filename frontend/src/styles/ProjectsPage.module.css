@@ -327,3 +327,37 @@
 .comment-hover-bubble.visible {
     display: block; /* Show when hovered */
 }
+.description-box {
+    background-color: #f9f9f9; /* Light gray background */
+    padding: 10px; /* Add padding for spacing */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ddd; /* Subtle border for better visibility */
+}
+
+.file-info .files-table td:nth-child(6),
+.file-info .files-table th:nth-child(6),
+.file-info .versions-table td:nth-child(6),
+.file-info .versions-table th:nth-child(6) {
+    width: 5%; /* Shrink to fit content */
+    white-space: nowrap; /* Prevent wrapping */
+    text-align: right; /* Align text to the right */
+}
+
+.file-info .files-table td:nth-child(9),
+.file-info .files-table th:nth-child(9),
+.file-info .versions-table td:nth-child(9),
+.file-info .versions-table th:nth-child(9) {
+    width: 50px; /* Explicitly set a minimal width */
+    max-width: 50px; /* Prevent expansion */
+    white-space: nowrap; /* Prevent wrapping */
+    text-align: center; /* Center align the content */
+    padding: 0; /* Remove extra padding */
+    margin: 0; /* Remove extra margin */
+}
+
+.file-info .files-table td:nth-child(9) .dots-button,
+.file-info .versions-table td:nth-child(9) .dots-button {
+    width: auto; /* Shrink to fit content */
+    padding: 0; /* Remove extra padding */
+    text-align: center; /* Center align the button */
+}
