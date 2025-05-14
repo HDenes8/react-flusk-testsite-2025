@@ -354,7 +354,7 @@ const ProjectsPage = () => {
                         "Unknown"
                       )}
                     </td> 
-                    <td className="actions-cell" style={{ textAlign: 'right' }}> {/* Use global class */}
+                    <td className="actions-cell"> {/* Use global class */}
                       <button
                         className="dots-button"
                         onClick={(e) => toggleFileDropdown(file.version_id, e)} // Pass event to get position
