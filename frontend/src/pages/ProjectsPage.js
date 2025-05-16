@@ -14,6 +14,12 @@ function formatFileSize(sizeInBytes) {
   return `${Math.ceil(size)} ${units[unitIndex]}`;
 }
 
+// Helper to truncate comments to 30 chars
+function truncateComment(comment) {
+  if (!comment) return null;
+  return comment.length > 30 ? comment.slice(0, 30) + '...' : comment;
+}
+
 const ProjectsPage = () => {
   const { project_id } = useParams();
   const navigate = useNavigate();
@@ -384,7 +390,10 @@ const ProjectsPage = () => {
                         onMouseLeave={handleCommentLeave}
                         ref={el => colRefs.current[4] = el}
                       >
-                        {file.comment}
+                        {file.comment
+                          ? truncateComment(file.comment)
+                          : <span style={{ color: '#888', fontStyle: 'italic', fontSize: '0.98em' }}>no comment</span>
+                        }
                       </td>
                       <td ref={el => colRefs.current[5] = el}>
                         {formatFileSize(file.file_size)}
@@ -505,7 +514,10 @@ const ProjectsPage = () => {
                                           className={styles['comment-cell']}
                                           title={version.comment}
                                         >
-                                          {version.comment || ''}
+                                          {version.comment
+                                            ? truncateComment(version.comment)
+                                            : <span style={{ color: '#888', fontStyle: 'italic', fontSize: '0.98em' }}>no comment</span>
+                                          }
                                         </td>
                                         <td>{formatFileSize(version.file_size)}</td>
                                         <td className="date-cell">
