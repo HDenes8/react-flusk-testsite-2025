@@ -264,6 +264,21 @@ const ProjectsPage = () => {
     setFilteredFiles(files); // Replace with filter logic if needed
   }, [files]);
 
+  // Track the widths of each column in the main table
+  const mainTableRef = useRef(null);
+  const colRefs = useRef([]);
+  const [colWidths, setColWidths] = useState([]);
+
+  // After render, measure all column widths in the main table
+  useEffect(() => {
+    if (mainTableRef.current && colRefs.current.length) {
+      const widths = colRefs.current.map(ref =>
+        ref && ref.offsetWidth ? ref.offsetWidth : undefined
+      );
+      setColWidths(widths);
+    }
+  }, [filteredFiles]);
+
   if (!project) return <p>Loading...</p>;
 
   return (
@@ -313,7 +328,7 @@ const ProjectsPage = () => {
         ) : (
           <>
             {/* Main files table */}
-            <table className={styles['files-table']}>
+            <table ref={mainTableRef}>
               <thead>
                 <tr>
                   <th className={styles['select-cell']}>Select</th>
@@ -330,38 +345,54 @@ const ProjectsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredFiles.map((file) => (
+                {filteredFiles.map((file, idx) => (
                   <React.Fragment key={file.version_id}>
                     <tr>
-                      {/* ...existing code for file row... */}
-                      {/* ...existing code for file columns... */}
-                      <td className={styles['checkbox-cell']}>
+                      <td className={styles['checkbox-cell']} ref={el => colRefs.current[0] = el}>
                         <input
                           type="checkbox"
                           value={file.version_id}
                           onChange={handleFileSelect}
                         />
                       </td>
-                      <td className={styles['ver-cell']}>
+                      <td className={styles['ver-cell']} ref={el => colRefs.current[1] = el}>
                         {file.version_number}
                         <span className={`${styles['status']} ${download_file_results[file.version_id] ? styles['success'] : styles['error']}`}>
                           {download_file_results[file.version_id] ? '✔' : '❕'}
                         </span>
                       </td>
-                      <td title={file.title}>{file.title}</td>
-                      <td title={file.file_name}>{file.file_name}</td>
                       <td
-                        title={file.comment.length > 30 ? file.comment : undefined}
+                        title={file.title}
+                        ref={el => colRefs.current[2] = el}
+                        style={{ minWidth: 80, maxWidth: 400 }}
+                      >
+                        {file.title}
+                      </td>
+                      <td
+                        title={file.file_name}
+                        className={styles['file-name-cell']}
+                        ref={el => colRefs.current[3] = el}
+                      >
+                        {file.file_name.length > 40
+                          ? `${file.file_name.slice(0, 15)}......${file.file_name.slice(-15)}`
+                          : file.file_name}
+                      </td>
+                      <td
+                        className={styles['comment-cell']}
+                        title={file.comment}
                         onMouseEnter={(e) => handleCommentHover(file.comment, e)}
                         onMouseLeave={handleCommentLeave}
+                        ref={el => colRefs.current[4] = el}
                       >
                         {file.comment}
                       </td>
-                      <td>{formatFileSize(file.file_size)}</td>
-                      <td className="date-cell">
+                      <td ref={el => colRefs.current[5] = el}>
+                        {formatFileSize(file.file_size)}
+                      </td>
+                      <td className="date-cell" ref={el => colRefs.current[6] = el}>
                         <FormattedDate dateInput={file.upload_date} />
                       </td>
-                      <td>
+                      <td ref={el => colRefs.current[7] = el}>
                         {file.uploader_nickname ? (
                           <div className={styles['uploader-info']}>
                             <img
@@ -378,7 +409,7 @@ const ProjectsPage = () => {
                           "Unknown"
                         )}
                       </td>
-                      <td className="actions-cell">
+                      <td className="actions-cell" ref={el => colRefs.current[8] = el}>
                         <button
                           className="dots-button"
                           onClick={(e) => toggleFileDropdown(file.version_id, e)}
@@ -416,64 +447,101 @@ const ProjectsPage = () => {
                     {/* Version history table for this file */}
                     {fileVersions[file.file_data_id] && (
                       <tr className={styles['version-history-row']}>
-                        <td className={styles['version-history-data']} colSpan="9">
-                          <table className={styles['versions-table']}>                         
-                            <tbody>
-                              {fileVersions[file.file_data_id]
-                                .filter((version) => version.version_id !== file.version_id)
-                                .map((version) => (
-                                  <tr key={version.version_id} className={styles['version-history-row']}>
-                                    <td className={styles['checkbox-cell']}>
-                                      <input
-                                        type="checkbox"
-                                        value={version.version_id}
-                                        onChange={handleFileSelect}
-                                      />
-                                    </td>
-                                    <td className={styles['ver-cell']}>
-                                      {version.version_number}
-                                      <span className={`${styles['status']} ${version.downloaded ? styles['success'] : styles['warning']}`}>
-                                        {version.downloaded ? "✔" : "❕"}
-                                      </span>
-                                    </td>
-                                    <td>
-                                      <span style={{ visibility: 'hidden' }}>{file.title}</span>
-                                    </td>
-                                    <td title={version.file_name}>{version.file_name}</td>
-                                    <td title={version.comment}>{version.comment}</td>
-                                    <td>{formatFileSize(version.file_size)}</td>
-                                    <td className="date-cell">
-                                      <FormattedDate dateInput={version.upload_date} />
-                                    </td>
-                                    <td>
-                                      {version.uploader_nickname ? (
-                                        <div className={styles['uploader-info']}>
-                                          <img
-                                            src={version.uploader_pic || '/default-profile.png'}
-                                            alt={`${version.uploader_nickname}'s profile`}
-                                            className={styles['uploader-profile-picture']}
+                        <td
+                          className={styles['version-history-data']}
+                          colSpan="9"
+                          style={{ padding: 0, borderLeft: 'none' }}
+                        >
+                          <div style={{ display: 'flex' }}>
+                            <div style={{
+                              width: '5px',
+                              background: '#007bff',
+                              borderRadius: '5px 0 0 5px',
+                              flexShrink: 0,
+                            }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <table
+                                style={{ width: '100%', tableLayout: "auto", margin: 0, borderSpacing: 0 }}
+                              >
+                                <colgroup>
+                                  {colWidths.map((w, i) => (
+                                    <col key={i} style={w ? { width: w } : {}} />
+                                  ))}
+                                </colgroup>
+                                <tbody>
+                                  {fileVersions[file.file_data_id]
+                                    .filter((version) => version.version_id !== file.version_id)
+                                    .map((version) => (
+                                      <tr key={version.version_id} className={styles['version-history-row']}>
+                                        <td className={styles['checkbox-cell']}>
+                                          <input
+                                            type="checkbox"
+                                            value={version.version_id}
+                                            onChange={handleFileSelect}
                                           />
-                                          <span>
-                                            {version.uploader_nickname || 'Unknown'}
-                                            <span className="nickname-id">{`#${version.uploader_nickname_id || 'No ID'}`}</span>
+                                        </td>
+                                        <td className={styles['ver-cell']}>
+                                          {version.version_number}
+                                          <span className={`${styles['status']} ${version.downloaded ? styles['success'] : styles['warning']}`}>
+                                            {version.downloaded ? "✔" : "❕"}
                                           </span>
-                                        </div>
-                                      ) : (
-                                        "Unknown"
-                                      )}
-                                    </td>
-                                    <td className={styles['actions-cell']}>
-                                      <span style={{ visibility: 'hidden' }}>•••</span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              {fileVersions[file.file_data_id].filter((version) => version.version_id !== file.version_id).length === 0 && (
-                                <tr>
-                                  <td colSpan="9" style={{ textAlign: "center" }}>There are no older versions yet.</td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
+                                        </td>
+                                        <td
+                                          style={{ minWidth: 80, maxWidth: 400 }}
+                                          title={file.title}
+                                        >
+                                          {/* Hidden but keeps width for alignment */}
+                                          <span style={{ visibility: 'hidden' }}>{file.title}</span>
+                                        </td>
+                                        <td
+                                          title={version.file_name}
+                                          className={styles['file-name-cell']}
+                                        >
+                                          {version.file_name.length > 40
+                                            ? `${version.file_name.slice(0, 15)}......${version.file_name.slice(-15)}`
+                                            : version.file_name}
+                                        </td>
+                                        <td
+                                          className={styles['comment-cell']}
+                                          title={version.comment}
+                                        >
+                                          {version.comment || ''}
+                                        </td>
+                                        <td>{formatFileSize(version.file_size)}</td>
+                                        <td className="date-cell">
+                                          <FormattedDate dateInput={version.upload_date} />
+                                        </td>
+                                        <td>
+                                          {version.uploader_nickname ? (
+                                            <div className={styles['uploader-info']}>
+                                              <img
+                                                src={version.uploader_pic || '/default-profile.png'}
+                                                alt={`${version.uploader_nickname}'s profile`}
+                                                className={styles['uploader-profile-picture']}
+                                              />
+                                              <span>
+                                                {version.uploader_nickname || 'Unknown'}
+                                                <span className="nickname-id">{`#${version.uploader_nickname_id || 'No ID'}`}</span>
+                                              </span>
+                                            </div>
+                                          ) : (
+                                            "Unknown"
+                                          )}
+                                        </td>
+                                        <td className="actions-cell">
+                                          <span style={{ visibility: 'hidden' }}>•••</span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  {fileVersions[file.file_data_id].filter((version) => version.version_id !== file.version_id).length === 0 && (
+                                    <tr>
+                                      <td colSpan="9" style={{ textAlign: "center" }}>There are no older versions yet.</td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     )}

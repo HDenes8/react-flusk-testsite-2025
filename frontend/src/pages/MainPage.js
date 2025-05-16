@@ -133,7 +133,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
         {filteredProjects.length === 0 ? (
           <p className={styles['no-projects-row']}>No projects found.</p>
         ) : (
-          <table className={styles['projects-table']}>
+          <table>
             <thead>
               <tr>
                 <th>Project Name</th>
@@ -174,7 +174,6 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       '-'
                     )}
                   </td>
-
                   <td>
                     <img
                       src={`/static/profile_pics/${
@@ -188,10 +187,10 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       <span className="nickname-id">{`#${project.nickname_id || 'No ID'}`}</span>
                     </span>
                   </td>
-                  <td className="actions-cell"> {/* Use global class */}
+                  <td className="actions-cell">
                     <button
                       className="dots-button"
-                      onClick={(e) => toggleMenu(project.project_id, e)} // Pass event to get position
+                      onClick={(e) => toggleMenu(project.project_id, e)}
                     >
                       ⋯
                     </button>
@@ -199,14 +198,14 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       <div
                         className="horizontal-menu"
                         ref={menuRef}
-                        style={{ top: `${hoverPosition.y}px`, left: `${hoverPosition.x}px` }} // Apply dynamic position
+                        style={{ top: `${hoverPosition.y}px`, left: `${hoverPosition.x}px` }}
                       >
-                        <div className="description-box"> {/* Use global class */}
-                          <span className="description-paragraph"> {/* Use global class */}
+                        <div className="description-box">
+                          <span className="description-paragraph">
                             {project.description && <strong>Description:</strong>} {project.description || 'No description available'}
                           </span>
                         </div>
-                        <div className="button-container"> {/* Use global class */}
+                        <div className="button-container">
                           <button onClick={() => openProject(project.project_id)}>Open Project</button>
                         </div>
                       </div>

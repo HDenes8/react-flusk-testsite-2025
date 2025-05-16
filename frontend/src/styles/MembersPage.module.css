@@ -150,11 +150,10 @@
   
   .remove-buttons {
     display: flex;
-    justify-content: flex-end; /* Pushes buttons to the right */
+    justify-content: center; /* Center buttons horizontally */
     align-items: center; /* Vertically aligns the buttons if needed */
-    gap: 10px; /* Adds spacing between buttons */
-
-    width: 50%; /* Allows the buttons to occupy only the required width */
+    gap: 10px;
+    width: 100%; /* Occupy full cell width for centering */
   }
   
   
@@ -254,3 +253,11 @@
     background-color: #000000; /* Background color on hover */
     color: white; /* Text color on hover */
   }
+
+  .members-table th.actions-header,
+.members-table td.actions-cell {
+    text-align: center !important;
+    vertical-align: middle;
+    width: auto !important;
+    white-space: nowrap;
+}

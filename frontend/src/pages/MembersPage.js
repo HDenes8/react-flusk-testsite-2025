@@ -247,7 +247,7 @@ const MembersPage = () => {
             <th>Job</th>
             <th>Role</th>
             <th className="date-header">Join Date</th>
-            <th>Action</th>
+            <th className="actions-header">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -296,7 +296,7 @@ const MembersPage = () => {
                   <td className="date-cell">
                     {member.join_date ? <FormattedDate dateInput={member.join_date} /> : '-'}
                   </td>
-                  <td>
+                  <td className="actions-cell">
                     <div className={styles["remove-buttons"]}>
                       {!isOwner && (
                         <button

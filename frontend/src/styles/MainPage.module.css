@@ -253,3 +253,12 @@
     font-size: 1.2rem;
     color: #000000;
   }
+
+  /* Center align and auto width for actions column in all tables */
+  th.actions-header,
+  td.actions-cell {
+    text-align: center !important;
+    vertical-align: middle;
+    width: auto !important;
+    white-space: nowrap;
+  }
