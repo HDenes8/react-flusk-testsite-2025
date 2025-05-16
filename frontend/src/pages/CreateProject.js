@@ -4,12 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/CreateProject.module.css'; // Updated to scoped styles
 
 const CreateProject = () => {
-  const navigate = useNavigate(); // ✅ This was missing!
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     projectName: '',
     description: '',
     inviteEmail: ''
   });
+  const [globalMessage, setGlobalMessage] = useState('');
+
+  // Helper to show global message
+  const showGlobalMessage = React.useCallback((msg, timeout = 2000) => {
+    setGlobalMessage(msg);
+    setTimeout(() => setGlobalMessage(''), timeout);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,16 +30,19 @@ const CreateProject = () => {
     e.preventDefault();
     try {
       await axios.post('/create-project', formData, { withCredentials: true });
-      alert('Project created successfully');
-      navigate('/MyProjectsPage'); // ✅ This will now work
+      showGlobalMessage('Project created successfully');
+      setTimeout(() => navigate('/MyProjectsPage'), 1200);
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Failed to create project');
+      showGlobalMessage('Failed to create project');
     }
   };
 
   return (
     <div className="create-project-container">
+      {globalMessage && (
+        <div className="global-message-popup">{globalMessage}</div>
+      )}
       <h3 className="create-project-title" align="center">Create New Project</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">

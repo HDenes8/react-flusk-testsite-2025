@@ -167,7 +167,7 @@ const Navbar = () => {
           </button>
         </div>
         {logoutMessage && (
-          <div className="logout-message-popup">
+          <div className="global-message-popup">
             {logoutMessage}
           </div>
         )}

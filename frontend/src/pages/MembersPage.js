@@ -14,6 +14,13 @@ const MembersPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmails, setInviteEmails] = useState("");
+  const [globalMessage, setGlobalMessage] = useState('');
+
+  // Helper to show global message
+  const showGlobalMessage = (msg, timeout = 2000) => {
+    setGlobalMessage(msg);
+    setTimeout(() => setGlobalMessage(''), timeout);
+  };
 
   const fetchMembers = async () => {
     try {
@@ -53,14 +60,14 @@ const MembersPage = () => {
   const handleInviteMember = async () => {
     const emailInput = prompt("Enter the email(s) to invite (comma-separated):");
     if (!emailInput) {
-      alert("Email is required.");
+      showGlobalMessage("Email is required.");
       return;
     }
 
     const emailList = emailInput.split(",").map(email => email.trim()).filter(email => email);
 
     if (emailList.length === 0) {
-      alert("No valid emails entered.");
+      showGlobalMessage("No valid emails entered.");
       return;
     }
 
@@ -73,7 +80,7 @@ const MembersPage = () => {
           { email },
           { withCredentials: true }
         );
-        alert(`Invited ${email}: ${response.data.message}`);
+        showGlobalMessage(`Invited ${email}: ${response.data.message}`);
       } catch (err) {
         console.error(`Error inviting ${email}:`, err);
         errors.push(`${email}: ${err.response?.data?.error || "Failed to invite."}`);
@@ -81,7 +88,7 @@ const MembersPage = () => {
     }
 
     if (errors.length > 0) {
-      alert("Some errors occurred:\n" + errors.join("\n"));
+      showGlobalMessage("Some errors occurred:\n" + errors.join("\n"));
     }
 
     fetchMembers();
@@ -93,32 +100,47 @@ const MembersPage = () => {
       ? "Are you sure you want to leave this project?"
       : "Are you sure you want to remove this member?";
 
-    if (!window.confirm(confirmationMessage)) return;
-
-    console.log("Attempting to remove user:", userId); // Debugging log
-
-    try {
-      const response = await axios.post(
-        `/api/projects/${project_id}/remove-user`,
-        { user_id: userId },
-        { withCredentials: true }
-      );
-      alert(response.data.message);
-
-      if (isSelf) {
-        navigate("/mainpage"); // Redirect the user after leaving the project
-      } else {
-        fetchMembers(); // Refresh the members list
-      }
-    } catch (err) {
-      console.error("Error removing member:", err);
-      alert(err.response?.data?.error || "Failed to remove member.");
-    }
+    setGlobalMessage(
+      <span>
+        {confirmationMessage}
+        <br />
+        <button
+          className="popup-action-btn"
+          onClick={async () => {
+            setGlobalMessage('');
+            try {
+              const response = await axios.post(
+                `/api/projects/${project_id}/remove-user`,
+                { user_id: userId },
+                { withCredentials: true }
+              );
+              showGlobalMessage(response.data.message);
+              if (isSelf) {
+                navigate("/mainpage");
+              } else {
+                fetchMembers();
+              }
+            } catch (err) {
+              console.error("Error removing member:", err);
+              showGlobalMessage(err.response?.data?.error || "Failed to remove member.");
+            }
+          }}
+        >
+          Yes
+        </button>
+        <button
+          className="popup-action-btn"
+          onClick={() => setGlobalMessage('')}
+        >
+          No
+        </button>
+      </span>
+    );
   };
 
   const handleChangeRole = async (userId, newRole) => {
     if (!newRole) {
-      alert("Role is required.");
+      showGlobalMessage("Role is required.");
       return;
     }
 
@@ -128,11 +150,11 @@ const MembersPage = () => {
         { user_id: userId, role: newRole },
         { withCredentials: true }
       );
-      alert(response.data.message);
+      showGlobalMessage(response.data.message);
       fetchMembers();
     } catch (err) {
       console.error("Error changing role:", err);
-      alert(err.response?.data?.error || "Failed to change role.");
+      showGlobalMessage(err.response?.data?.error || "Failed to change role.");
     }
   };
 
@@ -153,7 +175,7 @@ const MembersPage = () => {
     const emailList = inviteEmails.split(",").map(email => email.trim()).filter(email => email);
 
     if (emailList.length === 0) {
-      alert("No valid emails entered.");
+      showGlobalMessage("No valid emails entered.");
       return;
     }
 
@@ -166,7 +188,7 @@ const MembersPage = () => {
           { email },
           { withCredentials: true }
         );
-        alert(`Invited ${email}: ${response.data.message}`);
+        showGlobalMessage(`Invited ${email}: ${response.data.message}`);
       } catch (err) {
         console.error(`Error inviting ${email}:`, err);
         errors.push(`${email}: ${err.response?.data?.error || "Failed to invite."}`);
@@ -174,7 +196,7 @@ const MembersPage = () => {
     }
 
     if (errors.length > 0) {
-      alert("Some errors occurred:\n" + errors.join("\n"));
+      showGlobalMessage("Some errors occurred:\n" + errors.join("\n"));
     }
 
     fetchMembers();
@@ -185,6 +207,9 @@ const MembersPage = () => {
 
   return (
     <div className={styles["members-page-container"]}>
+      {globalMessage && (
+        <div className="global-message-popup">{globalMessage}</div>
+      )}
       <div className={styles["top-buttons"]}>
         <button onClick={handleBack}>Back</button>
         {(userRole === "owner" || userRole === "admin") && (

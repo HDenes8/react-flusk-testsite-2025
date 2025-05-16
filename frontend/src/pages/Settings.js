@@ -25,6 +25,7 @@ const Settings = () => {
   });
 
   const [showProfilePicMenu, setShowProfilePicMenu] = useState(false);
+  const [globalMessage, setGlobalMessage] = useState('');
 
   useEffect(() => {
     fetchUserData();
@@ -80,17 +81,17 @@ const Settings = () => {
 
     if (formData.password1 !== formData.password2) {
       setErrors({ ...errors, password2: true });
-      alert('Passwords do not match');
+      showGlobalMessage('Passwords do not match');
       return;
     }
 
     try {
       await axios.post('/api/user/update', formData);
-      alert('Profile updated successfully');
-      window.location.reload(); // Reload the whole site
+      showGlobalMessage('Profile updated successfully');
+      setTimeout(() => window.location.reload(), 1200); // Give user time to see the message
     } catch (error) {
       console.error('Error updating profile:', error);
-      const err = error.response?.data?.error || '';
+      const err = error.response?.data?.error || 'An error occurred. Please try again.';
       const updatedErrors = {
         currentPassword: false,
         password1: false,
@@ -103,7 +104,7 @@ const Settings = () => {
       ) {
         updatedErrors.currentPassword = true;
       }
-      if (err === "Passwords don't match.") {
+      if (err === "Passwords don't match." || err === "Passwords do not match") {
         updatedErrors.password1 = true;
         updatedErrors.password2 = true;
       }
@@ -115,7 +116,7 @@ const Settings = () => {
       }
 
       setErrors(updatedErrors);
-      alert(err);
+      showGlobalMessage(err);
     }
   };
 
@@ -126,8 +127,17 @@ const Settings = () => {
     });
   };
 
+  // Helper to show global message
+  const showGlobalMessage = React.useCallback((msg, timeout = 2000) => {
+    setGlobalMessage(msg);
+    setTimeout(() => setGlobalMessage(''), timeout);
+  }, []);
+
   return (
     <div className={styles['settings-container']}>
+      {globalMessage && (
+        <div className="global-message-popup">{globalMessage}</div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className={styles['form-group']}>
           <label htmlFor="fullName">Full Name:</label>

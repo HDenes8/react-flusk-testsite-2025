@@ -34,6 +34,13 @@ const ProjectsPage = () => {
   const [hoveredComment, setHoveredComment] = useState(null);
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
   const [filteredFiles, setFilteredFiles] = useState([]);
+  const [globalMessage, setGlobalMessage] = useState('');
+
+  // Helper to show global message (define this before any usage)
+  const showGlobalMessage = React.useCallback((msg, timeout = 2000) => {
+    setGlobalMessage(msg);
+    setTimeout(() => setGlobalMessage(''), timeout);
+  }, []);
 
   const dropdownRef = useRef(null); // To track the dropdown menu
 
@@ -87,7 +94,7 @@ const ProjectsPage = () => {
       const response = await fetch(`/project/${project_id}`);
       if (!response.ok) {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error}`);
+        showGlobalMessage(`Error: ${errorData.error}`);
         return;
       }
       const data = await response.json();
@@ -99,7 +106,7 @@ const ProjectsPage = () => {
       setDownloadFileResults(data.download_file_results); // Store download_file_results in state
     } catch (error) {
       console.error("Error fetching project data:", error);
-      alert("An error occurred while fetching project data.");
+      showGlobalMessage("An error occurred while fetching project data.");
     }
   };
 
@@ -152,21 +159,21 @@ const ProjectsPage = () => {
 
       if (response.ok) {
         setShowUploadModal(false);
-        alert("File uploaded successfully!");
+        showGlobalMessage("File uploaded successfully!");
         fetchProjectData(); // Refresh the file list
       } else {
-        alert(`Error: ${jsonData.error || 'Upload failed'}`);
+        showGlobalMessage(`Error: ${jsonData.error || 'Upload failed'}`);
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("An error occurred while uploading the file.");
+      showGlobalMessage("An error occurred while uploading the file.");
     }
   };
 
   const handleVersionUploadSubmit = async (e) => {
     e.preventDefault();
     if (!versionUploadTarget) {
-      alert("No file selected for version upload.");
+      showGlobalMessage("No file selected for version upload.");
       return;
     }
   
@@ -186,21 +193,21 @@ const ProjectsPage = () => {
       if (response.ok) {
         setVersionUploadTarget(null);
         setVersionUploadData({ file: null, comment: '' });
-        alert("Version uploaded!");
+        showGlobalMessage("Version uploaded!");
         fetchProjectData(); // Refresh file list
       } else {
-        alert(`Error: ${jsonData.error}`);
+        showGlobalMessage(`Error: ${jsonData.error}`);
       }
     } catch (err) {
       console.error("Upload version failed:", err);
-      alert("Failed to upload version.");
+      showGlobalMessage("Failed to upload version.");
     }
   };  
 
   const handleDownloadSubmit = async (e) => {
     e.preventDefault();
     if (selectedFiles.length === 0) {
-      alert("No files selected for download.");
+      showGlobalMessage("No files selected for download.");
       return;
     }
 
@@ -221,13 +228,14 @@ const ProjectsPage = () => {
         a.click();
         a.remove();
         setShowDownloadModal(false);
+        showGlobalMessage("Download started.");
       } else {
         const errorData = await response.json();
-        alert(`Error: ${errorData.error || 'Failed to download files'}`);
+        showGlobalMessage(`Error: ${errorData.error || 'Failed to download files'}`);
       }
     } catch (error) {
       console.error("Error downloading files:", error);
-      alert("An error occurred while downloading the files.");
+      showGlobalMessage("An error occurred while downloading the files.");
     }
   };
 
@@ -260,6 +268,9 @@ const ProjectsPage = () => {
 
   return (
     <div className={styles['project-page-container']}>
+      {globalMessage && (
+        <div className="global-message-popup">{globalMessage}</div>
+      )}
       <div className={styles['top-buttons']}>
         <button
           className={styles['button-secondary']}

@@ -33,9 +33,9 @@ const LoginPage = () => {
 
   return (
     <div className={styles['container']}>
-      {loginSuccess && (
-        <div className="logout-message-popup">
-          You successfully logged in
+      {(loginSuccess || message) && (
+        <div className="global-message-popup">
+          {loginSuccess ? "You successfully logged in" : message}
         </div>
       )}
       <form method="POST" onSubmit={handleLogin}>
@@ -43,8 +43,6 @@ const LoginPage = () => {
           <img src="/sortify_logo.png" alt="Sortify Logo" width="250" />
         </div>
         <h3 align="center">Log In</h3>
-
-        {message && <p className={styles['error-message']}>{message}</p>}
 
         <div className={styles['form-group']}>
           <label htmlFor="email">Email Address</label>

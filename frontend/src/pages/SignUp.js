@@ -113,13 +113,16 @@ const SignUp = () => {
 
   return (
     <div className={styles['container']}>
+      {message && (
+        <div className="global-message-popup">
+          {message}
+        </div>
+      )}
       <form onSubmit={handleSubmit} method="POST">
         <div className={styles['logo']} style={{ textAlign: 'center' }}>
           <img src="/sortify_logo.png" alt="Sortify Logo" width="250" />
         </div>
         <h3 align="center">Register</h3>
-
-        {message && <p className={styles['error-message']}>{message}</p>}
 
         <div className={styles['form-group']}>
           <label htmlFor="fullName">Full Name *</label>
