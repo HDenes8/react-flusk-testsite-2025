@@ -24,6 +24,8 @@ const Settings = () => {
     password2: false
   });
 
+  const [showProfilePicMenu, setShowProfilePicMenu] = useState(false);
+
   useEffect(() => {
     fetchUserData();
     fetchProfilePics();
@@ -85,7 +87,7 @@ const Settings = () => {
     try {
       await axios.post('/api/user/update', formData);
       alert('Profile updated successfully');
-      fetchUserData();
+      window.location.reload(); // Reload the whole site
     } catch (error) {
       console.error('Error updating profile:', error);
       const err = error.response?.data?.error || '';
@@ -161,6 +163,7 @@ const Settings = () => {
               name="nicknameId"
               value={`#${formData.nicknameId}`}
               readOnly
+              style={{ color: '#888' }} // Optional: inline style for input, but global class is preferred for spans
             />
           </div>
         </div>
@@ -240,11 +243,15 @@ const Settings = () => {
           className='btn-primary'
           type="button"
           id="selectProfilePicButton"
-          onClick={() => document.getElementById('profilePicMenu').style.display = 'block'}
+          onClick={() => setShowProfilePicMenu((prev) => !prev)}
         >
           Select Profile Picture
         </button>
-        <div id="profilePicMenu" className={styles['profile-pic-menu']} style={{ display: 'none' }}>
+        <div
+          id="profilePicMenu"
+          className={styles['profile-pic-menu']}
+          style={{ display: showProfilePicMenu ? 'block' : 'none' }}
+        >
           <div className={styles['profile-pic-options']}>
             {profilePics.length > 0 ? (
               profilePics.map((pic) => (

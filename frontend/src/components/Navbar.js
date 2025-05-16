@@ -105,7 +105,7 @@ const Navbar = () => {
             <li
               className={window.location.pathname === '/favourite' ? `${styles['active']} ${styles['disabled']}` : styles['disabled']}
             >
-              <FaHeart style={{ color: 'grey', cursor: 'not-allowed' }} /> {!sidebarCollapsed && 'Favourite (not working)'}
+              <FaHeart style={{ color: 'grey', cursor: 'not-allowed' }} /> {!sidebarCollapsed && 'Favourite (under maintenance)'}
             </li>
             <li
               className={window.location.pathname === '/invitations' ? styles['active'] : ''}
@@ -154,7 +154,10 @@ const Navbar = () => {
         )}
         <div className={styles['user-profile']}>
           <img src={profile.avatar} alt="User" />
-          <span>{`${profile.nickname || "Loading"}#${profile.nickname_id || 'No ID'}`}</span>
+          <span>
+            {profile.nickname || "Loading"}
+            <span className="nickname-id">{`#${profile.nickname_id || 'No ID'}`}</span>
+          </span>
           <button onClick={handleLogout}>
             <FaSignOutAlt />
           </button>

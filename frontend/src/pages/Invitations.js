@@ -101,7 +101,8 @@ const Invitations = () => {
                         className={styles['inviter-avatar']}
                       />
                       <span className={styles['inviter-nickname']}>
-                        {invite.referrer_nickname}#{invite.referrer_nickname_id}
+                        {invite.referrer_nickname}
+                        <span className="nickname-id">{`#${invite.referrer_nickname_id}`}</span>
                       </span>
                     </div>
                   </td>

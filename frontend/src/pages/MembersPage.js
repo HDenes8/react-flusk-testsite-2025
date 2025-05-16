@@ -245,7 +245,12 @@ const MembersPage = () => {
               return (
                 <tr key={member.id}>
                   <td>{member.name}</td>
-                  <td>{member.nickname}  #{member.nickname_id}</td>
+                  <td>
+                    <span>
+                      {member.nickname || 'Unknown'}
+                      <span className="nickname-id">{`#${member.nickname_id || 'No ID'}`}</span>
+                    </span>
+                  </td>
                   <td>{member.email}</td>
                   <td>{member.phoneNumber}</td>
                   <td>{member.job}</td>

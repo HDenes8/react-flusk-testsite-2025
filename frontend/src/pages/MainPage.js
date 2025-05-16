@@ -145,15 +145,17 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project) => (
                 <tr key={project.project_id}>
-                  <td>
-                    {project.project_name}{' '}
-                    <span
-                      className={`${styles['status']} ${
-                        project.has_latest === true ? styles['success'] : styles['error']
-                      }`}
-                    >
-                      {project.has_latest === true ? '✔' : '❕'}
-                    </span>
+                  <td className={styles['project-name-cell']}>
+                    <div className={styles['project-name-cell-inner']}>
+                      <span>{project.project_name}</span>
+                      <span
+                        className={`${styles['status']} ${
+                          project.has_latest === true ? styles['success'] : styles['error']
+                        }`}
+                      >
+                        {project.has_latest === true ? '✔' : '❕'}
+                      </span>
+                    </div>
                   </td>
                   <td>{project.role}</td>
                   <td className="date-cell">
@@ -180,7 +182,8 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       className={styles['owner-avatar']}
                     />
                     <span className={styles['ownername']}>
-                      {`${project.nickname || 'Unknown'}#${project.nickname_id || 'No ID'}`}
+                      {project.nickname || 'Unknown'}
+                      <span className="nickname-id">{`#${project.nickname_id || 'No ID'}`}</span>
                     </span>
                   </td>
                   <td className="actions-cell"> {/* Use global class */}

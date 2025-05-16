@@ -208,3 +208,37 @@
     color: white;
     transition: background 0.2s ease;
   }
+
+  /* Standardize all table cells for consistent height and padding */
+  .projects-table td,
+  .projects-table th {
+    padding: 12px 16px;
+    vertical-align: middle;
+    border-bottom: 2px solid #eee;
+    box-sizing: border-box;
+    background: inherit;
+    min-height: 48px; /* Ensures consistent row height */
+  }
+
+  /* New inner flex container for project name cell */
+  .project-name-cell-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .project-name-cell-inner > span:first-child {
+    flex: 1 1 auto;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .project-name-cell-inner > span:last-child {
+    flex: 0 0 auto;
+    margin-left: 10px;
+  }

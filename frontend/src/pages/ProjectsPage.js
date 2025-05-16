@@ -348,7 +348,10 @@ const ProjectsPage = () => {
                             alt={`${file.uploader_nickname}'s profile`}
                             className={styles['uploader-profile-picture']}
                           />
-                          <span>{`${file.uploader_nickname || 'Unknown'}#${file.uploader_nickname_id || 'No ID'}`}</span>
+                          <span>
+                            {file.uploader_nickname || 'Unknown'}
+                            <span className="nickname-id">{`#${file.uploader_nickname_id || 'No ID'}`}</span>
+                          </span>
                         </div>
                       ) : (
                         "Unknown"
@@ -432,7 +435,10 @@ const ProjectsPage = () => {
                                         alt={`${version.uploader_nickname}'s profile`}
                                         className={styles['uploader-profile-picture']}
                                       />
-                                      <span>{`${version.uploader_nickname || 'Unknown'}#${version.uploader_nickname_id || 'No ID'}`}</span>
+                                      <span>
+                                        {version.uploader_nickname || 'Unknown'}
+                                        <span className="nickname-id">{`#${version.uploader_nickname_id || 'No ID'}`}</span>
+                                      </span>
                                     </div>
                                   ) : (
                                     "Unknown"
