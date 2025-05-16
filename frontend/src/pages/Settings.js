@@ -138,6 +138,9 @@ const Settings = () => {
       {globalMessage && (
         <div className="global-message-popup">{globalMessage}</div>
       )}
+      <div className={styles['h3-padding-top']}>
+        <h3 className="settings-title" align="center">Modify your profile</h3>
+      </div>
       <form onSubmit={handleSubmit}>
         <div className={styles['form-group']}>
           <label htmlFor="fullName">Full Name:</label>

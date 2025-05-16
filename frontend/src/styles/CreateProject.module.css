@@ -40,6 +40,7 @@
     background-color: #fafafa;
     font-style: Arial, sans-serif;
     resize: none;
+    margin-bottom: 12px; /* Add spacing after input fields */
   }
   
   button {
@@ -63,4 +64,8 @@
   p {
     text-align: left;
     color:rgb(116, 116, 116)
+  }
+
+  .h3-padding-top {
+    padding-top: 18px;
   }

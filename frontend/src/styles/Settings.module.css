@@ -68,3 +68,7 @@
 .nickname-id-container {
     flex: 1; 
 }
+
+.h3-padding-top {
+    padding-top: 18px;
+}

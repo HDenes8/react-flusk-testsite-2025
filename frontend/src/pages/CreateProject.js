@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../styles/CreateProject.module.css'; // Updated to scoped styles
+import styles from '../styles/CreateProject.module.css'; // Use CSS module
 
 const CreateProject = () => {
   const navigate = useNavigate();
@@ -39,11 +39,13 @@ const CreateProject = () => {
   };
 
   return (
-    <div className="create-project-container">
+    <div className={styles['create-project-container']}>
       {globalMessage && (
         <div className="global-message-popup">{globalMessage}</div>
       )}
-      <h3 className="create-project-title" align="center">Create New Project</h3>
+      <div className={styles['h3-padding-top']}>
+        <h3 className="create-project-title" align="center">Enter your new project details</h3>
+      </div>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="projectName">Project Name: *</label>
