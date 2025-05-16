@@ -10,6 +10,7 @@ import CreateProject from './pages/CreateProject';
 import Settings from './pages/Settings';
 import ProjectsPage from './pages/ProjectsPage';
 import MembersPage from './pages/MembersPage';
+import About from './pages/About';
 import './App.css';
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
             <MembersPage />
           </Layout>
         } />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   );
