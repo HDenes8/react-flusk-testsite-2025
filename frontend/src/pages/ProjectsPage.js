@@ -322,7 +322,9 @@ const ProjectsPage = () => {
                   <th>File Name</th>
                   <th>Comment</th>
                   <th>File Size</th>
-                  <th className="date-header">Upload Date</th>
+                  <th className="date-header">
+                    <span style={{ display: "block", textAlign: "center", width: "100%" }}>Upload Date</span>
+                  </th>
                   <th>Uploader</th>
                   <th className="actions-header">Actions</th>
                 </tr>
@@ -415,7 +417,7 @@ const ProjectsPage = () => {
                     {fileVersions[file.file_data_id] && (
                       <tr className={styles['version-history-row']}>
                         <td className={styles['version-history-data']} colSpan="9">
-                          <table className={styles['versions-table']}>
+                          <table className={styles['versions-table']}>                         
                             <tbody>
                               {fileVersions[file.file_data_id]
                                 .filter((version) => version.version_id !== file.version_id)

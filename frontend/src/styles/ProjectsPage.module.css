@@ -38,6 +38,11 @@
     border-bottom: 1px solid #ddd; /* Subtle border for readability */
 }
 
+.files-table th.date-header {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
 .files-table td,
 .versions-table td {
     border-bottom: 1px solid #ddd; /* Add subtle borders for better readability */
