@@ -432,9 +432,11 @@ const ProjectsPage = () => {
                             style={{ top: `${hoverPosition.y}px`, left: `${hoverPosition.x}px` }}
                           >
                             <div className="description-box">
-                              <p className="description-paragraph">
-                                <strong>Description:</strong> {file.description || "No description available"}
-                              </p>
+                              <span className="description-paragraph">
+                                {file.description
+                                  ? (<><strong>Description:</strong> {file.description}</>)
+                                  : "No description available"}
+                              </span>
                             </div>
                             <div className="button-container">
                               <button onClick={() => toggleVersionTable(file.file_data_id)}>
