@@ -12,3 +12,4 @@ gz
 docx
 xlsx
 pptx
+py
