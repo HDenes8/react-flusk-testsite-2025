@@ -392,7 +392,7 @@ const ProjectsPage = () => {
                       >
                         {file.comment
                           ? truncateComment(file.comment)
-                          : <span style={{ color: '#888', fontStyle: 'italic', fontSize: '0.98em' }}>no comment</span>
+                          : <span className={styles['no-comment']}>no comment</span>
                         }
                       </td>
                       <td ref={el => colRefs.current[5] = el}>
@@ -516,7 +516,7 @@ const ProjectsPage = () => {
                                         >
                                           {version.comment
                                             ? truncateComment(version.comment)
-                                            : <span style={{ color: '#888', fontStyle: 'italic', fontSize: '0.98em' }}>no comment</span>
+                                            : <span className={styles['no-comment']}>no comment</span>
                                           }
                                         </td>
                                         <td>{formatFileSize(version.file_size)}</td>

@@ -343,3 +343,9 @@
   font-size: 1.2rem;
   color: #000000;
 }
+
+.no-comment {
+    color: #888;
+    font-style: italic;
+    font-size: 0.98em;
+}
