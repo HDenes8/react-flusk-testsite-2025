@@ -260,7 +260,7 @@ h3 {
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   z-index: 1000;
-  transform: translateY(-50%) translateX(-105%); /* Adjust position closer to the button */
+  transform: translateY(-50%) translateX(-90%); /* Adjust position closer to the button */
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
