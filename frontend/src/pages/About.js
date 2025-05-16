@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLoader } from '../components/LoaderContext';
 import styles from '../styles/About.module.css';
 
 const GITHUB_REPO_URL = "https://github.com/yourusername/sortify"; // Change to your actual repo
@@ -9,6 +10,7 @@ const About = () => {
   const [showAnimatedButton, setShowAnimatedButton] = useState(false);
   const [dotCount, setDotCount] = useState(1);
   const navigate = useNavigate();
+  const { hideLoader } = useLoader();
 
   useEffect(() => {
     const versionTimer = setTimeout(() => setCheckingVersion(false), 4000);
@@ -26,6 +28,10 @@ const About = () => {
     }, 400);
     return () => clearInterval(interval);
   }, [checkingVersion]);
+
+  useEffect(() => {
+    hideLoader();
+  }, []);
 
   return (
     <div className={styles.aboutContainer}>

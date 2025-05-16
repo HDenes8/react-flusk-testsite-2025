@@ -3,8 +3,10 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../styles/MainPage.module.css'; // Import styles as an object
 import FormattedDate from '../components/FormattedDate'; // adjust if needed
+import { useLoader } from '../components/LoaderContext';
 
 const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
+  const { hideLoader } = useLoader();
   const [projects, setProjects] = useState([]);
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,11 +33,13 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
       } catch (error) {
         console.error('❌ Error fetching project data:', error);
         navigate('/login');
+      } finally {
+        hideLoader();
       }
     };
 
     fetchData();
-  }, [navigate, defaultRoleFilter]);
+  }, [navigate, defaultRoleFilter, hideLoader]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

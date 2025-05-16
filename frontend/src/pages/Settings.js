@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from '../styles/Settings.module.css'; // Updated to scoped styles
+import { useLoader } from '../components/LoaderContext';
 
 const Settings = () => {
   const [user, setUser] = useState({});
@@ -26,10 +27,10 @@ const Settings = () => {
 
   const [showProfilePicMenu, setShowProfilePicMenu] = useState(false);
   const [globalMessage, setGlobalMessage] = useState('');
+  const { hideLoader } = useLoader();
 
   useEffect(() => {
-    fetchUserData();
-    fetchProfilePics();
+    Promise.all([fetchUserData(), fetchProfilePics()]).finally(() => hideLoader());
   }, []);
 
   const fetchUserData = async () => {

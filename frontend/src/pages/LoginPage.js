@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLoader } from '../components/LoaderContext';
 import styles from '../styles/LoginPage.module.css'; // Updated to scoped styles
 
 const LoginPage = () => {
@@ -9,6 +10,7 @@ const LoginPage = () => {
   const [message, setMessage] = useState('');
   const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
+  const { hideLoader } = useLoader();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,6 +32,10 @@ const LoginPage = () => {
       }
     }
   };
+
+  React.useEffect(() => {
+    hideLoader();
+  }, [hideLoader]);
 
   return (
     <div className={styles['container']}>

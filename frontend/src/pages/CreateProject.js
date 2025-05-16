@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLoader } from '../components/LoaderContext';
 import styles from '../styles/CreateProject.module.css'; // Use CSS module
 
 const CreateProject = () => {
   const navigate = useNavigate();
+  const { hideLoader } = useLoader();
   const [formData, setFormData] = useState({
     projectName: '',
     description: '',
@@ -17,6 +19,10 @@ const CreateProject = () => {
     setGlobalMessage(msg);
     setTimeout(() => setGlobalMessage(''), timeout);
   }, []);
+
+  React.useEffect(() => {
+    hideLoader();
+  }, [hideLoader]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

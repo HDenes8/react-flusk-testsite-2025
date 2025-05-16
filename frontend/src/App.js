@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import SignUp from './pages/SignUp';
@@ -11,11 +11,29 @@ import Settings from './pages/Settings';
 import ProjectsPage from './pages/ProjectsPage';
 import MembersPage from './pages/MembersPage';
 import About from './pages/About';
+import { LoaderProvider, useLoader } from './components/LoaderContext';
+import GlobalLoader from './components/GlobalLoader';
 import './App.css';
 
-function App() {
+function AppRoutes() {
+  const location = useLocation();
+  const { loading, showLoader, hideLoader } = useLoader();
+
+  useEffect(() => {
+    let minTimer;
+    showLoader();
+    minTimer = setTimeout(() => {
+      // If the page hasn't called hideLoader yet, keep loader visible
+      // hideLoader will be called by the page when data is ready
+    }, 500); // minimum 0.5s
+
+    return () => clearTimeout(minTimer);
+    // hideLoader will be called by the page/component when data is loaded
+  }, [location.pathname, showLoader]);
+
   return (
-    <Router>
+    <>
+      {loading && <GlobalLoader />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUp />} />
@@ -61,7 +79,17 @@ function App() {
         } />
         <Route path="/about" element={<About />} />
       </Routes>
-    </Router>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <LoaderProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </LoaderProvider>
   );
 }
 

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import styles from "../styles/MembersPage.module.css"; // Updated to scoped styles
 import FormattedDate from "../components/FormattedDate"; // Add this line
+import { useLoader } from '../components/LoaderContext';
 
 const MembersPage = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const MembersPage = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmails, setInviteEmails] = useState("");
   const [globalMessage, setGlobalMessage] = useState('');
+  const { hideLoader } = useLoader();
 
   // Helper to show global message
   const showGlobalMessage = (msg, timeout = 2000) => {
@@ -50,6 +52,8 @@ const MembersPage = () => {
         console.error("Error fetching members:", err);
         setError("Failed to load members.");
       }
+    } finally {
+      hideLoader();
     }
   };
 

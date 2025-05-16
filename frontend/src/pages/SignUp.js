@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLoader } from '../components/LoaderContext';
 import styles from '../styles/SignUp.module.css'; // Updated to scoped styles
 
 const SignUp = () => {
@@ -17,6 +18,7 @@ const SignUp = () => {
 
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const { hideLoader } = useLoader();
 
   const loadRecaptchaScript = () => {
     return new Promise((resolve, reject) => {
@@ -108,8 +110,11 @@ const SignUp = () => {
       })
       .catch((error) => {
         console.error('Failed to load reCAPTCHA script:', error);
+      })
+      .finally(() => {
+        hideLoader();
       });
-  }, [renderRecaptcha]);
+  }, [renderRecaptcha, hideLoader]);
 
   return (
     <div className={styles['container']}>

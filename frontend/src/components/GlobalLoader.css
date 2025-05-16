@@ -1,0 +1,26 @@
+.global-loader-overlay {
+  position: fixed;
+  z-index: 5000;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30, 30, 30, 0.55); /* Darker and more transparent */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.global-loader-spinner {
+  width: 64px;
+  height: 64px;
+  border: 8px solid #232946;
+  border-top: 8px solid #bdbdbd;
+  border-radius: 50%;
+  animation: global-loader-spin 1s linear infinite;
+}
+
+@keyframes global-loader-spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}

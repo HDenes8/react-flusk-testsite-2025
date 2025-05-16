@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useLoader } from '../components/LoaderContext';
 import styles from '../styles/Invitations.module.css'; // Updated to scoped styles
 import FormattedDate from '../components/FormattedDate'; // adjust if needed
 
@@ -8,9 +9,11 @@ const Invitations = () => {
   const [invitations, setInvitations] = useState([]);
   const [filter, setFilter] = useState('pending'); // default to "pending"
   const navigate = useNavigate();
+  const { hideLoader } = useLoader();
 
   useEffect(() => {
     fetchInvitations();
+    // eslint-disable-next-line
   }, []);
 
   const fetchInvitations = async (status = 'pending') => {
@@ -19,6 +22,8 @@ const Invitations = () => {
       setInvitations(response.data.invitations);
     } catch (error) {
       console.error('Error fetching invitations:', error);
+    } finally {
+      hideLoader();
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../styles/ProjectsPage.module.css'; // Import styles as an object
 import FormattedDate from '../components/FormattedDate';
+import { useLoader } from '../components/LoaderContext';
 
 function formatFileSize(sizeInBytes) {
   const units = ["bytes", "KB", "MB", "GB", "TB"];
@@ -23,6 +24,7 @@ function truncateComment(comment) {
 const ProjectsPage = () => {
   const { project_id } = useParams();
   const navigate = useNavigate();
+  const { hideLoader } = useLoader();
 
   const [project, setProject] = useState(null);
   const [files, setFiles] = useState([]);
@@ -113,6 +115,8 @@ const ProjectsPage = () => {
     } catch (error) {
       console.error("Error fetching project data:", error);
       showGlobalMessage("An error occurred while fetching project data.");
+    } finally {
+      hideLoader();
     }
   };
 
