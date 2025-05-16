@@ -358,27 +358,27 @@ const ProjectsPage = () => {
                 {filteredFiles.map((file, idx) => (
                   <React.Fragment key={file.version_id}>
                     <tr>
-                      <td className={styles['checkbox-cell']} ref={el => colRefs.current[0] = el}>
+                      <td data-label="Select" className={styles['checkbox-cell']} ref={el => colRefs.current[0] = el}>
                         <input
                           type="checkbox"
                           value={file.version_id}
                           onChange={handleFileSelect}
                         />
                       </td>
-                      <td className={styles['ver-cell']} ref={el => colRefs.current[1] = el}>
+                      <td data-label="Ver" className={styles['ver-cell']} ref={el => colRefs.current[1] = el}>
                         {file.version_number}
                         <span className={`${styles['status']} ${download_file_results[file.version_id] ? styles['success'] : styles['error']}`}>
                           {download_file_results[file.version_id] ? '✔' : '❕'}
                         </span>
                       </td>
-                      <td
+                      <td data-label="Title"
                         title={file.title}
                         ref={el => colRefs.current[2] = el}
                         style={{ minWidth: 80, maxWidth: 400 }}
                       >
                         {file.title}
                       </td>
-                      <td
+                      <td data-label="File Name"
                         title={file.file_name}
                         className={styles['file-name-cell']}
                         ref={el => colRefs.current[3] = el}
@@ -387,7 +387,7 @@ const ProjectsPage = () => {
                           ? `${file.file_name.slice(0, 15)}......${file.file_name.slice(-15)}`
                           : file.file_name}
                       </td>
-                      <td
+                      <td data-label="Comment"
                         className={styles['comment-cell']}
                         title={file.comment}
                         onMouseEnter={(e) => handleCommentHover(file.comment, e)}
@@ -399,13 +399,13 @@ const ProjectsPage = () => {
                           : <span className={styles['no-comment']}>no comment</span>
                         }
                       </td>
-                      <td ref={el => colRefs.current[5] = el}>
+                      <td data-label="File Size" ref={el => colRefs.current[5] = el}>
                         {formatFileSize(file.file_size)}
                       </td>
-                      <td className="date-cell" ref={el => colRefs.current[6] = el}>
+                      <td data-label="Upload Date" className="date-cell" ref={el => colRefs.current[6] = el}>
                         <FormattedDate dateInput={file.upload_date} />
                       </td>
-                      <td ref={el => colRefs.current[7] = el}>
+                      <td data-label="Uploader" ref={el => colRefs.current[7] = el}>
                         {file.uploader_nickname ? (
                           <div className={styles['uploader-info']}>
                             <img
@@ -422,7 +422,7 @@ const ProjectsPage = () => {
                           "Unknown"
                         )}
                       </td>
-                      <td className="actions-cell" ref={el => colRefs.current[8] = el}>
+                      <td data-label="Actions" className="actions-cell" ref={el => colRefs.current[8] = el}>
                         <button
                           className="dots-button"
                           onClick={(e) => toggleFileDropdown(file.version_id, e)}
@@ -488,27 +488,27 @@ const ProjectsPage = () => {
                                     .filter((version) => version.version_id !== file.version_id)
                                     .map((version) => (
                                       <tr key={version.version_id} className={styles['version-history-row']}>
-                                        <td className={styles['checkbox-cell']}>
+                                        <td data-label="Select" className={styles['checkbox-cell']}>
                                           <input
                                             type="checkbox"
                                             value={version.version_id}
                                             onChange={handleFileSelect}
                                           />
                                         </td>
-                                        <td className={styles['ver-cell']}>
+                                        <td data-label="Ver" className={styles['ver-cell']}>
                                           {version.version_number}
                                           <span className={`${styles['status']} ${version.downloaded ? styles['success'] : styles['warning']}`}>
                                             {version.downloaded ? "✔" : "❕"}
                                           </span>
                                         </td>
-                                        <td
+                                        <td data-label="Title"
                                           style={{ minWidth: 80, maxWidth: 400 }}
                                           title={file.title}
                                         >
                                           {/* Hidden but keeps width for alignment */}
                                           <span style={{ visibility: 'hidden' }}>{file.title}</span>
                                         </td>
-                                        <td
+                                        <td data-label="File Name"
                                           title={version.file_name}
                                           className={styles['file-name-cell']}
                                         >
@@ -516,7 +516,7 @@ const ProjectsPage = () => {
                                             ? `${version.file_name.slice(0, 15)}......${version.file_name.slice(-15)}`
                                             : version.file_name}
                                         </td>
-                                        <td
+                                        <td data-label="Comment"
                                           className={styles['comment-cell']}
                                           title={version.comment}
                                         >
@@ -525,11 +525,11 @@ const ProjectsPage = () => {
                                             : <span className={styles['no-comment']}>no comment</span>
                                           }
                                         </td>
-                                        <td>{formatFileSize(version.file_size)}</td>
-                                        <td className="date-cell">
+                                        <td data-label="File Size">{formatFileSize(version.file_size)}</td>
+                                        <td data-label="Upload Date" className="date-cell">
                                           <FormattedDate dateInput={version.upload_date} />
                                         </td>
-                                        <td>
+                                        <td data-label="Uploader">
                                           {version.uploader_nickname ? (
                                             <div className={styles['uploader-info']}>
                                               <img
@@ -546,7 +546,7 @@ const ProjectsPage = () => {
                                             "Unknown"
                                           )}
                                         </td>
-                                        <td className="actions-cell">
+                                        <td data-label="Actions" className="actions-cell">
                                           <span style={{ visibility: 'hidden' }}>•••</span>
                                         </td>
                                       </tr>

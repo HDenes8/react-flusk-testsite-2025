@@ -349,3 +349,82 @@
     font-style: italic;
     font-size: 0.98em;
 }
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .project-page-container {
+    padding: 8px;
+  }
+  .file-info {
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: 10px;
+  }
+  .modal {
+    width: 95vw;
+    min-width: 0;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 700px) {
+  .project-page-container {
+    padding: 2px;
+  }
+  .file-info {
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: 4px;
+  }
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+    width: 100%;
+  }
+  thead {
+    display: none;
+  }
+  tr {
+    margin-bottom: 18px;
+    border-bottom: 2px solid #eee;
+  }
+  td {
+    padding: 8px 6px;
+    text-align: left;
+    border: none;
+    position: relative;
+    min-height: 32px;
+  }
+  .checkbox-cell,
+  .ver-cell {
+    width: auto;
+    max-width: 100%;
+  }
+  .uploader-profile-picture {
+    width: 22px;
+    height: 22px;
+  }
+  .modal {
+    width: 98vw;
+    min-width: 0;
+    padding: 4px;
+  }
+}
+
+@media (max-width: 500px) {
+  .project-page-container {
+    padding: 1px;
+  }
+  .modal {
+    width: 100vw;
+    min-width: 0;
+    padding: 2px;
+  }
+  .no-files-row {
+    font-size: 1rem;
+  }
+}

@@ -151,7 +151,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
             <tbody>
               {filteredProjects.map((project) => (
                 <tr key={project.project_id}>
-                  <td className={styles['project-name-cell']}>
+                  <td data-label="Project Name" className={styles['project-name-cell']}>
                     <div className={styles['project-name-cell-inner']}>
                       <span>{project.project_name}</span>
                       <span
@@ -163,22 +163,22 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       </span>
                     </div>
                   </td>
-                  <td>{project.role}</td>
-                  <td className="date-cell">
+                  <td data-label="My Roles">{project.role}</td>
+                  <td data-label="Last Modified" className="date-cell">
                     {project.last_modified_date ? (
                       <FormattedDate dateInput={project.last_modified_date} />
                     ) : (
                       '-'
                     )}
                   </td>
-                  <td className="date-cell">
+                  <td data-label="Date" className="date-cell">
                     {project.created_date ? (
                       <FormattedDate dateInput={project.created_date} />
                     ) : (
                       '-'
                     )}
                   </td>
-                  <td>
+                  <td data-label="Owner">
                     <img
                       src={`/static/profile_pics/${
                         project.creator_profile_picture || 'default.png'
@@ -191,7 +191,7 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                       <span className="nickname-id">{`#${project.nickname_id || 'No ID'}`}</span>
                     </span>
                   </td>
-                  <td className="actions-cell">
+                  <td data-label="Actions" className="actions-cell">
                     <button
                       className="dots-button"
                       onClick={(e) => toggleMenu(project.project_id, e)}

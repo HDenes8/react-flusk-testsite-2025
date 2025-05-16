@@ -328,3 +328,31 @@
     opacity: 0.18;
   }
 }
+
+@media (max-width: 700px) {
+  .aboutContainer {
+    max-width: 98vw;
+    padding: 10px;
+  }
+  .logoImage {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+@media (max-width: 500px) {
+  .aboutContainer {
+    max-width: 100vw;
+    padding: 4px;
+  }
+  .logoImage {
+    width: 100px;
+    height: 100px;
+  }
+  .aboutTitle {
+    font-size: 1.2rem;
+  }
+  .aboutParagraph {
+    font-size: 0.98rem;
+  }
+}

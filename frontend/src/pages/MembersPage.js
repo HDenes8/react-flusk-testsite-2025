@@ -273,21 +273,21 @@ const MembersPage = () => {
 
               return (
                 <tr key={member.id}>
-                  <td>{member.name}</td>
-                  <td>
+                  <td data-label="Name">{member.name}</td>
+                  <td data-label="Nickname">
                     <span>
                       {member.nickname || 'Unknown'}
                       <span className="nickname-id">{`#${member.nickname_id || 'No ID'}`}</span>
                     </span>
                   </td>
-                  <td>{member.email}</td>
-                  <td>{member.phoneNumber}</td>
-                  <td>{member.job}</td>
-                  <td>
+                  <td data-label="Email">{member.email}</td>
+                  <td data-label="Mobile">{member.phoneNumber}</td>
+                  <td data-label="Job">{member.job}</td>
+                  <td data-label="Role">
                     <select
                       value={member.role}
                       onChange={(e) => handleChangeRole(member.id, e.target.value)}
-                      disabled={!canChangeRole || isOwner} // Disable if the member is an owner
+                      disabled={!canChangeRole || isOwner}
                     >
                       <option value="owner" disabled>
                         Owner
@@ -297,10 +297,10 @@ const MembersPage = () => {
                       <option value="reader">Reader</option>
                     </select>
                   </td>
-                  <td className="date-cell">
+                  <td data-label="Join Date" className="date-cell">
                     {member.join_date ? <FormattedDate dateInput={member.join_date} /> : '-'}
                   </td>
-                  <td className="actions-cell">
+                  <td data-label="Action" className="actions-cell">
                     <div className={styles["remove-buttons"]}>
                       {!isOwner && (
                         <button

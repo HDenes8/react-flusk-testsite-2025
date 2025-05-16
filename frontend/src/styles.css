@@ -378,3 +378,98 @@ h3 {
   background: #fff;
   color: #222;
 }
+
+/* Responsive Styles */
+@media (max-width: 700px) {
+  form {
+    width: 98vw;
+    padding: 18px 4px;
+    margin: 10px auto;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 15px;
+    padding: 7px 8px;
+  }
+  .btn-primary, .btn-secondary, button {
+    font-size: 15px;
+    padding: 8px 10px;
+  }
+  h3 {
+    font-size: 1.3rem;
+  }
+
+  /* Responsive Table Styles: Make tables more readable on mobile */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+    width: 100%;
+  }
+  thead {
+    display: none;
+  }
+  tr {
+    margin-bottom: 18px;
+    border-bottom: 2px solid #eee;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    padding: 8px 0;
+  }
+  td {
+    padding: 10px 8px;
+    text-align: left;
+    border: none;
+    position: relative;
+    min-height: 32px;
+    background: inherit;
+  }
+  td:before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+    color: #555;
+    font-size: 0.98em;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+  }
+}
+
+@media (max-width: 500px) {
+  form {
+    width: 100vw;
+    padding: 8px 2px;
+    margin: 2px auto;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 13px;
+    padding: 6px 6px;
+  }
+  .btn-primary, .btn-secondary, button {
+    font-size: 13px;
+    padding: 7px 8px;
+  }
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Optional: Reduce font size and padding for very small screens */
+  td {
+    padding: 8px 4px;
+    font-size: 0.97em;
+  }
+  tr {
+    margin-bottom: 12px;
+    border-radius: 6px;
+  }
+}

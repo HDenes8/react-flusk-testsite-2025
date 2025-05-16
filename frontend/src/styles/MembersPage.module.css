@@ -261,3 +261,63 @@
     width: auto !important;
     white-space: nowrap;
 }
+
+@media (max-width: 900px) {
+  .members-page-container {
+    padding-top: 8px;
+  }
+  .top-buttons {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .members-page-container {
+    padding-top: 2px;
+  }
+  .members-table,
+  .members-table table,
+  .members-table thead,
+  .members-table tbody,
+  .members-table th,
+  .members-table td,
+  .members-table tr {
+    display: block;
+    width: 100%;
+  }
+  .members-table thead {
+    display: none;
+  }
+  .members-table tr {
+    margin-bottom: 18px;
+    border-bottom: 2px solid #eee;
+  }
+  .members-table td {
+    padding: 8px 6px;
+    text-align: left;
+    border: none;
+    position: relative;
+    min-height: 32px;
+  }
+  .owner-avatar {
+    width: 22px;
+    height: 22px;
+  }
+  .modal-content {
+    width: 98vw;
+    min-width: 0;
+    padding: 4px;
+  }
+}
+
+@media (max-width: 500px) {
+  .members-page-container {
+    padding-top: 1px;
+  }
+  .modal-content {
+    width: 100vw;
+    min-width: 0;
+    padding: 2px;
+  }
+}
