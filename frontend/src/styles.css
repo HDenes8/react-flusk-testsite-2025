@@ -327,3 +327,17 @@ h3 {
   color: #666 !important;
   font-weight: normal;
 }
+
+/* Logout message popup style */
+.logout-message-popup {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 0 0 6px 6px;
+  z-index: 2000;
+  font-weight: bold;
+}

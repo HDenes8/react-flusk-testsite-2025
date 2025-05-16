@@ -7,6 +7,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -16,8 +17,10 @@ const LoginPage = () => {
       setMessage(response.data.message);
 
       if (response.data.status === 'success') {
-        // Redirect to home page or perform other actions
-        navigate('/mainpage');
+        setLoginSuccess(true);
+        setTimeout(() => {
+          navigate('/mainpage');
+        }, 1000);
       }
     } catch (error) {
       if (error.response) {
@@ -30,6 +33,11 @@ const LoginPage = () => {
 
   return (
     <div className={styles['container']}>
+      {loginSuccess && (
+        <div className="logout-message-popup">
+          You successfully logged in
+        </div>
+      )}
       <form method="POST" onSubmit={handleLogin}>
         <div className={styles['logo']} style={{ textAlign: 'center' }}>
           <img src="/sortify_logo.png" alt="Sortify Logo" width="250" />

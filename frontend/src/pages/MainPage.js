@@ -130,20 +130,22 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
       </div>
 
       <section className={styles['project-list']}>
-        <table className={styles['projects-table']}>
-          <thead>
-            <tr>
-              <th>Project Name</th>
-              <th>My Roles</th>
-              <th className="date-header">Last Modified</th> {/* Apply date-header */}
-              <th className="date-header">Date</th> {/* Apply date-header */}
-              <th>Owner</th>
-              <th className="actions-header">Actions</th> {/* Use global class */}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
+        {filteredProjects.length === 0 ? (
+          <p className={styles['no-projects-row']}>No projects found.</p>
+        ) : (
+          <table className={styles['projects-table']}>
+            <thead>
+              <tr>
+                <th>Project Name</th>
+                <th>My Roles</th>
+                <th className="date-header">Last Modified</th>
+                <th className="date-header">Date</th>
+                <th>Owner</th>
+                <th className="actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProjects.map((project) => (
                 <tr key={project.project_id}>
                   <td className={styles['project-name-cell']}>
                     <div className={styles['project-name-cell-inner']}>
@@ -211,14 +213,10 @@ const MainPage = ({ defaultRoleFilter = '', showFilterDropdown = true }) => {
                     )}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6">No projects found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
     </div>
   );

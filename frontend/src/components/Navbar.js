@@ -18,9 +18,10 @@ const Navbar = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [profile, setProfile] = useState(null);
   const [projectInfo, setProjectInfo] = useState(null);
+  const [logoutMessage, setLogoutMessage] = useState('');
   const navigate = useNavigate();
 
-// Fetch project information if on ProjectsPage or MembersPage
+  // Fetch project information if on ProjectsPage or MembersPage
   useEffect(() => {
     const fetchProjectInfo = async () => {
       const path = window.location.pathname;
@@ -66,7 +67,10 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await axios.post('/logout');
-      window.location.href = '/login';
+      setLogoutMessage('You successfully logged out');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000); // Changed from 2000 to 1000 ms
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -162,6 +166,11 @@ const Navbar = () => {
             <FaSignOutAlt />
           </button>
         </div>
+        {logoutMessage && (
+          <div className="logout-message-popup">
+            {logoutMessage}
+          </div>
+        )}
       </header>
     </>
   );

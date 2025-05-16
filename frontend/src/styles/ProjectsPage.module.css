@@ -342,3 +342,14 @@
     white-space: nowrap; /* Prevent wrapping */
     text-align: right; /* Align text to the right */
 }
+
+.no-files-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
+  height: 50px;
+  font-size: 1.2rem;
+  color: #000000;
+}
